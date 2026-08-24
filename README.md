@@ -1,21 +1,20 @@
-# Questwheel v3.1 — cache repair build
+# Questwheel v4
 
-This build fixes the v2→v3 upgrade crash caused by an old service worker mixing cached v2 JavaScript with v3 HTML.
+This build keeps the same `questwheel-v1` localStorage key, so updating the existing GitHub Pages site should preserve v1–v3.1 planner data.
 
-## What changed
-- All v3.1 assets have new versioned filenames, so old caches cannot substitute v2 files.
-- The new service worker uses network-first navigation, preventing the installed PWA from getting permanently trapped on an old index page.
-- The PWA start URL includes a version query.
-- Icon files also have new URLs to give iOS a fresh icon resource.
-- A small `v3.1` label appears beside Questwheel so you can verify which build actually loaded.
-- All v3 feature changes remain intact.
-- Local planner data still uses the same `questwheel-v1` localStorage key, preserving v1/v2 data.
+## v4 changes
+- Swipe animation follows the finger and transitions the old/new day wheels horizontally.
+- Header uses relative day language plus compact exact dates, including tomorrow, one week hence, week + N days, and fortnight hence (with past equivalents).
+- Simultaneous/overlapping activities are supported and drawn as concentric tracks rather than painting over one another.
+- Main wheel hour ticks now point inward; only the compact hour numbers sit outside the ring, reducing clipping.
+- Colour controls now use native radio inputs for reliable iPhone selection.
+- Quest panel heading now says “Quests”.
+- Standalone blocks can always be created without first making a quest.
+- Repetition is available for standalone blocks even when the quest log is empty.
+- Nested quests have stronger indentation, branch lines/connectors, and explicit “subtask of” hierarchy labels.
+- v4 assets are versioned and the service worker remains network-first for navigation to avoid the v2/v3 cache-mixing problem.
 
-## Upload
-Upload all files/folders in this package to the same GitHub Pages repository. They may coexist with old files; v3.1 references only the new versioned assets.
+## Update
+Upload all v4 files/folders to the same GitHub Pages repository. Old versioned assets can remain in the repository; `index.html` points only to the v4 files.
 
-## First recovery load
-After GitHub Pages republishes, open your normal Pages URL in Safari and add `?v=3.1` to the end once. Example:
-`https://YOURNAME.github.io/questwheel/?v=3.1`
-
-That bypasses the old cached root page and lets v3.1 install its repaired service worker. Do not clear Safari website data, because that would erase locally stored Questwheel data.
+After Pages republishes, open the site once in Safari with `?v=4` appended to the URL. You should see `v4` beside Questwheel. Do not clear Safari website data, since that contains your local Questwheel data.
