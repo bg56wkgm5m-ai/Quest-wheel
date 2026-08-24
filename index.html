@@ -24,28 +24,14 @@
 
     <main>
       <section class="view active" id="dayView" aria-labelledby="dayTab">
-        <div class="date-row">
-          <button class="icon-btn" id="prevDay" type="button" aria-label="Previous day">‹</button>
-          <label class="date-label">
-            <span class="sr-only">Selected date</span>
-            <input id="datePicker" type="date" />
-          </label>
-          <button class="icon-btn" id="nextDay" type="button" aria-label="Next day">›</button>
-        </div>
-
         <section class="panel wheel-panel">
-          <div class="panel-heading">
-            <div>
-              <span class="eyebrow">DAY MAP</span>
-              <h2 id="selectedDateHeading">Today</h2>
-            </div>
-            <div class="free-time-badge">
-              <span>Reclaimed</span>
-              <strong id="reclaimedTotal">0m</strong>
-            </div>
+          <div class="day-heading">
+            <span class="eyebrow">DAY MAP</span>
+            <h2 id="selectedDateHeading">Today</h2>
+            <span class="swipe-hint">Swipe wheel left or right to change day</span>
           </div>
 
-          <div class="wheel-wrap">
+          <div class="wheel-wrap" id="wheelWrap" tabindex="0" aria-label="24 hour schedule wheel. Swipe left or right to change day.">
             <svg id="dayWheel" viewBox="0 0 360 360" role="img" aria-label="24 hour schedule wheel"></svg>
             <div class="wheel-center">
               <span id="wheelScheduled">0h</span>
@@ -53,6 +39,12 @@
             </div>
           </div>
 
+          <div class="wheel-stats">
+            <div class="free-time-badge">
+              <span>Reclaimed</span>
+              <strong id="reclaimedTotal">0m</strong>
+            </div>
+          </div>
           <div class="legend" id="wheelLegend"></div>
         </section>
 
@@ -95,15 +87,9 @@
     </main>
 
     <nav class="tabbar" aria-label="Primary">
-      <button id="dayTab" class="tab active" data-view="dayView" type="button">
-        <span class="tab-icon">◷</span><span>Day</span>
-      </button>
-      <button id="questsTab" class="tab" data-view="questsView" type="button">
-        <span class="tab-icon">◆</span><span>Quests</span>
-      </button>
-      <button id="weekTab" class="tab" data-view="weekView" type="button">
-        <span class="tab-icon">▦</span><span>Week</span>
-      </button>
+      <button id="dayTab" class="tab active" data-view="dayView" type="button"><span class="tab-icon">◷</span><span>Day</span></button>
+      <button id="questsTab" class="tab" data-view="questsView" type="button"><span class="tab-icon">◆</span><span>Quests</span></button>
+      <button id="weekTab" class="tab" data-view="weekView" type="button"><span class="tab-icon">▦</span><span>Week</span></button>
     </nav>
   </div>
 
@@ -111,13 +97,14 @@
     <form method="dialog" id="questForm">
       <div class="dialog-head">
         <div>
-          <span class="eyebrow">NEW QUEST</span>
-          <h2>Create objective</h2>
+          <span class="eyebrow" id="questDialogEyebrow">NEW QUEST</span>
+          <h2 id="questDialogTitle">Create objective</h2>
         </div>
         <button class="icon-btn" value="cancel" aria-label="Close">×</button>
       </div>
-      <label>Quest name
-        <input id="questName" maxlength="80" required placeholder="e.g. Opus follow-up" />
+      <input id="questParentId" type="hidden" />
+      <label>Quest / task name
+        <input id="questName" maxlength="100" required placeholder="e.g. Opus follow-up" />
       </label>
       <label>Category
         <select id="questCategory">
@@ -130,29 +117,19 @@
       </label>
       <label>Default duration
         <select id="questDuration">
-          <option value="2">2 minutes</option>
-          <option value="5">5 minutes</option>
-          <option value="10">10 minutes</option>
-          <option value="15">15 minutes</option>
-          <option value="20">20 minutes</option>
-          <option value="30" selected>30 minutes</option>
-          <option value="45">45 minutes</option>
-          <option value="60">1 hour</option>
-          <option value="90">1½ hours</option>
-          <option value="120">2 hours</option>
-          <option value="180">3 hours</option>
-          <option value="240">4 hours</option>
-          <option value="360">6 hours</option>
-          <option value="480">8 hours</option>
-          <option value="600">10 hours</option>
+          <option value="2">2 minutes</option><option value="5">5 minutes</option><option value="10">10 minutes</option>
+          <option value="15">15 minutes</option><option value="20">20 minutes</option><option value="30" selected>30 minutes</option>
+          <option value="45">45 minutes</option><option value="60">1 hour</option><option value="90">1½ hours</option>
+          <option value="120">2 hours</option><option value="180">3 hours</option><option value="240">4 hours</option>
+          <option value="360">6 hours</option><option value="480">8 hours</option><option value="600">10 hours</option>
         </select>
       </label>
-      <label>Quest colour
+      <label>Colour
         <div id="questColorPicker" class="color-picker" role="radiogroup" aria-label="Quest colour"></div>
       </label>
       <div class="dialog-actions">
         <button class="ghost" value="cancel" type="button" id="cancelQuest">Cancel</button>
-        <button class="primary" value="default" type="submit">Create quest</button>
+        <button class="primary" value="default" type="submit">Create</button>
       </div>
     </form>
   </dialog>
@@ -160,23 +137,36 @@
   <dialog id="blockDialog">
     <form method="dialog" id="blockForm">
       <div class="dialog-head">
-        <div>
-          <span class="eyebrow">TIME BLOCK</span>
-          <h2>Schedule quest</h2>
-        </div>
+        <div><span class="eyebrow">TIME BLOCK</span><h2>Schedule quest</h2></div>
         <button class="icon-btn" value="cancel" aria-label="Close">×</button>
       </div>
-      <label>Quest
+      <label>Quest / task
         <select id="blockQuest" required></select>
       </label>
       <div class="two-col">
-        <label>Start
-          <input id="blockStart" type="time" required value="09:00" />
-        </label>
-        <label>Minutes
-          <input id="blockMinutes" type="number" min="2" max="600" step="1" value="30" required />
-        </label>
+        <label>Start<input id="blockStart" type="time" required value="09:00" /></label>
+        <label>Minutes<input id="blockMinutes" type="number" min="2" max="600" step="1" value="30" required /></label>
       </div>
+
+      <label class="repeat-toggle">
+        <input id="repeatEnabled" type="checkbox" />
+        <span>Repeat this block</span>
+      </label>
+      <div id="repeatFields" class="repeat-fields" hidden>
+        <div class="two-col">
+          <label>Every
+            <div class="input-suffix"><input id="repeatEvery" type="number" min="1" max="365" step="1" value="1" /><span>days</span></div>
+          </label>
+          <label>For
+            <input id="repeatFor" type="number" min="1" max="3650" step="1" value="7" />
+          </label>
+        </div>
+        <label>Duration unit
+          <select id="repeatUnit"><option value="days">Days</option><option value="weeks" selected>Weeks</option><option value="months">Months</option></select>
+        </label>
+        <p class="hint">Example: every 2 days for 6 weeks. Questwheel creates the repeated blocks now, so each occurrence can still be edited or deleted individually.</p>
+      </div>
+
       <div class="dialog-actions">
         <button class="ghost" value="cancel" type="button" id="cancelBlock">Cancel</button>
         <button class="primary" value="default" type="submit">Schedule</button>
@@ -187,16 +177,11 @@
   <dialog id="finishDialog">
     <form method="dialog" id="finishForm">
       <div class="dialog-head">
-        <div>
-          <span class="eyebrow">COMPLETE</span>
-          <h2 id="finishTitle">Finish block</h2>
-        </div>
+        <div><span class="eyebrow">COMPLETE</span><h2 id="finishTitle">Finish block</h2></div>
         <button class="icon-btn" value="cancel" aria-label="Close">×</button>
       </div>
       <input id="finishBlockId" type="hidden" />
-      <label>Actual minutes used
-        <input id="actualMinutes" type="number" min="1" max="600" step="1" required />
-      </label>
+      <label>Actual minutes used<input id="actualMinutes" type="number" min="1" max="600" step="1" required /></label>
       <p class="hint">Finish faster than planned and the difference becomes reclaimed free time.</p>
       <div class="dialog-actions">
         <button class="ghost" value="cancel" type="button" id="cancelFinish">Cancel</button>

@@ -1,26 +1,25 @@
-# Questwheel v2
+# Questwheel v3
 
-Questwheel is a private, offline-friendly RPG-style planner.
+Questwheel is a private, offline-friendly RPG-style quest and time planner.
 
-## v2 changes
-- Opens on the actual current day and current week each time the app launches
-- Quest/default durations now range from 2 minutes to 10 hours
-- Scheduled blocks accept any whole-minute duration from 2 to 600 minutes
-- Each quest can have its own persistent colour
-- Day-wheel segments use quest colours
-- Week view now shows all seven days as miniature 24-hour schedule wheels
-- Reclaimed time still appears as free-time segments
+## v3 changes
+- Reworked colour palette with more clearly separated hues and several reds
+- Removed the day-picker arrows and off-centre date input
+- Swipe the main 24-hour wheel left/right to change days
+- Keyboard left/right on the focused wheel remains as a non-swipe accessibility option
+- Recurring blocks: repeat every X days for a duration in days, weeks, or months
+- Permanent Delete alongside Archive for quests
+- Deleting a quest cascades through nested subtasks and their scheduled blocks after confirmation
+- Cascading quest tree: any quest or subtask can contain more subtasks
+- Any level of the quest tree can be scheduled as its own time block
+- Subtasks inherit the parent category/colour by default but can be given a different colour when created
+- Quest/subtask completion toggles for checklist-style progress
+- Keeps the same local-storage key as v1/v2 for data compatibility
 
-## Existing v1 data
-v2 intentionally keeps the same local-storage key as v1. If you replace the files in the same GitHub Pages site, your existing quests and schedule should remain. Older quests without a saved colour automatically fall back to their category colour.
+## Updating an existing GitHub Pages copy
+Upload/replace the v3 files in the same GitHub repository and commit the changes. Keep the same Pages URL. Your existing local Questwheel data should remain because the storage key is unchanged.
 
-## Updating your GitHub Pages copy
-Replace the old root files with the v2 files from this folder: `index.html`, `app.js`, `styles.css`, `manifest.webmanifest`, `sw.js`, and the `icons` folder.
+If the Home Screen app briefly shows the old version after GitHub finishes publishing, fully close Questwheel and open it again. The service-worker cache is versioned as v3.
 
-After GitHub Pages republishes, reopen Questwheel. The service worker uses a new cache version so updated files replace the old cached version.
-
-## Privacy
-Quest and schedule data stays in local browser storage. GitHub hosts only the app code.
-
-## Backup warning
-Clearing Safari website data for the Questwheel site can erase local planner data. Export/import backup is a good next feature.
+## Privacy and backup
+Quest and schedule data remains in local browser storage on your device. GitHub hosts the app code only. Clearing Safari website data for the Questwheel site can erase local planner data, so Export/Import backup remains an important future feature.
