@@ -106,3 +106,38 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   .week-num { font-size: 16px; }
   .week-hours { font-size: 9px; }
 }
+
+
+/* v2 */
+.color-picker { display: flex; flex-wrap: wrap; gap: 10px; }
+.color-swatch {
+  width: 42px; height: 42px; border-radius: 50%; border: 3px solid transparent;
+  padding: 0; position: relative; background: var(--swatch);
+}
+.color-swatch[aria-checked="true"] { border-color: var(--text); }
+.color-swatch[aria-checked="true"]::after {
+  content: ""; position: absolute; inset: 9px; border: 2px solid rgba(0,0,0,.55); border-radius: 50%;
+}
+
+.week-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.week-day { border-radius: 15px; overflow: hidden; }
+.week-day button {
+  display: grid; grid-template-columns: 72px 92px minmax(0,1fr); gap: 12px;
+  align-items: center; min-height: 112px; padding: 10px 12px;
+}
+.week-date-stack { text-align: left; }
+.week-num { font-size: 28px; margin: 2px 0 5px; }
+.week-hours { font-size: 12px; color: var(--text); }
+.week-free { font-size: 11px; }
+.mini-wheel { width: 92px; height: 92px; display: block; }
+.week-quests { min-width: 0; display: grid; gap: 5px; text-align: left; }
+.week-quest-line { display: flex; align-items: center; gap: 7px; min-width: 0; color: var(--muted); font-size: 11px; }
+.week-quest-line span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.week-quest-dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+
+@media (max-width: 420px) {
+  .week-day button { grid-template-columns: 58px 78px minmax(0,1fr); gap: 8px; padding: 9px 8px; }
+  .mini-wheel { width: 78px; height: 78px; }
+  .week-num { font-size: 23px; }
+  .week-quest-line { font-size: 10px; }
+}

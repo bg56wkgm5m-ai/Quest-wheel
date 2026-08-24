@@ -8,6 +8,13 @@
     rest: { label: "Rest", color: "#6f7682" }
   };
 
+  const questPalette = [
+    "#c9a84f", "#8aa8cf", "#9d8bc0", "#8eaa91",
+    "#c47c67", "#72aaa5", "#b88aa3", "#a5a66f",
+    "#d09055", "#6f8fb8", "#9a7ec7", "#73a77d"
+  ];
+  let selectedQuestColor = questPalette[0];
+
   const defaultState = {
     quests: [],
     blocks: [],
@@ -38,6 +45,7 @@
     questName: $("questName"),
     questCategory: $("questCategory"),
     questDuration: $("questDuration"),
+    questColorPicker: $("questColorPicker"),
     blockQuest: $("blockQuest"),
     blockStart: $("blockStart"),
     blockMinutes: $("blockMinutes"),
@@ -70,7 +78,7 @@
       return {
         quests: Array.isArray(parsed.quests) ? parsed.quests : [],
         blocks: Array.isArray(parsed.blocks) ? parsed.blocks : [],
-        selectedDate: /^\d{4}-\d{2}-\d{2}$/.test(parsed.selectedDate || "") ? parsed.selectedDate : isoDate(new Date())
+        selectedDate: isoDate(new Date())
       };
     } catch {
       return structuredClone(defaultState);
@@ -114,6 +122,29 @@
     return categories[category]?.color || categories.personal.color;
   }
 
+  function questColor(q) {
+    return q?.color || categoryColor(q?.category);
+  }
+
+  function renderColorPicker(preferred) {
+    selectedQuestColor = preferred || selectedQuestColor || questPalette[0];
+    el.questColorPicker.innerHTML = "";
+    questPalette.forEach(color => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "color-swatch";
+      btn.style.setProperty("--swatch", color);
+      btn.setAttribute("role", "radio");
+      btn.setAttribute("aria-label", `Colour ${color}`);
+      btn.setAttribute("aria-checked", color === selectedQuestColor ? "true" : "false");
+      btn.addEventListener("click", () => {
+        selectedQuestColor = color;
+        renderColorPicker(color);
+      });
+      el.questColorPicker.appendChild(btn);
+    });
+  }
+
   function render() {
     el.datePicker.value = state.selectedDate;
     const date = dateFromISO(state.selectedDate);
@@ -122,6 +153,7 @@
     el.selectedDateHeading.textContent = date.toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" });
 
     renderQuestOptions();
+    if (!el.questColorPicker.children.length) renderColorPicker(categoryColor(el.questCategory.value));
     renderQuests();
     renderTimeline();
     renderWheel();
@@ -163,7 +195,7 @@
       const scheduled = state.blocks.filter(b => b.questId === q.id && !b.completed).length;
       card.innerHTML = `
         <div class="card-main">
-          <span class="category-mark" style="background:${categoryColor(q.category)}"></span>
+          <span class="category-mark" style="background:${questColor(q)}"></span>
           <div class="card-text">
             <div class="card-title"></div>
             <div class="card-meta">${categories[q.category]?.label || "Quest"} · default ${fmtMinutes(q.defaultMinutes)}${scheduled ? ` · ${scheduled} scheduled` : ""}</div>
@@ -204,7 +236,7 @@
       const end = b.start + b.minutes;
       card.innerHTML = `
         <div class="card-main">
-          <span class="category-mark" style="background:${categoryColor(q.category)}"></span>
+          <span class="category-mark" style="background:${questColor(q)}"></span>
           <div class="card-text">
             <div class="card-title"></div>
             <div class="card-meta">${timeFromMinutes(b.start)}–${timeFromMinutes(end)} · ${fmtMinutes(b.minutes)}</div>
@@ -290,10 +322,10 @@
       const q = questById(b.questId);
       if (!q) return;
       const startA = b.start/1440*360;
-      const endA = Math.min(360, (b.start+b.minutes)/1440*360);
+      const endA = (b.start+b.minutes)/1440*360;
       const path = document.createElementNS(NS,"path");
       path.setAttribute("d", arcPath(cx,cy,ro,ri,startA,endA));
-      path.setAttribute("fill", categoryColor(q.category));
+      path.setAttribute("fill", questColor(q));
       path.setAttribute("opacity", b.completed ? ".48" : ".9");
       path.setAttribute("stroke","#0e1014");
       path.setAttribute("stroke-width","1.5");
@@ -316,12 +348,14 @@
     el.wheelScheduled.textContent = fmtMinutes(scheduled);
 
     el.wheelLegend.innerHTML = "";
-    Object.entries(categories).forEach(([key,val]) => {
-      const used = blocks.some(b => questById(b.questId)?.category === key);
-      if (!used) return;
+    const usedQuestIds = [...new Set(blocks.map(b => b.questId))];
+    usedQuestIds.forEach(id => {
+      const q = questById(id);
+      if (!q) return;
       const item = document.createElement("span");
       item.className = "legend-item";
-      item.innerHTML = `<span class="legend-dot" style="background:${val.color}"></span>${val.label}`;
+      item.innerHTML = `<span class="legend-dot" style="background:${questColor(q)}"></span>`;
+      item.appendChild(document.createTextNode(q.name));
       el.wheelLegend.appendChild(item);
     });
     if (blocks.some(b => b.reclaimed > 0)) {
@@ -340,6 +374,50 @@
     return d;
   }
 
+  function renderMiniWheel(svg, blocks) {
+    svg.innerHTML = "";
+    const NS = "http://www.w3.org/2000/svg";
+    const cx = 50, cy = 50, ro = 44, ri = 28;
+
+    const base = document.createElementNS(NS, "circle");
+    base.setAttribute("cx", cx); base.setAttribute("cy", cy); base.setAttribute("r", (ro+ri)/2);
+    base.setAttribute("fill", "none"); base.setAttribute("stroke", "#252a33"); base.setAttribute("stroke-width", ro-ri);
+    svg.appendChild(base);
+
+    [0,6,12,18].forEach(h => {
+      const a = h/24*360;
+      const p1 = polar(cx,cy,ro+1,a);
+      const p2 = polar(cx,cy,ro+5,a);
+      const line = document.createElementNS(NS,"line");
+      line.setAttribute("x1",p1.x); line.setAttribute("y1",p1.y); line.setAttribute("x2",p2.x); line.setAttribute("y2",p2.y);
+      line.setAttribute("stroke","#818896"); line.setAttribute("stroke-width","1");
+      svg.appendChild(line);
+    });
+
+    blocks.forEach(b => {
+      const q = questById(b.questId);
+      if (!q) return;
+      const startA = b.start/1440*360;
+      const endA = (b.start+b.minutes)/1440*360;
+      const path = document.createElementNS(NS,"path");
+      path.setAttribute("d", arcPath(cx,cy,ro,ri,startA,endA));
+      path.setAttribute("fill", questColor(q));
+      path.setAttribute("opacity", b.completed ? ".5" : ".95");
+      svg.appendChild(path);
+
+      if (b.completed && b.reclaimed > 0) {
+        const actualEndA = (b.start + b.actualMinutes)/1440*360;
+        const plannedEndA = (b.start + b.minutes)/1440*360;
+        const free = document.createElementNS(NS,"path");
+        free.setAttribute("d", arcPath(cx,cy,ro,ri,actualEndA,plannedEndA));
+        free.setAttribute("fill","#3d424d");
+        free.setAttribute("stroke","#d9b55b");
+        free.setAttribute("stroke-width","1");
+        svg.appendChild(free);
+      }
+    });
+  }
+
   function renderWeek() {
     const base = dateFromISO(state.selectedDate);
     const start = startOfWeek(base);
@@ -356,12 +434,51 @@
       const reclaimed = blocks.reduce((s,b)=>s+(b.reclaimed||0),0);
       const box = document.createElement("div");
       box.className = "week-day" + (iso===today ? " today" : "");
+
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.innerHTML = `<div class="week-name">${d.toLocaleDateString(undefined,{weekday:"short"})}</div>
+
+      const dateStack = document.createElement("div");
+      dateStack.className = "week-date-stack";
+      dateStack.innerHTML = `<div class="week-name">${d.toLocaleDateString(undefined,{weekday:"short"})}</div>
         <div class="week-num">${d.getDate()}</div>
         <div class="week-hours">${fmtMinutes(total)}</div>
         ${reclaimed ? `<div class="week-free">+${fmtMinutes(reclaimed)}</div>` : ""}`;
+
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("class", "mini-wheel");
+      svg.setAttribute("viewBox", "0 0 100 100");
+      svg.setAttribute("aria-label", `${d.toLocaleDateString(undefined,{weekday:"long"})} 24 hour schedule`);
+      renderMiniWheel(svg, blocks);
+
+      const questSummary = document.createElement("div");
+      questSummary.className = "week-quests";
+      const allIds = [...new Set(blocks.map(b => b.questId))];
+      const ids = allIds.slice(0,4);
+      if (!ids.length) {
+        questSummary.innerHTML = `<div class="week-quest-line">No quests scheduled</div>`;
+      } else {
+        ids.forEach(id => {
+          const q = questById(id);
+          if (!q) return;
+          const line = document.createElement("div");
+          line.className = "week-quest-line";
+          line.innerHTML = `<span class="week-quest-dot" style="background:${questColor(q)}"></span>`;
+          const name = document.createElement("span");
+          name.textContent = q.name;
+          line.appendChild(name);
+          questSummary.appendChild(line);
+        });
+        const extra = allIds.length - ids.length;
+        if (extra > 0) {
+          const more = document.createElement("div");
+          more.className = "week-quest-line";
+          more.textContent = `+${extra} more`;
+          questSummary.appendChild(more);
+        }
+      }
+
+      btn.append(dateStack, svg, questSummary);
       btn.addEventListener("click", () => {
         state.selectedDate = iso;
         saveState();
@@ -421,7 +538,11 @@
     }
   });
 
-  $("addQuestBtn").addEventListener("click", () => el.questDialog.showModal());
+  $("addQuestBtn").addEventListener("click", () => {
+    renderColorPicker(categoryColor(el.questCategory.value));
+    el.questDialog.showModal();
+  });
+  el.questCategory.addEventListener("change", () => renderColorPicker(categoryColor(el.questCategory.value)));
   $("cancelQuest").addEventListener("click", () => el.questDialog.close());
   el.questForm.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -431,12 +552,15 @@
       id: uid("q"),
       name,
       category: el.questCategory.value,
-      defaultMinutes: Math.max(5, Math.min(720, Number(el.questDuration.value)||30)),
+      defaultMinutes: Math.max(2, Math.min(600, Number(el.questDuration.value)||30)),
+      color: selectedQuestColor,
       archived: false,
       createdAt: Date.now()
     });
     el.questName.value = "";
-    saveState(); el.questDialog.close(); render();
+    saveState(); el.questDialog.close();
+    renderColorPicker(categoryColor(el.questCategory.value));
+    render();
   });
 
   $("addBlockBtn").addEventListener("click", () => openBlockDialog());
@@ -449,7 +573,7 @@
     e.preventDefault();
     const questId = el.blockQuest.value;
     const start = minutesFromTime(el.blockStart.value);
-    const minutes = Math.max(5, Math.min(720, Number(el.blockMinutes.value)||30));
+    const minutes = Math.max(2, Math.min(600, Number(el.blockMinutes.value)||30));
     if (!questById(questId)) return;
     state.blocks.push({
       id: uid("b"),
@@ -469,7 +593,7 @@
     e.preventDefault();
     const b = state.blocks.find(x => x.id === el.finishBlockId.value);
     if (!b) return;
-    const actual = Math.max(1, Math.min(720, Number(el.actualMinutes.value)||b.minutes));
+    const actual = Math.max(1, Math.min(600, Number(el.actualMinutes.value)||b.minutes));
     b.completed = true;
     b.actualMinutes = actual;
     b.reclaimed = Math.max(0, b.minutes - actual);

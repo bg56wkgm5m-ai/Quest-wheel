@@ -130,13 +130,25 @@
       </label>
       <label>Default duration
         <select id="questDuration">
+          <option value="2">2 minutes</option>
+          <option value="5">5 minutes</option>
+          <option value="10">10 minutes</option>
           <option value="15">15 minutes</option>
+          <option value="20">20 minutes</option>
           <option value="30" selected>30 minutes</option>
           <option value="45">45 minutes</option>
           <option value="60">1 hour</option>
           <option value="90">1½ hours</option>
           <option value="120">2 hours</option>
+          <option value="180">3 hours</option>
+          <option value="240">4 hours</option>
+          <option value="360">6 hours</option>
+          <option value="480">8 hours</option>
+          <option value="600">10 hours</option>
         </select>
+      </label>
+      <label>Quest colour
+        <div id="questColorPicker" class="color-picker" role="radiogroup" aria-label="Quest colour"></div>
       </label>
       <div class="dialog-actions">
         <button class="ghost" value="cancel" type="button" id="cancelQuest">Cancel</button>
@@ -162,7 +174,7 @@
           <input id="blockStart" type="time" required value="09:00" />
         </label>
         <label>Minutes
-          <input id="blockMinutes" type="number" min="5" max="720" step="5" value="30" required />
+          <input id="blockMinutes" type="number" min="2" max="600" step="1" value="30" required />
         </label>
       </div>
       <div class="dialog-actions">
@@ -183,7 +195,7 @@
       </div>
       <input id="finishBlockId" type="hidden" />
       <label>Actual minutes used
-        <input id="actualMinutes" type="number" min="1" max="720" step="1" required />
+        <input id="actualMinutes" type="number" min="1" max="600" step="1" required />
       </label>
       <p class="hint">Finish faster than planned and the difference becomes reclaimed free time.</p>
       <div class="dialog-actions">

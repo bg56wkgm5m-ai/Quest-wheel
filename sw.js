@@ -1,4 +1,4 @@
-const CACHE = "questwheel-v1";
+const CACHE = "questwheel-v2";
 const ASSETS = [
   "./",
   "./index.html",

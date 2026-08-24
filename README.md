@@ -1,31 +1,26 @@
-# Questwheel
+# Questwheel v2
 
 Questwheel is a private, offline-friendly RPG-style planner.
 
-## Current features
-- Quest log with categories and default durations
-- Schedule quests into time blocks
-- 24-hour circular day wheel
-- Mark a block complete with actual time used
-- Finishing early converts unused scheduled time into reclaimed free time
-- Weekly overview
-- Data stored locally in the browser using localStorage
-- Installable PWA and offline cache
+## v2 changes
+- Opens on the actual current day and current week each time the app launches
+- Quest/default durations now range from 2 minutes to 10 hours
+- Scheduled blocks accept any whole-minute duration from 2 to 600 minutes
+- Each quest can have its own persistent colour
+- Day-wheel segments use quest colours
+- Week view now shows all seven days as miniature 24-hour schedule wheels
+- Reclaimed time still appears as free-time segments
 
-## Install on iPhone
-A PWA needs to be served over HTTPS. The easiest free route is GitHub Pages:
+## Existing v1 data
+v2 intentionally keeps the same local-storage key as v1. If you replace the files in the same GitHub Pages site, your existing quests and schedule should remain. Older quests without a saved colour automatically fall back to their category colour.
 
-1. Create a free GitHub account if you do not already have one.
-2. Create a new repository, for example `questwheel`.
-3. Upload the contents of this folder (not the zip itself).
-4. In the repository: Settings → Pages.
-5. Under "Build and deployment", choose "Deploy from a branch".
-6. Choose the `main` branch and `/ (root)`, then Save.
-7. Open the resulting GitHub Pages address in Safari on your iPhone.
-8. Tap Share → Add to Home Screen.
+## Updating your GitHub Pages copy
+Replace the old root files with the v2 files from this folder: `index.html`, `app.js`, `styles.css`, `manifest.webmanifest`, `sw.js`, and the `icons` folder.
 
-Your quest/schedule data is stored locally on that browser/device. It is not sent to GitHub.
+After GitHub Pages republishes, reopen Questwheel. The service worker uses a new cache version so updated files replace the old cached version.
 
-## Important
-If you clear Safari website data for the hosted site, the app's local data can be erased.
-A later version should add Export/Import backup.
+## Privacy
+Quest and schedule data stays in local browser storage. GitHub hosts only the app code.
+
+## Backup warning
+Clearing Safari website data for the Questwheel site can erase local planner data. Export/import backup is a good next feature.
