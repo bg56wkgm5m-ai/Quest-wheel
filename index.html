@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#15171c" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Questwheel" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link rel="stylesheet" href="./styles.css" />
+  <title>Questwheel</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow" id="dayLabel">TODAY</div>
+        <h1>Questwheel</h1>
+      </div>
+      <button class="ghost compact" id="todayBtn" type="button">Today</button>
+    </header>
+
+    <main>
+      <section class="view active" id="dayView" aria-labelledby="dayTab">
+        <div class="date-row">
+          <button class="icon-btn" id="prevDay" type="button" aria-label="Previous day">‹</button>
+          <label class="date-label">
+            <span class="sr-only">Selected date</span>
+            <input id="datePicker" type="date" />
+          </label>
+          <button class="icon-btn" id="nextDay" type="button" aria-label="Next day">›</button>
+        </div>
+
+        <section class="panel wheel-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">DAY MAP</span>
+              <h2 id="selectedDateHeading">Today</h2>
+            </div>
+            <div class="free-time-badge">
+              <span>Reclaimed</span>
+              <strong id="reclaimedTotal">0m</strong>
+            </div>
+          </div>
+
+          <div class="wheel-wrap">
+            <svg id="dayWheel" viewBox="0 0 360 360" role="img" aria-label="24 hour schedule wheel"></svg>
+            <div class="wheel-center">
+              <span id="wheelScheduled">0h</span>
+              <small>scheduled</small>
+            </div>
+          </div>
+
+          <div class="legend" id="wheelLegend"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">TIMELINE</span>
+              <h2>Scheduled blocks</h2>
+            </div>
+            <button class="primary compact" id="addBlockBtn" type="button">+ Block</button>
+          </div>
+          <div id="timeline" class="timeline empty-state">No time blocks yet.</div>
+        </section>
+      </section>
+
+      <section class="view" id="questsView" aria-labelledby="questsTab">
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">QUEST LOG</span>
+              <h2>Objectives</h2>
+            </div>
+            <button class="primary compact" id="addQuestBtn" type="button">+ Quest</button>
+          </div>
+          <div id="questList" class="quest-list empty-state">No quests yet.</div>
+        </section>
+      </section>
+
+      <section class="view" id="weekView" aria-labelledby="weekTab">
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">WEEK MAP</span>
+              <h2 id="weekHeading">This week</h2>
+            </div>
+          </div>
+          <div id="weekGrid" class="week-grid"></div>
+        </section>
+      </section>
+    </main>
+
+    <nav class="tabbar" aria-label="Primary">
+      <button id="dayTab" class="tab active" data-view="dayView" type="button">
+        <span class="tab-icon">◷</span><span>Day</span>
+      </button>
+      <button id="questsTab" class="tab" data-view="questsView" type="button">
+        <span class="tab-icon">◆</span><span>Quests</span>
+      </button>
+      <button id="weekTab" class="tab" data-view="weekView" type="button">
+        <span class="tab-icon">▦</span><span>Week</span>
+      </button>
+    </nav>
+  </div>
+
+  <dialog id="questDialog">
+    <form method="dialog" id="questForm">
+      <div class="dialog-head">
+        <div>
+          <span class="eyebrow">NEW QUEST</span>
+          <h2>Create objective</h2>
+        </div>
+        <button class="icon-btn" value="cancel" aria-label="Close">×</button>
+      </div>
+      <label>Quest name
+        <input id="questName" maxlength="80" required placeholder="e.g. Opus follow-up" />
+      </label>
+      <label>Category
+        <select id="questCategory">
+          <option value="business">Business</option>
+          <option value="training">Training</option>
+          <option value="personal">Personal</option>
+          <option value="admin">Admin</option>
+          <option value="rest">Rest</option>
+        </select>
+      </label>
+      <label>Default duration
+        <select id="questDuration">
+          <option value="15">15 minutes</option>
+          <option value="30" selected>30 minutes</option>
+          <option value="45">45 minutes</option>
+          <option value="60">1 hour</option>
+          <option value="90">1½ hours</option>
+          <option value="120">2 hours</option>
+        </select>
+      </label>
+      <div class="dialog-actions">
+        <button class="ghost" value="cancel" type="button" id="cancelQuest">Cancel</button>
+        <button class="primary" value="default" type="submit">Create quest</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="blockDialog">
+    <form method="dialog" id="blockForm">
+      <div class="dialog-head">
+        <div>
+          <span class="eyebrow">TIME BLOCK</span>
+          <h2>Schedule quest</h2>
+        </div>
+        <button class="icon-btn" value="cancel" aria-label="Close">×</button>
+      </div>
+      <label>Quest
+        <select id="blockQuest" required></select>
+      </label>
+      <div class="two-col">
+        <label>Start
+          <input id="blockStart" type="time" required value="09:00" />
+        </label>
+        <label>Minutes
+          <input id="blockMinutes" type="number" min="5" max="720" step="5" value="30" required />
+        </label>
+      </div>
+      <div class="dialog-actions">
+        <button class="ghost" value="cancel" type="button" id="cancelBlock">Cancel</button>
+        <button class="primary" value="default" type="submit">Schedule</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="finishDialog">
+    <form method="dialog" id="finishForm">
+      <div class="dialog-head">
+        <div>
+          <span class="eyebrow">COMPLETE</span>
+          <h2 id="finishTitle">Finish block</h2>
+        </div>
+        <button class="icon-btn" value="cancel" aria-label="Close">×</button>
+      </div>
+      <input id="finishBlockId" type="hidden" />
+      <label>Actual minutes used
+        <input id="actualMinutes" type="number" min="1" max="720" step="1" required />
+      </label>
+      <p class="hint">Finish faster than planned and the difference becomes reclaimed free time.</p>
+      <div class="dialog-actions">
+        <button class="ghost" value="cancel" type="button" id="cancelFinish">Cancel</button>
+        <button class="primary" value="default" type="submit">Complete</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="./app.js"></script>
+</body>
+</html>
