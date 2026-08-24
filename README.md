@@ -1,25 +1,21 @@
-# Questwheel v3
+# Questwheel v3.1 — cache repair build
 
-Questwheel is a private, offline-friendly RPG-style quest and time planner.
+This build fixes the v2→v3 upgrade crash caused by an old service worker mixing cached v2 JavaScript with v3 HTML.
 
-## v3 changes
-- Reworked colour palette with more clearly separated hues and several reds
-- Removed the day-picker arrows and off-centre date input
-- Swipe the main 24-hour wheel left/right to change days
-- Keyboard left/right on the focused wheel remains as a non-swipe accessibility option
-- Recurring blocks: repeat every X days for a duration in days, weeks, or months
-- Permanent Delete alongside Archive for quests
-- Deleting a quest cascades through nested subtasks and their scheduled blocks after confirmation
-- Cascading quest tree: any quest or subtask can contain more subtasks
-- Any level of the quest tree can be scheduled as its own time block
-- Subtasks inherit the parent category/colour by default but can be given a different colour when created
-- Quest/subtask completion toggles for checklist-style progress
-- Keeps the same local-storage key as v1/v2 for data compatibility
+## What changed
+- All v3.1 assets have new versioned filenames, so old caches cannot substitute v2 files.
+- The new service worker uses network-first navigation, preventing the installed PWA from getting permanently trapped on an old index page.
+- The PWA start URL includes a version query.
+- Icon files also have new URLs to give iOS a fresh icon resource.
+- A small `v3.1` label appears beside Questwheel so you can verify which build actually loaded.
+- All v3 feature changes remain intact.
+- Local planner data still uses the same `questwheel-v1` localStorage key, preserving v1/v2 data.
 
-## Updating an existing GitHub Pages copy
-Upload/replace the v3 files in the same GitHub repository and commit the changes. Keep the same Pages URL. Your existing local Questwheel data should remain because the storage key is unchanged.
+## Upload
+Upload all files/folders in this package to the same GitHub Pages repository. They may coexist with old files; v3.1 references only the new versioned assets.
 
-If the Home Screen app briefly shows the old version after GitHub finishes publishing, fully close Questwheel and open it again. The service-worker cache is versioned as v3.
+## First recovery load
+After GitHub Pages republishes, open your normal Pages URL in Safari and add `?v=3.1` to the end once. Example:
+`https://YOURNAME.github.io/questwheel/?v=3.1`
 
-## Privacy and backup
-Quest and schedule data remains in local browser storage on your device. GitHub hosts the app code only. Clearing Safari website data for the Questwheel site can erase local planner data, so Export/Import backup remains an important future feature.
+That bypasses the old cached root page and lets v3.1 install its repaired service worker. Do not clear Safari website data, because that would erase locally stored Questwheel data.
