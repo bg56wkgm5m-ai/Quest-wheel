@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Questwheel" />
-  <link rel="manifest" href="./manifest-v5.1.webmanifest" />
-  <link rel="apple-touch-icon" href="./icons/icon-v5.1-192.png" />
+  <link rel="manifest" href="./manifest-v6.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-v6-192.png" />
   <style>
 :root {
   color-scheme: dark;
@@ -139,7 +139,7 @@ label { display: grid; gap: 7px; color: var(--muted); font-size: 13px; font-weig
 .week-quest-line span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .week-quest-dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
 
-.tabbar { position: fixed; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(calc(100% - 24px), 720px); display: grid; grid-template-columns: repeat(3,1fr); background: rgba(23,26,32,.95); backdrop-filter: blur(18px); border: 1px solid var(--border); border-radius: 18px; padding: 6px; z-index: 20; }
+.tabbar { position: fixed; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(calc(100% - 24px), 720px); display: grid; grid-template-columns: repeat(4,1fr); background: rgba(23,26,32,.95); backdrop-filter: blur(18px); border: 1px solid var(--border); border-radius: 18px; padding: 6px; z-index: 20; }
 .tab { border: 0; background: transparent; color: var(--muted); min-height: 52px; border-radius: 13px; display: grid; place-items: center; align-content: center; gap: 2px; font-size: 11px; }
 .tab.active { background: var(--panel-2); color: var(--text); }
 .tab-icon { font-size: 18px; }
@@ -224,8 +224,47 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
 .selected-close { width: 36px; min-height: 36px; height: 36px; align-self: start; font-size: 22px; }
 .block-card.selected { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 
+
+
+/* v6: category jars + prominent free-time reservoir */
+.jar-subtabs { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 8px; }
+.jar-period-label { text-align: center; color: var(--muted); font-size: 12px; margin: 2px 0 14px; }
+.free-bank-card { display: grid; grid-template-columns: minmax(0,1fr) 132px; gap: 18px; align-items: center; background: var(--panel-2); border: 1px solid var(--border); border-radius: 18px; padding: 16px; margin-bottom: 16px; overflow: hidden; }
+.free-bank-copy { min-width: 0; }
+.free-bank-copy h3 { margin: 0 0 4px; font-size: 21px; }
+.free-bank-copy p { color: var(--muted); font-size: 12px; line-height: 1.45; margin-top: 9px; }
+.free-bank-balance { display: block; font-size: 34px; line-height: 1; letter-spacing: -.04em; color: var(--accent); margin: 8px 0 5px; }
+.free-bank-balance.negative { color: var(--danger); }
+.free-bank-net { display: inline-block; font-size: 12px; color: var(--muted); }
+.jar-vessel { --jar-color: var(--accent); position: relative; width: 88px; height: 116px; border: 3px solid #737b88; border-top-width: 7px; border-radius: 11px 11px 23px 23px; overflow: hidden; background: rgba(255,255,255,.025); box-shadow: inset 0 0 0 2px rgba(255,255,255,.025); flex: 0 0 auto; }
+.jar-vessel::before { content: ""; position: absolute; z-index: 4; top: -7px; left: 14px; right: 14px; height: 9px; border: 3px solid #737b88; border-radius: 5px 5px 2px 2px; background: var(--panel-2); }
+.jar-vessel-large { width: 112px; height: 154px; justify-self: center; }
+.jar-liquid { position: absolute; left: 0; right: 0; bottom: 0; height: 0%; background: var(--jar-color); opacity: .78; transition: height .35s ease; }
+.jar-liquid::before { content: ""; position: absolute; left: 0; right: 0; top: -4px; height: 8px; border-radius: 50%; background: inherit; filter: brightness(1.12); }
+.free-liquid { --jar-color: #d9b55b; background: #d9b55b; }
+.jar-deficit { position: absolute; left: 0; right: 0; bottom: 0; height: 16%; background: repeating-linear-gradient(135deg, rgba(196,107,107,.88) 0 8px, rgba(196,107,107,.46) 8px 16px); }
+.jar-shine { position: absolute; z-index: 3; left: 12px; top: 16px; bottom: 18px; width: 10px; border-radius: 999px; background: rgba(255,255,255,.08); pointer-events: none; }
+.jar-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.jar-grid.empty-state { display: block; }
+.jar-card { min-width: 0; display: grid; grid-template-columns: 78px minmax(0,1fr); gap: 12px; align-items: center; background: var(--panel-2); border: 1px solid var(--border); border-radius: 16px; padding: 12px; }
+.jar-card .jar-vessel { width: 72px; height: 98px; }
+.jar-card-copy { min-width: 0; }
+.jar-card-title { font-size: 15px; font-weight: 800; overflow-wrap: anywhere; }
+.jar-card-total { font-size: 21px; font-weight: 850; margin: 4px 0 2px; }
+.jar-card-target { color: var(--muted); font-size: 11px; line-height: 1.35; }
+.jar-card-status { font-size: 11px; margin-top: 5px; font-weight: 700; }
+.jar-card-status.met { color: var(--accent); }
+.jar-card-actions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+.jar-card-actions .small-btn { min-height: 34px; padding: 0 8px; font-size: 10px; }
+.jar-count-hint { margin-top: -6px; }
+@media (max-width: 560px) {
+  .jar-grid { grid-template-columns: 1fr; }
+  .free-bank-card { grid-template-columns: minmax(0,1fr) 106px; gap: 12px; }
+  .jar-vessel-large { width: 92px; height: 132px; }
+}
+
 </style>
-  <title>Questwheel v5.1</title>
+  <title>Questwheel v6</title>
 </head>
 <body>
   <div class="app-shell">
@@ -235,7 +274,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
           <span class="relative-label">Today</span>
           <span class="relative-date">Mon 24 Aug ’26</span>
         </div>
-        <h1>Questwheel <span class="build-tag">v5.1</span></h1>
+        <h1>Questwheel <span class="build-tag">v6</span></h1>
       </div>
       <button class="ghost compact" id="todayBtn" type="button">Today</button>
     </header>
@@ -307,6 +346,37 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         </section>
       </section>
 
+      <section class="view" id="jarsView" aria-labelledby="jarsTab">
+        <section class="panel jars-panel">
+          <div class="panel-heading">
+            <div><span class="eyebrow">TIME RESERVOIRS</span><h2>Jars</h2></div>
+            <button class="primary compact" id="addJarBtn" type="button">+ Jar</button>
+          </div>
+          <div class="jar-subtabs" role="tablist" aria-label="Jar period">
+            <button id="dailyJarsSubtab" class="quest-subtab active" type="button" role="tab" aria-selected="true">Daily</button>
+            <button id="weeklyJarsSubtab" class="quest-subtab" type="button" role="tab" aria-selected="false">Weekly</button>
+          </div>
+          <div id="jarPeriodLabel" class="jar-period-label"></div>
+
+          <section class="free-bank-card" aria-labelledby="freeBankHeading">
+            <div class="free-bank-copy">
+              <span class="eyebrow">BANKED FREE TIME</span>
+              <h3 id="freeBankHeading">Free Time</h3>
+              <strong id="freeBankBalance" class="free-bank-balance">0m</strong>
+              <span id="freeBankPeriodNet" class="free-bank-net">Today ±0m</span>
+              <p>Finish early and time pours in. Run over and it is drawn back out.</p>
+            </div>
+            <div class="jar-vessel jar-vessel-large" aria-hidden="true">
+              <div id="freeBankLiquid" class="jar-liquid free-liquid"></div>
+              <div id="freeBankDeficit" class="jar-deficit" hidden></div>
+              <div class="jar-shine"></div>
+            </div>
+          </section>
+
+          <div id="jarGrid" class="jar-grid empty-state">No category jars yet.</div>
+        </section>
+      </section>
+
       <section class="view" id="weekView" aria-labelledby="weekTab">
         <section class="panel">
           <div class="panel-heading"><div><span class="eyebrow">WEEK MAP</span><h2 id="weekHeading">This week</h2></div></div>
@@ -318,6 +388,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     <nav class="tabbar" aria-label="Primary">
       <button id="dayTab" class="tab active" data-view="dayView" type="button"><span class="tab-icon">◷</span><span>Day</span></button>
       <button id="questsTab" class="tab" data-view="questsView" type="button"><span class="tab-icon">◆</span><span>Quests</span></button>
+      <button id="jarsTab" class="tab" data-view="jarsView" type="button"><span class="tab-icon">◫</span><span>Jars</span></button>
       <button id="weekTab" class="tab" data-view="weekView" type="button"><span class="tab-icon">▦</span><span>Week</span></button>
     </nav>
   </div>
@@ -363,6 +434,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         <label>Colour<div id="blockColorPicker" class="color-picker" role="radiogroup" aria-label="Standalone block colour"></div></label>
       </div>
 
+      <label>Fill jar when completed (optional)<select id="blockJar"></select></label>
+      <p class="hint jar-count-hint">A completed block fills its jar by the <strong>planned</strong> duration, even if you finish early.</p>
       <label>Start<input id="blockStart" type="time" required value="09:00" /></label>
       <fieldset class="duration-fieldset">
         <legend>Duration</legend>
@@ -413,6 +486,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         <label>Colour<div id="editBlockColorPicker" class="color-picker" role="radiogroup" aria-label="Edited block colour"></div></label>
       </div>
 
+      <label>Fill jar when completed (optional)<select id="editBlockJar"></select></label>
+      <p class="hint jar-count-hint">Jar credit uses the planned block length, not the actual completion time.</p>
       <div class="two-col">
         <label>Date<input id="editBlockDate" type="date" required /></label>
         <label>Start<input id="editBlockStart" type="time" required /></label>
@@ -427,6 +502,37 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       </fieldset>
 
       <div class="dialog-actions"><button class="ghost" value="cancel" type="button" id="cancelEditBlock">Cancel</button><button class="primary" value="default" type="submit">Save changes</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="jarDialog">
+    <form method="dialog" id="jarForm">
+      <div class="dialog-head">
+        <div><span class="eyebrow" id="jarDialogEyebrow">NEW JAR</span><h2 id="jarDialogTitle">Create category jar</h2></div>
+        <button class="icon-btn" value="cancel" aria-label="Close">×</button>
+      </div>
+      <input id="jarEditId" type="hidden" />
+      <label>Jar name<input id="jarName" maxlength="60" required placeholder="e.g. Housework" /></label>
+      <div class="two-col">
+        <label>Daily minimum (minutes)<input id="jarMinMinutes" type="number" min="1" max="1440" step="1" value="30" inputmode="numeric" required /></label>
+        <label>Daily full target (minutes)<input id="jarMaxMinutes" type="number" min="1" max="1440" step="1" value="45" inputmode="numeric" required /></label>
+      </div>
+      <label>Colour<div id="jarColorPicker" class="color-picker" role="radiogroup" aria-label="Jar colour"></div></label>
+      <div class="dialog-actions"><button class="ghost" value="cancel" type="button" id="cancelJar">Cancel</button><button class="primary" value="default" type="submit">Save jar</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="manualJarDialog">
+    <form method="dialog" id="manualJarForm">
+      <div class="dialog-head">
+        <div><span class="eyebrow">MANUAL FILL</span><h2 id="manualJarTitle">Add time</h2></div>
+        <button class="icon-btn" value="cancel" aria-label="Close">×</button>
+      </div>
+      <input id="manualJarId" type="hidden" />
+      <label>Date<input id="manualJarDate" type="date" required /></label>
+      <label>Minutes to add<input id="manualJarMinutes" type="number" min="1" max="1440" step="1" value="5" inputmode="numeric" required /></label>
+      <p class="hint">Use this for activity you did without scheduling a block first.</p>
+      <div class="dialog-actions"><button class="ghost" value="cancel" type="button" id="cancelManualJar">Cancel</button><button class="primary" value="default" type="submit">Add time</button></div>
     </form>
   </dialog>
 
@@ -456,7 +562,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   <script>
 (() => {
   const STORE = "questwheel-v1"; // Preserve all prior Questwheel local data.
-  const BUILD = "v5.1";
+  const BUILD = "v6";
 
   const categories = {
     business: { label: "Business", color: "#FFB000" },
@@ -486,6 +592,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   let selectedQuestColor = questPalette[0];
   let selectedBlockColor = categories.personal.color;
   let selectedEditBlockColor = categories.personal.color;
+  let selectedJarColor = questPalette[0];
+  let activeJarPeriod = "daily";
   let swipeStart = null;
   let swipeAnimating = false;
   let currentQuestMode = "active";
@@ -496,6 +604,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     quests: [],
     blocks: [],
     bankLedger: [],
+    jars: [],
+    jarEntries: [],
     selectedDate: isoDate(new Date())
   };
 
@@ -525,6 +635,29 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     completedQuestsSubtab: $("completedQuestsSubtab"),
     weekGrid: $("weekGrid"),
     weekHeading: $("weekHeading"),
+    jarGrid: $("jarGrid"),
+    dailyJarsSubtab: $("dailyJarsSubtab"),
+    weeklyJarsSubtab: $("weeklyJarsSubtab"),
+    jarPeriodLabel: $("jarPeriodLabel"),
+    freeBankBalance: $("freeBankBalance"),
+    freeBankPeriodNet: $("freeBankPeriodNet"),
+    freeBankLiquid: $("freeBankLiquid"),
+    freeBankDeficit: $("freeBankDeficit"),
+    jarDialog: $("jarDialog"),
+    jarForm: $("jarForm"),
+    jarDialogEyebrow: $("jarDialogEyebrow"),
+    jarDialogTitle: $("jarDialogTitle"),
+    jarEditId: $("jarEditId"),
+    jarName: $("jarName"),
+    jarMinMinutes: $("jarMinMinutes"),
+    jarMaxMinutes: $("jarMaxMinutes"),
+    jarColorPicker: $("jarColorPicker"),
+    manualJarDialog: $("manualJarDialog"),
+    manualJarForm: $("manualJarForm"),
+    manualJarTitle: $("manualJarTitle"),
+    manualJarId: $("manualJarId"),
+    manualJarDate: $("manualJarDate"),
+    manualJarMinutes: $("manualJarMinutes"),
     questDialog: $("questDialog"),
     blockDialog: $("blockDialog"),
     editBlockDialog: $("editBlockDialog"),
@@ -545,6 +678,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     blockName: $("blockName"),
     blockCategory: $("blockCategory"),
     blockColorPicker: $("blockColorPicker"),
+    blockJar: $("blockJar"),
     blockStart: $("blockStart"),
     blockHours: $("blockHours"),
     blockMinutes: $("blockMinutes"),
@@ -564,6 +698,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     editBlockName: $("editBlockName"),
     editBlockCategory: $("editBlockCategory"),
     editBlockColorPicker: $("editBlockColorPicker"),
+    editBlockJar: $("editBlockJar"),
     editBlockDate: $("editBlockDate"),
     editBlockStart: $("editBlockStart"),
     editBlockHours: $("editBlockHours"),
@@ -626,6 +761,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       name: b.name || null,
       category: b.category || "personal",
       color: b.color || null,
+      jarId: b.jarId || null,
       completed: Boolean(b.completed),
       bankDelta: b.bankDelta != null ? Number(b.bankDelta) || 0 : Math.max(0, Number(b.reclaimed) || 0),
       reclaimed: Math.max(0, b.bankDelta != null ? Number(b.bankDelta) || 0 : Number(b.reclaimed) || 0),
@@ -656,6 +792,21 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         quests: Array.isArray(parsed.quests) ? parsed.quests.map(normalizeQuest) : [],
         blocks,
         bankLedger,
+        jars: Array.isArray(parsed.jars) ? parsed.jars.map(j => ({
+          id: j.id || uid("jar"),
+          name: j.name || "Jar",
+          minMinutes: Math.max(1, Math.min(1440, Number(j.minMinutes) || 30)),
+          maxMinutes: Math.max(1, Math.min(1440, Number(j.maxMinutes) || 45)),
+          color: j.color || questPalette[0],
+          createdAt: Number(j.createdAt) || 0
+        })) : [],
+        jarEntries: Array.isArray(parsed.jarEntries) ? parsed.jarEntries.map(e => ({
+          id: e.id || uid("jar-entry"),
+          jarId: e.jarId || null,
+          date: /^\d{4}-\d{2}-\d{2}$/.test(e.date || "") ? e.date : isoDate(new Date()),
+          minutes: Math.max(1, Math.min(1440, Number(e.minutes) || 1)),
+          createdAt: Number(e.createdAt) || 0
+        })) : [],
         selectedDate: isoDate(new Date())
       };
     } catch {
@@ -687,6 +838,63 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   function bankBalance() {
     return (state.bankLedger || []).reduce((sum, entry) => sum + (Number(entry.delta) || 0), 0);
   }
+
+  function jarById(id) {
+    return id ? (state.jars || []).find(j => j.id === id) : null;
+  }
+
+  function renderJarOptions(select, selectedId = null) {
+    if (!select) return;
+    select.innerHTML = "";
+    const none = document.createElement("option");
+    none.value = "";
+    none.textContent = "No jar";
+    select.appendChild(none);
+    [...(state.jars || [])]
+      .sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0))
+      .forEach(jar => {
+        const opt = document.createElement("option");
+        opt.value = jar.id;
+        opt.textContent = jar.name;
+        select.appendChild(opt);
+      });
+    if (selectedId && jarById(selectedId)) select.value = selectedId;
+  }
+
+  function weekDatesFor(dateISO) {
+    const start = startOfWeek(dateFromISO(dateISO));
+    return Array.from({length: 7}, (_, i) => isoDate(addDays(start, i)));
+  }
+
+  function jarMinutesForDate(jarId, dateISO) {
+    const blockMinutes = state.blocks
+      .filter(b => b.completed && b.jarId === jarId && b.date === dateISO)
+      .reduce((sum, b) => sum + (Number(b.minutes) || 0), 0);
+    const manualMinutes = (state.jarEntries || [])
+      .filter(entry => entry.jarId === jarId && entry.date === dateISO)
+      .reduce((sum, entry) => sum + (Number(entry.minutes) || 0), 0);
+    return blockMinutes + manualMinutes;
+  }
+
+  function jarMinutesForPeriod(jarId) {
+    if (activeJarPeriod === "weekly") {
+      return weekDatesFor(state.selectedDate).reduce((sum, date) => sum + jarMinutesForDate(jarId, date), 0);
+    }
+    return jarMinutesForDate(jarId, state.selectedDate);
+  }
+
+  function bankNetForDate(dateISO) {
+    return (state.bankLedger || []).reduce((sum, entry) => {
+      const block = entry.blockId ? state.blocks.find(b => b.id === entry.blockId) : null;
+      return sum + (block?.date === dateISO ? (Number(entry.delta) || 0) : 0);
+    }, 0);
+  }
+
+  function bankNetForPeriod() {
+    if (activeJarPeriod === "weekly") return weekDatesFor(state.selectedDate).reduce((sum, date) => sum + bankNetForDate(date), 0);
+    return bankNetForDate(state.selectedDate);
+  }
+
 
   function blockBankDelta(b) {
     if (!b?.completed) return 0;
@@ -843,6 +1051,11 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     renderColorPicker(el.editBlockColorPicker, "editBlockColor", selectedEditBlockColor, picked => { selectedEditBlockColor = picked; });
   }
 
+  function setJarColorPicker(color) {
+    selectedJarColor = color || questPalette[0];
+    renderColorPicker(el.jarColorPicker, "jarColor", selectedJarColor, picked => { selectedJarColor = picked; });
+  }
+
   function calendarDayDiff(target, base = new Date()) {
     const a = Date.UTC(target.getFullYear(), target.getMonth(), target.getDate());
     const b = Date.UTC(base.getFullYear(), base.getMonth(), base.getDate());
@@ -885,13 +1098,134 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     el.selectedDateHeading.textContent = date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
   }
 
+
+  function setJarLiquid(liquid, percent, color) {
+    liquid.style.height = `${Math.max(0, Math.min(100, percent))}%`;
+    liquid.style.background = color;
+  }
+
+  function jarPeriodTargets(jar) {
+    const factor = activeJarPeriod === "weekly" ? 7 : 1;
+    return { min: jar.minMinutes * factor, max: jar.maxMinutes * factor };
+  }
+
+  function openJarDialog(jarId = null) {
+    const jar = jarById(jarId);
+    el.jarEditId.value = jar?.id || "";
+    el.jarDialogEyebrow.textContent = jar ? "EDIT JAR" : "NEW JAR";
+    el.jarDialogTitle.textContent = jar ? `Modify ${jar.name}` : "Create category jar";
+    el.jarName.value = jar?.name || "";
+    el.jarMinMinutes.value = String(jar?.minMinutes || 30);
+    el.jarMaxMinutes.value = String(jar?.maxMinutes || 45);
+    setJarColorPicker(jar?.color || questPalette[0]);
+    el.jarDialog.showModal();
+  }
+
+  function openManualJarDialog(jarId) {
+    const jar = jarById(jarId);
+    if (!jar) return;
+    el.manualJarId.value = jar.id;
+    el.manualJarTitle.textContent = `Add time to ${jar.name}`;
+    el.manualJarDate.value = state.selectedDate;
+    el.manualJarMinutes.value = "5";
+    el.manualJarDialog.showModal();
+  }
+
+  function renderJars() {
+    const selected = dateFromISO(state.selectedDate);
+    if (activeJarPeriod === "weekly") {
+      const dates = weekDatesFor(state.selectedDate);
+      const start = dateFromISO(dates[0]);
+      const end = dateFromISO(dates[6]);
+      el.jarPeriodLabel.textContent = `${start.toLocaleDateString(undefined,{month:"short",day:"numeric"})} – ${end.toLocaleDateString(undefined,{month:"short",day:"numeric"})}`;
+    } else {
+      el.jarPeriodLabel.textContent = selected.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
+    }
+
+    const balance = bankBalance();
+    const net = bankNetForPeriod();
+    el.freeBankBalance.textContent = fmtSignedMinutes(balance, {zeroLabel: "0m"});
+    el.freeBankBalance.classList.toggle("negative", balance < 0);
+    el.freeBankPeriodNet.textContent = `${activeJarPeriod === "weekly" ? "This week" : "This day"} ${fmtSignedMinutes(net, {zeroLabel:"±0m"})}`;
+    const visualCapacity = 480; // 8h visual reservoir; overflow remains readable in the number.
+    const bankPct = Math.min(100, Math.max(0, balance) / visualCapacity * 100);
+    el.freeBankLiquid.style.height = `${bankPct}%`;
+    el.freeBankDeficit.hidden = balance >= 0;
+
+    const jars = [...(state.jars || [])].sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
+    if (!jars.length) {
+      el.jarGrid.className = "jar-grid empty-state";
+      el.jarGrid.textContent = "No category jars yet. Create one for something like Housework or Hygiene.";
+      return;
+    }
+    el.jarGrid.className = "jar-grid";
+    el.jarGrid.innerHTML = "";
+
+    jars.forEach(jar => {
+      const total = jarMinutesForPeriod(jar.id);
+      const target = jarPeriodTargets(jar);
+      const pct = target.max > 0 ? total / target.max * 100 : 0;
+      const card = document.createElement("article");
+      card.className = "jar-card";
+
+      const vessel = document.createElement("div");
+      vessel.className = "jar-vessel";
+      vessel.style.setProperty("--jar-color", jar.color);
+      vessel.setAttribute("aria-hidden", "true");
+      const liquid = document.createElement("div");
+      liquid.className = "jar-liquid";
+      setJarLiquid(liquid, pct, jar.color);
+      const shine = document.createElement("div");
+      shine.className = "jar-shine";
+      vessel.append(liquid, shine);
+
+      const copy = document.createElement("div");
+      copy.className = "jar-card-copy";
+      const title = document.createElement("div");
+      title.className = "jar-card-title";
+      title.textContent = jar.name;
+      const totalEl = document.createElement("div");
+      totalEl.className = "jar-card-total";
+      totalEl.textContent = fmtMinutes(total);
+      const targetEl = document.createElement("div");
+      targetEl.className = "jar-card-target";
+      targetEl.textContent = `${fmtMinutes(target.min)} minimum · ${fmtMinutes(target.max)} full`;
+      const status = document.createElement("div");
+      status.className = "jar-card-status";
+      if (total < target.min) status.textContent = `${fmtMinutes(target.min - total)} to minimum`;
+      else if (total <= target.max) { status.textContent = "Minimum met"; status.classList.add("met"); }
+      else { status.textContent = `${fmtMinutes(total - target.max)} over full target`; status.classList.add("met"); }
+
+      const actions = document.createElement("div");
+      actions.className = "jar-card-actions";
+      actions.append(
+        makeSmallButton("+ Time", "accent", () => openManualJarDialog(jar.id)),
+        makeSmallButton("Edit", "", () => openJarDialog(jar.id)),
+        makeSmallButton("Delete", "danger", () => {
+          if (!window.confirm(`Delete the ${jar.name} jar? Existing blocks will remain, but will no longer fill this jar.`)) return;
+          state.jars = state.jars.filter(item => item.id !== jar.id);
+          state.jarEntries = (state.jarEntries || []).filter(entry => entry.jarId !== jar.id);
+          state.blocks.forEach(block => { if (block.jarId === jar.id) block.jarId = null; });
+          saveState();
+          render();
+        })
+      );
+      copy.append(title, totalEl, targetEl, status, actions);
+      card.append(vessel, copy);
+      el.jarGrid.appendChild(card);
+    });
+  }
+
   function render() {
     renderDateIdentity();
     renderQuestOptions();
+    renderJarOptions(el.blockJar, el.blockJar?.value || null);
+    renderJarOptions(el.editBlockJar, el.editBlockJar?.value || null);
     renderQuests();
     renderTimeline();
     renderWheel();
     renderSelectedBlockPanel();
+    renderJars();
     renderWeek();
   }
 
@@ -1242,7 +1576,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     el.selectedBlockPanel.hidden = false;
     el.selectedBlockMark.style.background = blockColor(block);
     el.selectedBlockTitle.textContent = blockTitle(block);
-    el.selectedBlockMeta.textContent = `${timeFromMinutes(block.start)}–${timeFromMinutes(block.start + block.minutes)} · ${fmtMinutes(block.minutes)} · ${blockCategoryLabel(block)}`;
+    const selectedJar = jarById(block.jarId);
+    el.selectedBlockMeta.textContent = `${timeFromMinutes(block.start)}–${timeFromMinutes(block.start + block.minutes)} · ${fmtMinutes(block.minutes)} · ${blockCategoryLabel(block)}${selectedJar ? ` · fills ${selectedJar.name}` : ""}`;
     const delta = blockBankDelta(block);
     el.selectedBlockStatus.className = "selected-block-status";
     if (block.completed) {
@@ -1673,6 +2008,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     el.repeatEvery.value = "1";
     el.repeatFor.value = "7";
     el.repeatUnit.value = "weeks";
+    renderJarOptions(el.blockJar, null);
     toggleBlockMode({ resetDuration: false });
     el.blockDialog.showModal();
   }
@@ -1731,6 +2067,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     el.editBlockName.value = block.questId ? "" : (block.name || "");
     el.editBlockCategory.value = block.questId ? (questById(block.questId)?.category || "personal") : (block.category || "personal");
     setEditBlockColorPicker(blockColor(block));
+    renderJarOptions(el.editBlockJar, block.jarId);
+    el.editBlockJar.value = block.jarId || "";
     el.editBlockDate.value = block.date;
     el.editBlockStart.value = timeFromMinutes(block.start);
     setEditBlockDurationInputs(block.minutes);
@@ -2001,6 +2339,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         name,
         category: standalone ? el.blockCategory.value : (q?.category || "personal"),
         color: standalone ? selectedBlockColor : null,
+        jarId: jarById(el.blockJar.value) ? el.blockJar.value : null,
         date,
         start,
         minutes,
@@ -2062,6 +2401,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       block.name = standalone ? name : null;
       block.category = standalone ? el.editBlockCategory.value : (q?.category || "personal");
       block.color = standalone ? selectedEditBlockColor : null;
+      block.jarId = jarById(el.editBlockJar.value) ? el.editBlockJar.value : null;
       refreshLedgerForBlock(block);
     });
 
@@ -2118,10 +2458,65 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     if (block) deleteSelectedBlock(block);
   });
 
+
+  $("addJarBtn").addEventListener("click", () => openJarDialog());
+  $("cancelJar").addEventListener("click", () => el.jarDialog.close());
+  el.jarForm.addEventListener("submit", event => {
+    event.preventDefault();
+    const name = el.jarName.value.trim();
+    if (!name) return;
+    let minMinutes = Math.max(1, Math.min(1440, Number(el.jarMinMinutes.value) || 1));
+    let maxMinutes = Math.max(1, Math.min(1440, Number(el.jarMaxMinutes.value) || 1));
+    if (maxMinutes < minMinutes) [minMinutes, maxMinutes] = [maxMinutes, minMinutes];
+    const existing = jarById(el.jarEditId.value);
+    if (existing) {
+      existing.name = name;
+      existing.minMinutes = minMinutes;
+      existing.maxMinutes = maxMinutes;
+      existing.color = selectedJarColor;
+    } else {
+      state.jars.push({ id: uid("jar"), name, minMinutes, maxMinutes, color: selectedJarColor, createdAt: Date.now() });
+    }
+    saveState();
+    el.jarDialog.close();
+    render();
+  });
+
+  $("cancelManualJar").addEventListener("click", () => el.manualJarDialog.close());
+  el.manualJarForm.addEventListener("submit", event => {
+    event.preventDefault();
+    const jar = jarById(el.manualJarId.value);
+    if (!jar) return;
+    const minutes = Math.max(1, Math.min(1440, Number(el.manualJarMinutes.value) || 1));
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(el.manualJarDate.value) ? el.manualJarDate.value : state.selectedDate;
+    state.jarEntries = Array.isArray(state.jarEntries) ? state.jarEntries : [];
+    state.jarEntries.push({ id: uid("jar-entry"), jarId: jar.id, date, minutes, createdAt: Date.now() });
+    saveState();
+    el.manualJarDialog.close();
+    render();
+  });
+
+  el.dailyJarsSubtab.addEventListener("click", () => {
+    activeJarPeriod = "daily";
+    el.dailyJarsSubtab.classList.add("active");
+    el.weeklyJarsSubtab.classList.remove("active");
+    el.dailyJarsSubtab.setAttribute("aria-selected", "true");
+    el.weeklyJarsSubtab.setAttribute("aria-selected", "false");
+    renderJars();
+  });
+  el.weeklyJarsSubtab.addEventListener("click", () => {
+    activeJarPeriod = "weekly";
+    el.weeklyJarsSubtab.classList.add("active");
+    el.dailyJarsSubtab.classList.remove("active");
+    el.weeklyJarsSubtab.setAttribute("aria-selected", "true");
+    el.dailyJarsSubtab.setAttribute("aria-selected", "false");
+    renderJars();
+  });
+
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./sw-v5.1.js", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw-v6.js", { updateViaCache: "none" });
         if (reg.update) reg.update().catch(() => {});
       } catch {}
     });
@@ -2130,6 +2525,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   setQuestColorPicker(categoryColor("business"));
   setBlockColorPicker(categoryColor("personal"));
   setEditBlockColorPicker(categoryColor("personal"));
+  setJarColorPicker(questPalette[0]);
   render();
 })();
 

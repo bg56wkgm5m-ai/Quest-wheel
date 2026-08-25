@@ -1,18 +1,15 @@
-# Questwheel v5.1 — runtime/cache repair
+# Questwheel v6 — Jars
 
-This build keeps all v5 features but packages the app's core CSS and JavaScript directly inside index.html.
-
-Why:
-- A blank wheel + dead buttons means the page HTML loaded without the matching app JavaScript.
-- Keeping the core app in one file prevents Safari/GitHub/service-worker version mismatches.
-- The service worker is network-first and uses a new v5.1 cache.
-- Existing local Questwheel data still uses the same `questwheel-v1` local-storage key.
+## New
+- Fourth **Jars** tab with Daily and Weekly views.
+- Create category jars such as Housework or Hygiene with a daily minimum/full target range.
+- Weekly view is exactly the seven-day sum, with the daily target range multiplied by seven.
+- Blocks can optionally be assigned to a jar.
+- **Jar credit uses planned duration.** A completed 5-minute block adds 5 minutes to its category jar even if it actually took 2 minutes.
+- Early/late completion still affects only the separate Free Time bank.
+- Free Time is now shown as a large reservoir jar with lifetime bank balance and daily/weekly net.
+- Manual `+ Time` lets you add unscheduled activity to a category jar.
+- Existing v1–v5.1 Questwheel data remains on the same local-storage key.
 
 ## Update
-Upload every file in this folder to the same GitHub Pages repository.
-Replace `index.html`.
-Then visit your Pages URL in Safari with `?v=5.1` appended once.
-
-You should see `v5.1` in the app header.
-
-Do not clear Safari website data; that is where your current Questwheel data is stored.
+Upload every file to the same GitHub Pages repository and replace `index.html`. Then open the site once with `?v=6` appended. Do not clear Safari website data.
