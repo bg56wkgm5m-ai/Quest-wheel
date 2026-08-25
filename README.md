@@ -1,37 +1,25 @@
-# Questwheel v13
+# Questwheel v13.1
 
-## Theme engine v2
-Questwheel themes can now carry safe embedded decorative artwork in addition to colours/material settings. Supported artwork slots are:
-- background texture
-- corner ornament
-- wheel-center emblem
-- cloud/decorative overlay
-- top-right constellation/ornament
+## Free-time bank simplification
+Questwheel now uses one cumulative Banked Free Time value on the Day screen.
 
-Imported artwork is restricted to embedded PNG/JPEG/WebP data. Themes still cannot execute CSS or JavaScript.
+The bank uses the absolute difference between planned and actual time:
+- planned 30m, actual 20m -> +10m banked
+- planned 30m, actual 55m -> +25m banked
+- planned 30m, actual 30m -> +0m
 
-The built-in Tanglang skin has been upgraded to **Tanglang · New Year** with a stronger Seven Star Praying Mantis identity: red velvet/crimson, gold trim, mantis emblem, Big Dipper ornament, cloud flourishes, corner detail and brocade-like texture.
+Old negative bank entries from earlier versions are migrated to their positive absolute value on load.
 
-### Theme import compatibility
-The iOS Files picker is no longer filtered by `.qtheme` MIME/extension. Pick any file; Questwheel validates its JSON contents after selection. This fixes `.qtheme` files appearing greyed out on iPhone.
+The Day screen no longer shows a separate Today net card. A smaller "Earned today" line sits under the cumulative bank instead.
 
-Older v1 `.qtheme` files remain importable. New exports use qthemeVersion 2 and can include artwork.
+## Tanglang1
+- Built-in theme renamed to Tanglang1.
+- Refined directly from the approved red/gold preview.
+- Central mantis, Big Dipper, cloud detail, corner fret ornament and brocade texture were rebuilt from the approved concept artwork.
+- The central mantis sits above the scheduled-time readout rather than behind it.
 
-## Collapsible quest trees
-- Parent quests now have an expand/collapse chevron.
-- Collapsing a parent hides every descendant while leaving the parent progress summary visible.
-- Nested parents can be collapsed independently.
-- Collapsed/expanded state is remembered locally across launches.
-
-## Jar hours + minutes
-- Daily and weekly jar targets now accept hours + minutes.
-- Manual `+ Time` entries also accept hours + minutes.
-- Questwheel continues storing/calculating jar time internally in minutes, so existing data remains compatible.
-
-## Recurrence default
-New recurrence forms now default the `For X` duration unit to **Days** instead of Weeks. Days, Weeks and Months remain selectable. Existing recurrence settings are not changed.
+All v13 data, themes, quests, jars and schedules remain compatible.
 
 ## Update
-Upload all v13 files to the same GitHub Pages repository, replace `index.html`, and open once with `?v=13`.
-
-Do not clear Safari website data; that contains your Questwheel data and personal themes.
+Upload v13.1 over the same GitHub Pages repository, replace index.html, then open once with ?v=13.1.
+Do not clear Safari website data.
