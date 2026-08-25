@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Questwheel" />
-  <link rel="manifest" href="./manifest-v10.webmanifest" />
-  <link rel="apple-touch-icon" href="./icons/icon-v10-192.png" />
+  <link rel="manifest" href="./manifest-v11.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-v11-192.png" />
   <style>
 :root {
   color-scheme: dark;
@@ -680,8 +680,29 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
 .quest-repeat-meta { color: #8fb8dd; font-size: 11px; margin-top: 4px; }
 .duplicate-schedule-row { padding: 10px 11px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel-2); }
 
+
+/* v11: quest hierarchy, progress, inline scheduling, historical week nav, rolling wheel */
+.quest-progress-wrap { display:grid; gap:4px; margin-top:8px; }
+.quest-progress-bar { height:7px; overflow:hidden; border-radius:999px; background:#11141a; border:1px solid var(--border); }
+.quest-progress-fill { height:100%; width:0; background:var(--node-color); border-radius:999px; transition:width .2s ease; }
+.quest-progress-label { color:var(--muted); font-size:10px; font-weight:700; }
+.parent-progress-badge { min-width:44px; height:32px; border-radius:999px; display:grid; place-items:center; border:1px solid var(--border); background:#151820; color:var(--muted); font-size:10px; font-weight:800; padding:0 7px; }
+.order-btn { min-width:38px; padding:0 8px !important; font-size:16px !important; }
+.quest-schedule-fields { display:grid; gap:10px; padding:11px 12px; border:1px solid var(--border); border-radius:13px; background:var(--panel-2); }
+.wheel-mode-switch { display:grid; grid-template-columns:1fr 1fr; gap:4px; margin:12px auto 0; max-width:390px; padding:4px; border:1px solid var(--border); border-radius:13px; background:#12151a; }
+.wheel-mode-btn { min-height:40px; border:0; border-radius:9px; background:transparent; color:var(--muted); font-weight:750; }
+.wheel-mode-btn.active { background:var(--panel-2); color:var(--text); }
+.week-nav { display:flex; align-items:center; gap:6px; }
+.week-nav .icon-btn { width:38px; min-height:38px; font-size:21px; }
+.week-history-note { color:var(--muted); font-size:11px; text-align:center; margin:-2px 0 12px; }
+.nested-block-note { color:#b9c6d2; font-size:11px; margin-top:4px; }
+@media (max-width:520px) {
+  .quest-card .card-actions { gap:5px; }
+  .order-btn { min-width:35px; }
+}
+
 </style>
-  <title>Questwheel v10</title>
+  <title>Questwheel v11</title>
 </head>
 <body>
   <div class="app-shell">
@@ -691,7 +712,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
           <span class="relative-label">Today</span>
           <span class="relative-date">Mon 24 Aug ’26</span>
         </div>
-        <h1>Questwheel <span class="build-tag">v10</span></h1>
+        <h1>Questwheel <span class="build-tag">v11</span></h1>
       </div>
       <button class="ghost compact" id="todayBtn" type="button">Today</button>
     </header>
@@ -703,7 +724,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
           <div class="day-heading">
             <span class="eyebrow">DAY MAP</span>
             <h2 id="selectedDateHeading">Monday, August 24</h2>
-            <span class="swipe-hint">Swipe the wheel to move between days</span>
+            <span id="wheelHint" class="swipe-hint">Swipe the wheel to move between days</span>
           </div>
 
           <div class="wheel-viewport" id="wheelWrap" tabindex="0" aria-label="24 hour schedule wheel. Swipe left or right to change day.">
@@ -711,7 +732,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
               <svg id="dayWheel" viewBox="0 0 360 360" role="img" aria-label="24 hour schedule wheel"></svg>
               <div class="wheel-center">
                 <span id="wheelScheduled">0h</span>
-                <small>scheduled</small>
+                <small id="wheelCenterLabel">scheduled</small>
               </div>
             </div>
           </div>
@@ -722,6 +743,10 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
           </div>
           <div class="legend" id="wheelLegend"></div>
           <div id="solarLegend" class="solar-legend" hidden></div>
+          <div class="wheel-mode-switch" role="tablist" aria-label="Day wheel mode">
+            <button id="calendarWheelMode" class="wheel-mode-btn active" type="button" role="tab" aria-selected="true">Calendar day</button>
+            <button id="rollingWheelMode" class="wheel-mode-btn" type="button" role="tab" aria-selected="false">Rolling 24h</button>
+          </div>
 
           <section id="selectedBlockPanel" class="selected-block-panel" hidden aria-live="polite">
             <div class="selected-block-main">
@@ -799,7 +824,15 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
 
       <section class="view" id="weekView" aria-labelledby="weekTab">
         <section class="panel">
-          <div class="panel-heading"><div><span class="eyebrow">WEEK MAP</span><h2 id="weekHeading">This week</h2></div></div>
+          <div class="panel-heading">
+            <div><span class="eyebrow">WEEK MAP</span><h2 id="weekHeading">This week</h2></div>
+            <div class="week-nav">
+              <button id="prevWeekBtn" class="icon-btn" type="button" aria-label="Previous week">‹</button>
+              <button id="thisWeekBtn" class="ghost compact" type="button">This week</button>
+              <button id="nextWeekBtn" class="icon-btn" type="button" aria-label="Next week">›</button>
+            </div>
+          </div>
+          <div class="week-history-note">Past weeks remain in your Questwheel history unless you delete their blocks.</div>
           <div id="weekGrid" class="week-grid"></div>
         </section>
       </section>
@@ -821,6 +854,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       </div>
       <input id="questParentId" type="hidden" />
       <input id="questDuplicateSourceId" type="hidden" />
+      <input id="questEditId" type="hidden" />
       <label>Quest / task name<input id="questName" maxlength="100" required placeholder="e.g. Opus follow-up" /></label>
       <label>Category
         <select id="questCategory">
@@ -843,7 +877,14 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         <label>Duration unit<select id="questRepeatUnit"><option value="days">Days</option><option value="weeks" selected>Weeks</option><option value="months">Months</option></select></label>
         <p class="hint">One occurrence stays active at a time. When you complete it, the next one returns on its cadence date and earlier completions stay in history.</p>
       </div>
-      <label id="questDuplicateScheduleRow" class="repeat-toggle duplicate-schedule-row" hidden><input id="questDuplicateSchedule" type="checkbox" checked /><span>Schedule the copy after creating it</span></label>
+      <label id="questScheduleRow" class="repeat-toggle duplicate-schedule-row"><input id="questScheduleEnabled" type="checkbox" /><span>Create a scheduled block when I save this quest</span></label>
+      <div id="questScheduleFields" class="quest-schedule-fields" hidden>
+        <div class="two-col">
+          <label>Date<input id="questScheduleDate" type="date" /></label>
+          <label>Start<input id="questScheduleStart" type="time" value="09:00" /></label>
+        </div>
+        <p class="hint">The block uses this quest's default duration. If the quest repeats, future occurrences can automatically get the same start time.</p>
+      </div>
       <div class="dialog-actions"><button class="ghost" value="cancel" type="button" id="cancelQuest">Cancel</button><button id="questSubmit" class="primary" value="default" type="submit">Create</button></div>
     </form>
   </dialog>
@@ -1081,7 +1122,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   <script>
 (() => {
   const STORE = "questwheel-v1"; // Preserve all prior Questwheel local data.
-  const BUILD = "v10";
+  const BUILD = "v11";
 
   const categories = {
     business: { label: "Business", color: "#FFB000" },
@@ -1126,16 +1167,21 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     jars: [],
     jarEntries: [],
     solar: { enabled: false, lat: null, lon: null },
-    selectedDate: isoDate(new Date())
+    selectedDate: isoDate(new Date()),
+    wheelMode: "calendar"
   };
 
   const $ = id => document.getElementById(id);
   const el = {
     dayLabel: $("dayLabel"),
     selectedDateHeading: $("selectedDateHeading"),
+    wheelHint: $("wheelHint"),
     reclaimedTotal: $("reclaimedTotal"),
     bankedTimeTotal: $("bankedTimeTotal"),
     wheelScheduled: $("wheelScheduled"),
+    wheelCenterLabel: $("wheelCenterLabel"),
+    calendarWheelMode: $("calendarWheelMode"),
+    rollingWheelMode: $("rollingWheelMode"),
     dayWheel: $("dayWheel"),
     wheelWrap: $("wheelWrap"),
     wheelSlide: $("wheelSlide"),
@@ -1156,6 +1202,9 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     completedQuestsSubtab: $("completedQuestsSubtab"),
     weekGrid: $("weekGrid"),
     weekHeading: $("weekHeading"),
+    prevWeekBtn: $("prevWeekBtn"),
+    thisWeekBtn: $("thisWeekBtn"),
+    nextWeekBtn: $("nextWeekBtn"),
     jarGrid: $("jarGrid"),
     dailyJarsSubtab: $("dailyJarsSubtab"),
     weeklyJarsSubtab: $("weeklyJarsSubtab"),
@@ -1212,8 +1261,12 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     questDialogTitle: $("questDialogTitle"),
     questParentId: $("questParentId"),
     questDuplicateSourceId: $("questDuplicateSourceId"),
-    questDuplicateScheduleRow: $("questDuplicateScheduleRow"),
-    questDuplicateSchedule: $("questDuplicateSchedule"),
+    questEditId: $("questEditId"),
+    questScheduleRow: $("questScheduleRow"),
+    questScheduleEnabled: $("questScheduleEnabled"),
+    questScheduleFields: $("questScheduleFields"),
+    questScheduleDate: $("questScheduleDate"),
+    questScheduleStart: $("questScheduleStart"),
     questSubmit: $("questSubmit"),
     questName: $("questName"),
     questCategory: $("questCategory"),
@@ -1327,7 +1380,10 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       questRecurrenceLabel: q.questSeriesId ? (q.questRecurrenceLabel || null) : null,
       questOccurrenceDate: /^\d{4}-\d{2}-\d{2}$/.test(q.questOccurrenceDate || "") ? q.questOccurrenceDate : null,
       questRecurrenceEndDate: /^\d{4}-\d{2}-\d{2}$/.test(q.questRecurrenceEndDate || "") ? q.questRecurrenceEndDate : null,
-      questSeriesStopped: Boolean(q.questSeriesStopped)
+      questSeriesStopped: Boolean(q.questSeriesStopped),
+      sortOrder: Number.isFinite(Number(q.sortOrder)) ? Number(q.sortOrder) : (Number(q.createdAt) || Date.now()),
+      questAutoSchedule: Boolean(q.questAutoSchedule),
+      questAutoScheduleStart: /^\d{2}:\d{2}$/.test(q.questAutoScheduleStart || "") ? q.questAutoScheduleStart : null
     };
   }
 
@@ -1394,7 +1450,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
           lat: parsed.solar?.lat != null && Number.isFinite(Number(parsed.solar.lat)) ? Number(parsed.solar.lat) : null,
           lon: parsed.solar?.lon != null && Number.isFinite(Number(parsed.solar.lon)) ? Number(parsed.solar.lon) : null
         },
-        selectedDate: isoDate(new Date())
+        selectedDate: isoDate(new Date()),
+        wheelMode: parsed.wheelMode === "rolling" ? "rolling" : "calendar"
       };
     } catch {
       return structuredClone(defaultState);
@@ -1540,6 +1597,126 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     return state.quests.filter(q => (q.parentId || null) === (parentId || null));
   }
 
+  function questSortValue(q) {
+    return Number.isFinite(Number(q?.sortOrder)) ? Number(q.sortOrder) : (Number(q?.createdAt) || 0);
+  }
+
+  function orderedChildren(parentId, { includeArchived = false } = {}) {
+    return childrenOf(parentId)
+      .filter(q => includeArchived || !q.archived)
+      .sort((a, b) => questSortValue(a) - questSortValue(b) || (a.createdAt || 0) - (b.createdAt || 0));
+  }
+
+  function nextQuestSortOrder(parentId) {
+    const siblings = childrenOf(parentId);
+    if (!siblings.length) return 1000;
+    return Math.max(...siblings.map(q => questSortValue(q))) + 1000;
+  }
+
+  function isLeafQuest(q) {
+    return Boolean(q && !orderedChildren(q.id).length);
+  }
+
+  function descendantLeaves(q) {
+    if (!q) return [];
+    const children = orderedChildren(q.id);
+    if (!children.length) return [q];
+    return children.flatMap(child => descendantLeaves(child));
+  }
+
+  function questProgress(q) {
+    const leaves = descendantLeaves(q).filter(leaf => !leaf.archived);
+    if (!leaves.length) return { done: q?.completed ? 1 : 0, total: 1, ratio: q?.completed ? 1 : 0 };
+    const done = leaves.filter(leaf => leaf.completed).length;
+    return { done, total: leaves.length, ratio: done / leaves.length };
+  }
+
+  function questDepth(q) {
+    let depth = 0, current = q, guard = 0;
+    while (current?.parentId && guard < 30) { depth += 1; current = questById(current.parentId); guard += 1; }
+    return depth;
+  }
+
+  function syncDerivedQuestCompletion() {
+    let changed = false;
+    const ordered = [...state.quests].sort((a, b) => questDepth(b) - questDepth(a));
+    ordered.forEach(q => {
+      if (q.archived) return;
+      const children = orderedChildren(q.id);
+      if (!children.length) return;
+      const shouldComplete = children.every(child => child.completed);
+      if (q.completed !== shouldComplete) {
+        q.completed = shouldComplete;
+        q.completedAt = shouldComplete ? Date.now() : null;
+        changed = true;
+      }
+    });
+    if (changed) saveState();
+    return changed;
+  }
+
+  function setLeafQuestCompletion(q, completed) {
+    if (!q || !isLeafQuest(q)) return;
+    q.completed = completed;
+    q.completedAt = completed ? Date.now() : null;
+    const linked = state.blocks.filter(b => b.questId === q.id);
+    if (completed) {
+      let eligible = linked.filter(b => !b.completed && b.date <= isoDate(new Date()));
+      if (!eligible.length) {
+        const next = linked.filter(b => !b.completed).sort((a,b) => String(a.date).localeCompare(String(b.date)) || a.start - b.start)[0];
+        eligible = next ? [next] : [];
+      }
+      eligible.forEach(block => {
+        block.completed = true;
+        block.actualMinutes = block.minutes;
+        block.bankDelta = 0;
+        block.reclaimed = 0;
+        block.completedByQuest = true;
+        refreshLedgerForBlock(block);
+      });
+    } else {
+      linked.filter(b => b.completedByQuest).forEach(block => {
+        block.completed = false;
+        block.actualMinutes = null;
+        block.bankDelta = 0;
+        block.reclaimed = 0;
+        block.completedByQuest = false;
+        refreshLedgerForBlock(block);
+      });
+    }
+    syncDerivedQuestCompletion();
+    saveState();
+    render();
+  }
+
+  function moveQuest(q, direction) {
+    if (!q || !direction) return;
+    const siblings = orderedChildren(q.parentId || null);
+    const index = siblings.findIndex(item => item.id === q.id);
+    const targetIndex = index + direction;
+    if (index < 0 || targetIndex < 0 || targetIndex >= siblings.length) return;
+    siblings.forEach((item, i) => { item.sortOrder = (i + 1) * 1000; });
+    const target = siblings[targetIndex];
+    const temp = q.sortOrder;
+    q.sortOrder = target.sortOrder;
+    target.sortOrder = temp;
+    saveState();
+    render();
+  }
+
+  function questAncestorDistance(childQuestId, ancestorQuestId) {
+    if (!childQuestId || !ancestorQuestId || childQuestId === ancestorQuestId) return null;
+    let current = questById(childQuestId), depth = 0, guard = 0;
+    while (current?.parentId && guard < 30) {
+      depth += 1;
+      if (current.parentId === ancestorQuestId) return depth;
+      current = questById(current.parentId);
+      guard += 1;
+    }
+    return null;
+  }
+
+
   function descendantIds(id) {
     const out = [];
     const seen = new Set();
@@ -1579,7 +1756,10 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         questRecurrenceLabel: null,
         questOccurrenceDate: null,
         questRecurrenceEndDate: null,
-        questSeriesStopped: false
+        questSeriesStopped: false,
+        sortOrder: questSortValue(child),
+        questAutoSchedule: false,
+        questAutoScheduleStart: null
       };
       state.quests.push(clone);
       copyJarQuestLinks(child.id, clone.id);
@@ -1622,6 +1802,13 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       state.quests.push(next);
       copyJarQuestLinks(latest.id, next.id);
       cloneQuestBranch(latest.id, next.id);
+      if (latest.questAutoSchedule && latest.questAutoScheduleStart) {
+        state.blocks.push({
+          id: uid("b"), questId: next.id, name: null, category: next.category || "personal", color: null, jarId: null,
+          date: nextDate, start: minutesFromTime(latest.questAutoScheduleStart), minutes: next.defaultMinutes,
+          completed: false, actualMinutes: null, reclaimed: 0, bankDelta: 0, seriesId: null, recurrenceLabel: null
+        });
+      }
       changed = true;
     });
     if (changed) saveState();
@@ -1647,9 +1834,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   function orderedActiveQuests() {
     const ordered = [];
     const walk = (parentId, depth) => {
-      childrenOf(parentId)
+      orderedChildren(parentId)
         .filter(isQuestActive)
-        .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))
         .forEach(q => {
           ordered.push({ q, depth });
           walk(q.id, depth + 1);
@@ -1739,8 +1925,80 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     return visible.sort((a, b) => a.start - b.start || a.minutes - b.minutes);
   }
 
+  function dateAtLocalMinutes(dateISO, minute) {
+    const d = dateFromISO(dateISO);
+    d.setHours(0, 0, 0, 0);
+    d.setMinutes(minute);
+    return d;
+  }
+
+  function rollingWindow() {
+    const now = new Date();
+    return { now, start: new Date(now.getTime() - 12*60*60*1000), end: new Date(now.getTime() + 12*60*60*1000) };
+  }
+
+  function rollingWheelBlocks() {
+    const { start: windowStart, end: windowEnd } = rollingWindow();
+    const visible = [];
+    state.blocks.forEach(block => {
+      const eventStart = dateAtLocalMinutes(block.date, block.start);
+      const eventEnd = new Date(eventStart.getTime() + block.minutes*60000);
+      const fragmentStart = eventStart > windowStart ? eventStart : windowStart;
+      const fragmentEnd = eventEnd < windowEnd ? eventEnd : windowEnd;
+      if (fragmentEnd <= fragmentStart) return;
+      visible.push({ ...block, start: (fragmentStart-windowStart)/60000, minutes: (fragmentEnd-fragmentStart)/60000, _rolling: true, _sourceDate: block.date });
+    });
+    (state.jarEntries || []).forEach(entry => {
+      if (!/^\d{2}:\d{2}$/.test(entry.time || "")) return;
+      const eventStart = dateAtLocalMinutes(entry.date, minutesFromTime(entry.time));
+      const eventEnd = new Date(eventStart.getTime() + (Number(entry.minutes)||1)*60000);
+      const fragmentStart = eventStart > windowStart ? eventStart : windowStart;
+      const fragmentEnd = eventEnd < windowEnd ? eventEnd : windowEnd;
+      if (fragmentEnd <= fragmentStart) return;
+      visible.push(manualEntryAsWheelBlock(entry, (fragmentStart-windowStart)/60000, (fragmentEnd-fragmentStart)/60000, "rolling"));
+    });
+    return visible.sort((a,b) => a.start-b.start || a.minutes-b.minutes);
+  }
+
+  function rollingSourceBlocks() {
+    const { start: windowStart, end: windowEnd } = rollingWindow();
+    return state.blocks.filter(block => {
+      const s = dateAtLocalMinutes(block.date, block.start), e = new Date(s.getTime()+block.minutes*60000);
+      return s < windowEnd && e > windowStart;
+    }).sort((a,b) => dateAtLocalMinutes(a.date,a.start)-dateAtLocalMinutes(b.date,b.start));
+  }
+
+  function appendRollingSolarRing(svg, cx, cy) {
+    if (!solarSettingsValid()) return;
+    const { start } = rollingWindow();
+    const lat=Number(state.solar.lat), lon=Number(state.solar.lon), step=5;
+    let segmentStart=0, current=null;
+    const segments=[];
+    for (let minute=0; minute<=1440; minute+=step) {
+      const probeDate = new Date(start.getTime()+Math.min(1439,minute+step/2)*60000);
+      const dateISO=isoDate(probeDate), minuteOfDay=probeDate.getHours()*60+probeDate.getMinutes()+probeDate.getSeconds()/60;
+      const band = minute>=1440 ? null : solarBand(solarAltitude(dateISO, minuteOfDay, lat, lon));
+      if (current===null) current=band;
+      if (band!==current || minute>=1440) { segments.push({start:segmentStart,end:minute,band:current}); segmentStart=minute; current=band; }
+    }
+    segments.forEach(seg => {
+      if (!seg.band || seg.end<=seg.start) return;
+      const p=document.createElementNS("http://www.w3.org/2000/svg","path");
+      p.setAttribute("d",arcPath(cx,cy,57,42,seg.start/1440*360,seg.end/1440*360)); p.setAttribute("fill",solarColors[seg.band]); p.setAttribute("opacity",seg.band==="day"?".94":".97"); p.setAttribute("pointer-events","none"); svg.appendChild(p);
+    });
+  }
+
+  function appendRollingNowOverlay(svg, cx, cy, ro, inner) {
+    const minute=720;
+    const shade=document.createElementNS("http://www.w3.org/2000/svg","path");
+    shade.setAttribute("d",arcPath(cx,cy,ro,inner,0,minute/1440*360)); shade.setAttribute("fill","#090b0f"); shade.setAttribute("opacity",".38"); shade.setAttribute("pointer-events","none"); svg.appendChild(shade);
+    const angle=minute/1440*360, p1=polar(cx,cy,Math.max(36,inner-4),angle), p2=polar(cx,cy,ro+2,angle);
+    const line=document.createElementNS("http://www.w3.org/2000/svg","line"); line.setAttribute("x1",p1.x);line.setAttribute("y1",p1.y);line.setAttribute("x2",p2.x);line.setAttribute("y2",p2.y);line.setAttribute("stroke","#ef4d4d");line.setAttribute("stroke-width","2.2");line.setAttribute("stroke-linecap","round"); svg.appendChild(line);
+    const dot=document.createElementNS("http://www.w3.org/2000/svg","circle");dot.setAttribute("cx",p2.x);dot.setAttribute("cy",p2.y);dot.setAttribute("r","4");dot.setAttribute("fill","#ef4d4d");dot.setAttribute("stroke","#270808");dot.setAttribute("stroke-width","1");svg.appendChild(dot);
+  }
+
   function selectedBlocks() {
-    return blocksFor(state.selectedDate);
+    return state.wheelMode === "rolling" ? rollingSourceBlocks() : blocksFor(state.selectedDate);
   }
 
   function categoryColor(category) {
@@ -1842,17 +2100,18 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   }
 
   function renderDateIdentity() {
-    const date = dateFromISO(state.selectedDate);
-    const diff = calendarDayDiff(date);
+    const displayDate = state.wheelMode === "rolling" ? new Date() : dateFromISO(state.selectedDate);
+    const diff = calendarDayDiff(displayDate);
     el.dayLabel.innerHTML = "";
-    const relative = document.createElement("span");
-    relative.className = "relative-label";
-    relative.textContent = relativeDayName(diff);
-    const exact = document.createElement("span");
-    exact.className = "relative-date";
-    exact.textContent = compactDate(date);
+    const relative = document.createElement("span"); relative.className = "relative-label"; relative.textContent = state.wheelMode === "rolling" ? "NOW" : relativeDayName(diff);
+    const exact = document.createElement("span"); exact.className = "relative-date"; exact.textContent = compactDate(displayDate);
     el.dayLabel.append(relative, exact);
-    el.selectedDateHeading.textContent = date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+    el.selectedDateHeading.textContent = state.wheelMode === "rolling" ? "Rolling 24 hours" : displayDate.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+    el.wheelHint.textContent = state.wheelMode === "rolling" ? "12 hours past · now · 12 hours ahead" : "Swipe the wheel to move between days";
+    el.calendarWheelMode.classList.toggle("active", state.wheelMode !== "rolling");
+    el.rollingWheelMode.classList.toggle("active", state.wheelMode === "rolling");
+    el.calendarWheelMode.setAttribute("aria-selected", state.wheelMode !== "rolling" ? "true" : "false");
+    el.rollingWheelMode.setAttribute("aria-selected", state.wheelMode === "rolling" ? "true" : "false");
   }
 
 
@@ -2069,7 +2328,9 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   }
 
   function render() {
+    syncDerivedQuestCompletion();
     materializeRecurringQuests();
+    syncDerivedQuestCompletion();
     renderDateIdentity();
     renderQuestOptions();
     renderJarOptions(el.blockJar, el.blockJar?.value || null);
@@ -2142,7 +2403,9 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     const card = document.createElement("article");
     card.className = "quest-card" + (q.completed ? " completed" : "");
     const scheduled = state.blocks.filter(b => b.questId === q.id && !b.completed).length;
-    const visibleChildren = childrenOf(q.id).filter(child => !child.archived).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    const visibleChildren = orderedChildren(q.id).filter(child => !child.archived);
+    const leaf = visibleChildren.length === 0;
+    const progress = questProgress(q);
 
     const main = document.createElement("div");
     main.className = "card-main";
@@ -2150,72 +2413,75 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
 
     const titleWrap = document.createElement("div");
     titleWrap.className = "card-text";
-
     const hierarchy = document.createElement("div");
     hierarchy.className = "hierarchy-label" + (depth === 0 ? " root" : "");
-    if (depth === 0) {
-      hierarchy.innerHTML = `<span>MAIN QUEST</span>`;
-    } else {
+    if (depth === 0) hierarchy.innerHTML = `<span>MAIN QUEST</span>`;
+    else {
       const parent = questById(q.parentId);
-      const arrow = document.createElement("span");
-      arrow.className = "hierarchy-arrow";
-      arrow.textContent = "↳";
-      const label = document.createElement("span");
-      label.textContent = `LEVEL ${depth + 1} · SUBTASK OF ${parent?.name || "PARENT"}`;
+      const arrow = document.createElement("span"); arrow.className = "hierarchy-arrow"; arrow.textContent = "↳";
+      const label = document.createElement("span"); label.textContent = `LEVEL ${depth + 1} · SUBTASK OF ${parent?.name || "PARENT"}`;
       hierarchy.append(arrow, label);
     }
 
     const titleRow = document.createElement("div");
     titleRow.className = "quest-title-row";
-    const complete = document.createElement("button");
-    complete.type = "button";
-    complete.className = "complete-toggle";
-    complete.setAttribute("aria-label", q.completed ? `Mark ${q.name} incomplete` : `Mark ${q.name} complete`);
-    complete.textContent = q.completed ? "✓" : "";
-    complete.addEventListener("click", () => {
-      q.completed = !q.completed;
-      q.completedAt = q.completed ? Date.now() : null;
-      saveState();
-      render();
-    });
-    const title = document.createElement("div");
-    title.className = "card-title";
-    title.textContent = q.name;
-    titleRow.append(complete, title);
+    if (leaf) {
+      const complete = document.createElement("button");
+      complete.type = "button";
+      complete.className = "complete-toggle";
+      complete.setAttribute("aria-label", q.completed ? `Mark ${q.name} incomplete` : `Mark ${q.name} complete`);
+      complete.textContent = q.completed ? "✓" : "";
+      complete.addEventListener("click", () => setLeafQuestCompletion(q, !q.completed));
+      titleRow.appendChild(complete);
+    } else {
+      const badge = document.createElement("span");
+      badge.className = "parent-progress-badge";
+      badge.textContent = `${progress.done}/${progress.total}`;
+      badge.title = "Parent quests complete automatically when all leaf subtasks are complete";
+      titleRow.appendChild(badge);
+    }
+    const title = document.createElement("div"); title.className = "card-title"; title.textContent = q.name;
+    titleRow.appendChild(title);
 
     const meta = document.createElement("div");
     meta.className = "card-meta";
     const parts = [categories[q.category]?.label || "Quest", `default ${fmtMinutes(q.defaultMinutes)}`];
     if (scheduled) parts.push(`${scheduled} scheduled`);
-    if (visibleChildren.length) parts.push(`${visibleChildren.length} subtask${visibleChildren.length === 1 ? "" : "s"}`);
+    if (visibleChildren.length) parts.push(`${visibleChildren.length} direct subtask${visibleChildren.length === 1 ? "" : "s"}`);
     meta.textContent = parts.join(" · ");
-
     titleWrap.append(hierarchy, titleRow, meta);
+
+    if (!leaf) {
+      const progressWrap = document.createElement("div");
+      progressWrap.className = "quest-progress-wrap";
+      progressWrap.innerHTML = `<div class="quest-progress-bar"><div class="quest-progress-fill" style="width:${Math.round(progress.ratio * 100)}%"></div></div><span class="quest-progress-label">${progress.done} of ${progress.total} leaf tasks complete · parent completes automatically</span>`;
+      titleWrap.appendChild(progressWrap);
+    }
     if (q.questSeriesId && q.questRecurrenceLabel) {
-      const repeatMeta = document.createElement("div");
-      repeatMeta.className = "quest-repeat-meta";
-      repeatMeta.textContent = `↻ ${q.questRecurrenceLabel}`;
+      const repeatMeta = document.createElement("div"); repeatMeta.className = "quest-repeat-meta";
+      repeatMeta.textContent = `↻ ${q.questRecurrenceLabel}${q.questAutoScheduleStart ? ` · auto-block ${q.questAutoScheduleStart}` : ""}`;
       titleWrap.appendChild(repeatMeta);
     }
     main.appendChild(titleWrap);
 
-    const actions = document.createElement("div");
-    actions.className = "card-actions";
+    const actions = document.createElement("div"); actions.className = "card-actions";
     actions.append(
       makeSmallButton("Schedule", "accent", () => openBlockDialog(q.id)),
+      makeSmallButton("Edit", "", () => openQuestDialog(q.parentId || null, null, q.id)),
       makeSmallButton("Duplicate", "", () => openQuestDialog(q.parentId || null, q.id)),
-      makeSmallButton("+ Subtask", "", () => openQuestDialog(q.id)),
-      makeSmallButton("Archive", "danger", () => archiveQuest(q)),
-      makeSmallButton("Delete", "danger", () => deleteQuest(q))
+      makeSmallButton("+ Subtask", "", () => openQuestDialog(q.id))
     );
+    const siblings = orderedChildren(q.parentId || null);
+    if (siblings.length > 1) {
+      const up = makeSmallButton("↑", "order-btn", () => moveQuest(q, -1)); up.disabled = siblings[0]?.id === q.id; up.setAttribute("aria-label", `Move ${q.name} up`);
+      const down = makeSmallButton("↓", "order-btn", () => moveQuest(q, 1)); down.disabled = siblings[siblings.length - 1]?.id === q.id; down.setAttribute("aria-label", `Move ${q.name} down`);
+      actions.append(up, down);
+    }
+    actions.append(makeSmallButton("Archive", "danger", () => archiveQuest(q)), makeSmallButton("Delete", "danger", () => deleteQuest(q)));
 
-    card.append(main, actions);
-    node.appendChild(card);
-
+    card.append(main, actions); node.appendChild(card);
     if (visibleChildren.length) {
-      const group = document.createElement("div");
-      group.className = "quest-children";
-      group.style.setProperty("--branch-color", questColor(q));
+      const group = document.createElement("div"); group.className = "quest-children"; group.style.setProperty("--branch-color", questColor(q));
       visibleChildren.forEach(child => group.appendChild(createQuestNode(child, depth + 1)));
       node.appendChild(group);
     }
@@ -2281,13 +2547,9 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     if (!contextOnly) {
       const actions = document.createElement("div");
       actions.className = "card-actions";
+      actions.appendChild(makeSmallButton("Edit", "", () => openQuestDialog(q.parentId || null, null, q.id)));
       actions.appendChild(makeSmallButton("Duplicate", "", () => openQuestDialog(q.parentId || null, q.id)));
-      actions.appendChild(makeSmallButton("Restore", "", () => {
-        q.completed = false;
-        q.completedAt = null;
-        saveState();
-        render();
-      }));
+      if (isLeafQuest(q)) actions.appendChild(makeSmallButton("Restore", "", () => setLeafQuestCompletion(q, false)));
       card.appendChild(actions);
     }
     node.appendChild(card);
@@ -2309,7 +2571,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   }
 
   function renderActiveQuests() {
-    const roots = state.quests.filter(q => !q.archived && !q.completed && (!q.parentId || !isQuestActive(questById(q.parentId)))).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    const roots = state.quests.filter(q => !q.archived && !q.completed && (!q.parentId || !isQuestActive(questById(q.parentId)))).sort((a, b) => questSortValue(a) - questSortValue(b) || (a.createdAt || 0) - (b.createdAt || 0));
     if (!roots.length) {
       el.questList.className = "quest-list empty-state";
       el.questList.textContent = "No active quests yet.";
@@ -2420,7 +2682,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
 
   function selectBlock(blockId) {
     const block = state.blocks.find(item => item.id === blockId);
-    if (!block || block.date !== state.selectedDate) return;
+    if (!block || (state.wheelMode !== "rolling" && block.date !== state.selectedDate)) return;
     selectedBlockId = block.id;
     renderSelectedBlockPanel();
     renderTimeline();
@@ -2433,7 +2695,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   }
 
   function renderSelectedBlockPanel() {
-    const block = state.blocks.find(item => item.id === selectedBlockId && item.date === state.selectedDate);
+    const block = state.blocks.find(item => item.id === selectedBlockId && (state.wheelMode === "rolling" || item.date === state.selectedDate));
     if (!block) {
       selectedBlockId = null;
       el.selectedBlockPanel.hidden = true;
@@ -2443,7 +2705,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     el.selectedBlockMark.style.background = blockColor(block);
     el.selectedBlockTitle.textContent = blockTitle(block);
     const selectedJar = jarById(block.jarId);
-    el.selectedBlockMeta.textContent = `${timeFromMinutes(block.start)}–${timeFromMinutes(block.start + block.minutes)} · ${fmtMinutes(block.minutes)} · ${blockCategoryLabel(block)}${selectedJar ? ` · fills ${selectedJar.name}` : ""}`;
+    el.selectedBlockMeta.textContent = `${state.wheelMode === "rolling" ? compactDate(dateFromISO(block.date)) + " · " : ""}${timeFromMinutes(block.start)}–${timeFromMinutes(block.start + block.minutes)} · ${fmtMinutes(block.minutes)} · ${blockCategoryLabel(block)}${selectedJar ? ` · fills ${selectedJar.name}` : ""}`;
     const delta = blockBankDelta(block);
     el.selectedBlockStatus.className = "selected-block-status";
     if (block.completed) {
@@ -2461,7 +2723,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     } else {
       el.selectedBlockStatus.textContent = block.questId ? "Quest-linked block" : "Standalone block";
     }
-    el.selectedBlockFinish.hidden = block.completed;
+    const selectedQuest = questById(block.questId);
+    el.selectedBlockFinish.hidden = block.completed || Boolean(selectedQuest && !isLeafQuest(selectedQuest));
   }
 
   function renderTimeline() {
@@ -2483,7 +2746,9 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     el.timeline.innerHTML = "";
     blocks.forEach(b => {
       const card = document.createElement("article");
-      card.className = "block-card" + (b.completed ? " done" : "") + (b.id === selectedBlockId ? " selected" : "");
+      const linkedQuest = questById(b.questId);
+      const effectiveDone = b.completed || Boolean(linkedQuest?.completed);
+      card.className = "block-card" + (effectiveDone ? " done" : "") + (b.id === selectedBlockId ? " selected" : "");
       const end = b.start + b.minutes;
 
       const main = document.createElement("div");
@@ -2496,7 +2761,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       title.textContent = blockTitle(b);
       const meta = document.createElement("div");
       meta.className = "card-meta";
-      meta.textContent = `${timeFromMinutes(b.start)}–${timeFromMinutes(end)} · ${fmtMinutes(b.minutes)} · ${blockCategoryLabel(b)}`;
+      meta.textContent = `${state.wheelMode === "rolling" ? compactDate(dateFromISO(b.date)) + " · " : ""}${timeFromMinutes(b.start)}–${timeFromMinutes(end)} · ${fmtMinutes(b.minutes)} · ${blockCategoryLabel(b)}`;
       text.append(title, meta);
 
       if (!b.questId) {
@@ -2527,13 +2792,14 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         else note.textContent = `On time · completed in ${fmtMinutes(b.actualMinutes)}`;
         text.appendChild(note);
       }
+      if (linkedQuest && !isLeafQuest(linkedQuest) && !b.completed) { const note = document.createElement("div"); note.className = "nested-block-note"; const p = questProgress(linkedQuest); note.textContent = `Progress follows subtasks · ${p.done}/${p.total} complete`; text.appendChild(note); }
       main.appendChild(text);
 
       const actions = document.createElement("div");
       actions.className = "card-actions";
       actions.appendChild(makeSmallButton("Edit", "", () => openEditBlockDialog(b.id)));
       actions.appendChild(makeSmallButton("Duplicate", "", () => openBlockDialog(null, b.id)));
-      if (!b.completed) actions.appendChild(makeSmallButton("Finish", "accent", () => openFinishDialog(b.id)));
+      if (!b.completed && (!linkedQuest || isLeafQuest(linkedQuest))) actions.appendChild(makeSmallButton("Finish", "accent", () => openFinishDialog(b.id)));
       actions.appendChild(makeSmallButton("Delete", "danger", () => openDeleteBlockDialog(b.id)));
 
       card.append(main, actions);
@@ -2564,21 +2830,46 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   }
 
   function assignLanes(blocks) {
-    const sorted = [...blocks].sort((a, b) => a.start - b.start || a.minutes - b.minutes);
-    const laneEnds = [];
-    const laneById = new Map();
+    const sorted = [...blocks].sort((a, b) => a.start - b.start || b.minutes - a.minutes);
+    const overlayParentById = new Map();
     sorted.forEach(block => {
+      if (!block.questId || block._manualJarEntry) return;
+      let best = null;
+      sorted.forEach(candidate => {
+        if (candidate.id === block.id || !candidate.questId || candidate._manualJarEntry) return;
+        const distance = questAncestorDistance(block.questId, candidate.questId);
+        if (distance == null) return;
+        const candidateEnd = Math.min(1440, candidate.start + candidate.minutes);
+        const blockEnd = Math.min(1440, block.start + block.minutes);
+        if (candidate.start <= block.start && candidateEnd >= blockEnd) {
+          if (!best || distance < best.distance || (distance === best.distance && candidate.minutes < best.block.minutes)) best = { block: candidate, distance };
+        }
+      });
+      if (best) overlayParentById.set(block.id, best.block.id);
+    });
+
+    const roots = sorted.filter(block => !overlayParentById.has(block.id));
+    const laneEnds = [], laneById = new Map(), overlayDepthById = new Map();
+    roots.forEach(block => {
       const end = Math.min(1440, block.start + block.minutes);
       let lane = laneEnds.findIndex(lastEnd => block.start >= lastEnd);
-      if (lane === -1) {
-        lane = laneEnds.length;
-        laneEnds.push(end);
-      } else {
-        laneEnds[lane] = end;
-      }
-      laneById.set(block.id, lane);
+      if (lane === -1) { lane = laneEnds.length; laneEnds.push(end); } else laneEnds[lane] = end;
+      laneById.set(block.id, lane); overlayDepthById.set(block.id, 0);
     });
-    return { laneById, laneCount: Math.max(1, laneEnds.length) };
+    const unresolved = sorted.filter(block => overlayParentById.has(block.id));
+    let guard = 0;
+    while (unresolved.length && guard < 40) {
+      for (let i = unresolved.length - 1; i >= 0; i -= 1) {
+        const block = unresolved[i], parentId = overlayParentById.get(block.id);
+        if (!laneById.has(parentId)) continue;
+        laneById.set(block.id, laneById.get(parentId));
+        overlayDepthById.set(block.id, (overlayDepthById.get(parentId) || 0) + 1);
+        unresolved.splice(i, 1);
+      }
+      guard += 1;
+    }
+    unresolved.forEach(block => { laneById.set(block.id, 0); overlayDepthById.set(block.id, 0); });
+    return { laneById, overlayDepthById, overlayParentById, laneCount: Math.max(1, laneEnds.length) };
   }
 
   function laneGeometry(laneCount, ro, minInner) {
@@ -2591,74 +2882,73 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
 
   function appendWheelBlocks(svg, blocks, cx, cy, ro, minInner, strokeWidth = 1.5, interactive = false) {
     const NS = "http://www.w3.org/2000/svg";
-    const lanes = assignLanes(blocks);
-    const geo = laneGeometry(lanes.laneCount, ro, minInner);
+    const layout = assignLanes(blocks);
+    const geo = laneGeometry(layout.laneCount, ro, minInner);
+    const ordered = [...blocks].sort((a,b) => (layout.overlayDepthById.get(a.id)||0) - (layout.overlayDepthById.get(b.id)||0) || a.start-b.start);
 
-    blocks.forEach(b => {
-      const lane = lanes.laneById.get(b.id) || 0;
-      const laneOuter = ro - lane * (geo.band + geo.gap);
-      const laneInner = laneOuter - geo.band;
+    ordered.forEach(b => {
+      const lane = layout.laneById.get(b.id) || 0;
+      const overlayDepth = layout.overlayDepthById.get(b.id) || 0;
+      let laneOuter = ro - lane * (geo.band + geo.gap);
+      let laneInner = laneOuter - geo.band;
+      if (overlayDepth > 0) {
+        const maxInset = Math.max(1, geo.band * .35);
+        const inset = Math.min(maxInset, 1.8 + (overlayDepth - 1) * 1.4);
+        laneOuter -= inset;
+        laneInner += inset;
+      }
       const visibleEnd = Math.min(1440, b.start + b.minutes);
-      if (visibleEnd <= b.start) return;
-      const startA = b.start / 1440 * 360;
-      const endA = visibleEnd / 1440 * 360;
+      if (visibleEnd <= b.start || laneOuter <= laneInner) return;
+      const startA = b.start / 1440 * 360, endA = visibleEnd / 1440 * 360;
       const path = document.createElementNS(NS, "path");
       path.setAttribute("d", arcPath(cx, cy, laneOuter, laneInner, startA, endA));
       path.setAttribute("fill", blockColor(b));
-      path.setAttribute("opacity", b._manualJarEntry ? ".72" : (b.completed ? ".48" : ".93"));
-      path.setAttribute("stroke", b._manualJarEntry ? "rgba(242,243,245,.8)" : (b.id === selectedBlockId && interactive ? "#f2f3f5" : "#0e1014"));
+      const linkedQuest = questById(b.questId);
+      const effectiveDone = b.completed || Boolean(linkedQuest?.completed);
+      path.setAttribute("opacity", b._manualJarEntry ? ".72" : (effectiveDone ? ".52" : (overlayDepth ? ".96" : ".93")));
+      const nestedStroke = overlayDepth ? "rgba(242,243,245,.58)" : "#0e1014";
+      path.setAttribute("stroke", b._manualJarEntry ? "rgba(242,243,245,.8)" : (b.id === selectedBlockId && interactive ? "#f2f3f5" : nestedStroke));
       path.setAttribute("stroke-width", String(b.id === selectedBlockId && interactive && !b._manualJarEntry ? Math.max(2.8, strokeWidth * 2) : strokeWidth));
+      if (overlayDepth) path.setAttribute("stroke-dasharray", overlayDepth > 1 ? "2.2 1.6" : "none");
+
       if (b._manualJarEntry) {
-        path.classList.add("manual-wheel-segment");
-        path.setAttribute("pointer-events", "none");
-        const carryPrefix = b._displayPart === "carry" ? "Continues from previous day, " : "";
-        path.setAttribute("aria-label", `${carryPrefix}Manual log: ${blockTitle(b)}, ${timeFromMinutes(b.start)} to ${timeFromMinutes(b.start + b.minutes)}, ${fmtMinutes(b.minutes)}`);
+        path.classList.add("manual-wheel-segment"); path.setAttribute("pointer-events", "none");
       } else if (interactive) {
         path.classList.add("wheel-block-segment");
         if (b.id === selectedBlockId) path.classList.add("selected");
-        path.setAttribute("tabindex", "0");
-        path.setAttribute("role", "button");
+        path.setAttribute("tabindex", "0"); path.setAttribute("role", "button");
         const carryPrefix = b._displayPart === "carry" ? "Continues from previous day, " : "";
-        path.setAttribute("aria-label", `${carryPrefix}${blockTitle(b)}, ${timeFromMinutes(b.start)} to ${timeFromMinutes(b.start + b.minutes)}, ${fmtMinutes(b.minutes)} visible today`);
-        const activate = event => {
-          if (suppressBlockClick) return;
-          event.stopPropagation();
-          selectBlock(b.id);
-        };
+        const hierarchyPrefix = overlayDepth ? `Nested level ${overlayDepth}, ` : "";
+        path.setAttribute("aria-label", `${carryPrefix}${hierarchyPrefix}${blockTitle(b)}, ${timeFromMinutes(b.start)} to ${timeFromMinutes(b.start + b.minutes)}, ${fmtMinutes(b.minutes)} visible`);
+        const activate = event => { if (suppressBlockClick) return; event.stopPropagation(); selectBlock(b.id); };
         path.addEventListener("click", activate);
-        path.addEventListener("keydown", event => {
-          if (event.key === "Enter" || event.key === " ") { event.preventDefault(); activate(event); }
-        });
+        path.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); activate(event); } });
       }
       svg.appendChild(path);
 
+      // Completed leaf descendants grey only their exact portion of an ancestor block.
+      if (effectiveDone && overlayDepth > 0 && !b._manualJarEntry) {
+        const doneMask = document.createElementNS(NS, "path");
+        doneMask.setAttribute("d", path.getAttribute("d"));
+        doneMask.setAttribute("fill", "#9aa0aa"); doneMask.setAttribute("opacity", ".28"); doneMask.setAttribute("pointer-events", "none");
+        svg.appendChild(doneMask);
+      }
+
       if (b.completed && b.reclaimed > 0 && b.actualMinutes != null) {
-        // Reclaimed time belongs to the tail of the original planned block. Project only the part
-        // that lands inside this visible calendar-day fragment.
         const original = state.blocks.find(item => item.id === b.id) || b;
-        const originalPlannedEnd = original.start + original.minutes;
-        const originalActualEnd = original.start + original.actualMinutes;
+        const originalPlannedEnd = original.start + original.minutes, originalActualEnd = original.start + original.actualMinutes;
         const dayOffset = b._displayPart === "carry" ? 1440 : 0;
-        const fragmentStartOriginal = dayOffset + b.start;
-        const fragmentEndOriginal = fragmentStartOriginal + b.minutes;
-        const freeStartOriginal = Math.max(originalActualEnd, fragmentStartOriginal);
-        const freeEndOriginal = Math.min(originalPlannedEnd, fragmentEndOriginal);
+        const fragmentStartOriginal = dayOffset + b.start, fragmentEndOriginal = fragmentStartOriginal + b.minutes;
+        const freeStartOriginal = Math.max(originalActualEnd, fragmentStartOriginal), freeEndOriginal = Math.min(originalPlannedEnd, fragmentEndOriginal);
         if (freeEndOriginal > freeStartOriginal) {
-          const freeStart = b.start + (freeStartOriginal - fragmentStartOriginal);
-          const freeEnd = b.start + (freeEndOriginal - fragmentStartOriginal);
+          const freeStart = b.start + (freeStartOriginal - fragmentStartOriginal), freeEnd = b.start + (freeEndOriginal - fragmentStartOriginal);
           const free = document.createElementNS(NS, "path");
-          free.setAttribute("d", arcPath(cx, cy, laneOuter, laneInner, freeStart / 1440 * 360, freeEnd / 1440 * 360));
-          free.setAttribute("fill", "#3d424d");
-          free.setAttribute("stroke", "#d9b55b");
-          free.setAttribute("stroke-width", String(strokeWidth));
+          free.setAttribute("d", arcPath(cx, cy, laneOuter, laneInner, freeStart/1440*360, freeEnd/1440*360));
+          free.setAttribute("fill", "#3d424d"); free.setAttribute("stroke", "#d9b55b"); free.setAttribute("stroke-width", String(strokeWidth));
           if (interactive) {
-            free.classList.add("wheel-block-segment");
-            free.setAttribute("tabindex", "0");
-            free.setAttribute("role", "button");
-            free.setAttribute("aria-label", `${blockTitle(b)} reclaimed time`);
+            free.classList.add("wheel-block-segment"); free.setAttribute("tabindex", "0"); free.setAttribute("role", "button");
             const activateFree = event => { if (suppressBlockClick) return; event.stopPropagation(); selectBlock(b.id); };
             free.addEventListener("click", activateFree);
-            free.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); activateFree(event); } });
           }
           svg.appendChild(free);
         }
@@ -2841,80 +3131,29 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   }
 
   function renderWheel() {
-    const svg = el.dayWheel;
-    svg.innerHTML = "";
-    const NS = "http://www.w3.org/2000/svg";
-    const cx = 180, cy = 180, ro = 148;
-    const blocks = wheelBlocksFor(state.selectedDate);
-    const lanes = assignLanes(blocks);
-    const geo = laneGeometry(lanes.laneCount, ro, 58);
+    const svg=el.dayWheel; svg.innerHTML="";
+    const NS="http://www.w3.org/2000/svg", cx=180,cy=180,ro=148;
+    const rolling=state.wheelMode==="rolling";
+    const blocks=rolling?rollingWheelBlocks():wheelBlocksFor(state.selectedDate);
+    const layout=assignLanes(blocks), geo=laneGeometry(layout.laneCount,ro,58);
+    const base=document.createElementNS(NS,"circle");base.setAttribute("cx",cx);base.setAttribute("cy",cy);base.setAttribute("r",(ro+geo.inner)/2);base.setAttribute("fill","none");base.setAttribute("stroke","#252a33");base.setAttribute("stroke-width",ro-geo.inner);svg.appendChild(base);
+    if (rolling) appendRollingSolarRing(svg,cx,cy); else appendSolarRing(svg,state.selectedDate,cx,cy);
+    appendWheelBlocks(svg,blocks,cx,cy,ro,58,1.4,true);
+    if (rolling) appendRollingNowOverlay(svg,cx,cy,ro,geo.inner); else appendNowOverlay(svg,state.selectedDate,cx,cy,ro,geo.inner);
 
-    const base = document.createElementNS(NS, "circle");
-    base.setAttribute("cx", cx);
-    base.setAttribute("cy", cy);
-    base.setAttribute("r", (ro + geo.inner) / 2);
-    base.setAttribute("fill", "none");
-    base.setAttribute("stroke", "#252a33");
-    base.setAttribute("stroke-width", ro - geo.inner);
-    svg.appendChild(base);
-
-    appendSolarRing(svg, state.selectedDate, cx, cy);
-    appendWheelBlocks(svg, blocks, cx, cy, ro, 58, 1.4, true);
-    appendNowOverlay(svg, state.selectedDate, cx, cy, ro, geo.inner);
-
-    // Hour ticks point inward so they no longer get clipped by the SVG edge.
-    for (let h = 0; h < 24; h += 1) {
-      const a = h / 24 * 360;
-      const p1 = polar(cx, cy, ro - 1, a);
-      const p2 = polar(cx, cy, ro - (h % 6 === 0 ? 15 : 9), a);
-      const line = document.createElementNS(NS, "line");
-      line.setAttribute("x1", p1.x);
-      line.setAttribute("y1", p1.y);
-      line.setAttribute("x2", p2.x);
-      line.setAttribute("y2", p2.y);
-      line.setAttribute("stroke", h % 6 === 0 ? "#d1d5dc" : "#777f8d");
-      line.setAttribute("stroke-width", h % 6 === 0 ? "1.8" : "1");
-      svg.appendChild(line);
-
-      if (h % 3 === 0) {
-        const tp = polar(cx, cy, ro + 11, a);
-        const text = document.createElementNS(NS, "text");
-        text.setAttribute("x", tp.x);
-        text.setAttribute("y", tp.y + 3.5);
-        text.setAttribute("fill", "#a5abb6");
-        text.setAttribute("font-size", "9.5");
-        text.setAttribute("font-weight", "650");
-        text.setAttribute("text-anchor", "middle");
-        text.textContent = String(h).padStart(2, "0");
-        svg.appendChild(text);
-      }
+    const rollingStart=rolling?rollingWindow().start:null;
+    for(let h=0;h<24;h+=1){
+      const a=h/24*360,p1=polar(cx,cy,ro-1,a),p2=polar(cx,cy,ro-(h%6===0?15:9),a);
+      const line=document.createElementNS(NS,"line");line.setAttribute("x1",p1.x);line.setAttribute("y1",p1.y);line.setAttribute("x2",p2.x);line.setAttribute("y2",p2.y);line.setAttribute("stroke",h%6===0?"#d1d5dc":"#777f8d");line.setAttribute("stroke-width",h%6===0?"1.8":"1");svg.appendChild(line);
+      if(h%3===0){const tp=polar(cx,cy,ro+11,a),text=document.createElementNS(NS,"text");text.setAttribute("x",tp.x);text.setAttribute("y",tp.y+3.5);text.setAttribute("fill","#a5abb6");text.setAttribute("font-size","9.5");text.setAttribute("font-weight","650");text.setAttribute("text-anchor","middle");
+        if(rolling){const t=new Date(rollingStart.getTime()+h*60*60000);text.textContent=String(t.getHours()).padStart(2,"0");} else text.textContent=String(h).padStart(2,"0");svg.appendChild(text);}
     }
-
-    el.wheelScheduled.textContent = fmtMinutes(blocks.filter(b => !b._manualJarEntry).reduce((s, b) => s + b.minutes, 0));
-    el.wheelLegend.innerHTML = "";
-    const seen = new Set();
-    blocks.forEach(b => {
-      const key = `${blockTitle(b)}|${blockColor(b)}`;
-      if (seen.has(key)) return;
-      seen.add(key);
-      const item = document.createElement("span");
-      item.className = "legend-item";
-      item.innerHTML = `<span class="legend-dot" style="background:${blockColor(b)}"></span>`;
-      item.appendChild(document.createTextNode(blockTitle(b)));
-      el.wheelLegend.appendChild(item);
-    });
-    if (blocks.some(b => b._manualJarEntry)) {
-      const item = document.createElement("span");
-      item.className = "legend-item";
-      item.innerHTML = `<span class="legend-dot" style="background:#7a808b;border:1px dashed #f2f3f5"></span>Manual log`;
-      el.wheelLegend.appendChild(item);
-    }
-    if (blocks.some(b => b.reclaimed > 0)) {
-      const item = document.createElement("span");
-      item.className = "legend-item";
-      item.innerHTML = `<span class="legend-dot" style="background:#3d424d;border:1px solid #d9b55b"></span>Reclaimed`;
-      el.wheelLegend.appendChild(item);
-    }
+    el.wheelScheduled.textContent=fmtMinutes(blocks.filter(b=>!b._manualJarEntry).reduce((s,b)=>s+b.minutes,0));
+    el.wheelCenterLabel.textContent=rolling?"in rolling 24h":"scheduled";
+    el.wheelLegend.innerHTML=""; const seen=new Set();
+    blocks.forEach(b=>{const key=`${blockTitle(b)}|${blockColor(b)}`;if(seen.has(key))return;seen.add(key);const item=document.createElement("span");item.className="legend-item";item.innerHTML=`<span class="legend-dot" style="background:${blockColor(b)}"></span>`;item.appendChild(document.createTextNode(blockTitle(b)));el.wheelLegend.appendChild(item);});
+    if(blocks.some(b=>b._manualJarEntry)){const item=document.createElement("span");item.className="legend-item";item.innerHTML=`<span class="legend-dot" style="background:#7a808b;border:1px dashed #f2f3f5"></span>Manual log`;el.wheelLegend.appendChild(item);}
+    if(blocks.some(b=>b.reclaimed>0)){const item=document.createElement("span");item.className="legend-item";item.innerHTML=`<span class="legend-dot" style="background:#3d424d;border:1px solid #d9b55b"></span>Reclaimed`;el.wheelLegend.appendChild(item);}
     renderSolarLegend();
   }
 
@@ -3031,6 +3270,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       btn.append(dateStack, svg, summary);
       btn.addEventListener("click", () => {
         selectedBlockId = null;
+        state.wheelMode = "calendar";
         state.selectedDate = iso;
         saveState();
         switchView("dayView");
@@ -3041,43 +3281,42 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     }
   }
 
-  function openQuestDialog(parentId = null, duplicateSourceId = null) {
+  function openQuestDialog(parentId = null, duplicateSourceId = null, editQuestId = null) {
     const source = duplicateSourceId ? questById(duplicateSourceId) : null;
-    const parent = parentId ? questById(parentId) : (source?.parentId ? questById(source.parentId) : null);
+    const editing = editQuestId ? questById(editQuestId) : null;
+    const basis = editing || source;
+    const parent = parentId ? questById(parentId) : (basis?.parentId ? questById(basis.parentId) : null);
     el.questParentId.value = parent?.id || "";
     el.questDuplicateSourceId.value = source?.id || "";
-    el.questDuplicateScheduleRow.hidden = !source;
-    el.questDuplicateSchedule.checked = true;
-    el.questDialogEyebrow.textContent = source ? "DUPLICATE QUEST" : (parent ? "NEW SUBTASK" : "NEW QUEST");
-    el.questDialogTitle.textContent = source ? `Copy ${source.name}` : (parent ? `Add under ${parent.name}` : "Create quest");
-    el.questSubmit.textContent = source ? "Create copy" : "Create";
-    el.questName.value = source?.name || "";
-    const base = source || parent;
+    el.questEditId.value = editing?.id || "";
+    el.questDialogEyebrow.textContent = editing ? "EDIT QUEST" : source ? "DUPLICATE QUEST" : (parent ? "NEW SUBTASK" : "NEW QUEST");
+    el.questDialogTitle.textContent = editing ? `Edit ${editing.name}` : source ? `Copy ${source.name}` : (parent ? `Add under ${parent.name}` : "Create quest");
+    el.questSubmit.textContent = editing ? "Save changes" : source ? "Create copy" : "Create";
+    el.questName.value = basis?.name || "";
+    const base = basis || parent;
     if (base) {
       el.questCategory.value = base.category || "personal";
       el.questDuration.value = String(base.defaultMinutes || 30);
       setQuestColorPicker(questColor(base));
     } else {
-      el.questCategory.value = "business";
-      el.questDuration.value = "30";
-      setQuestColorPicker(categoryColor("business"));
+      el.questCategory.value = "business"; el.questDuration.value = "30"; setQuestColorPicker(categoryColor("business"));
     }
-    const repeating = Boolean(source?.questSeriesId);
+    const repeating = Boolean(basis?.questSeriesId);
     el.questRepeatEnabled.checked = repeating;
     el.questRepeatFields.hidden = !repeating;
-    el.questRepeatStart.value = state.selectedDate || isoDate(new Date());
-    el.questRepeatEvery.value = String(Math.max(1, Number(source?.questRecurrenceEvery) || 1));
-    el.questRepeatFor.value = String(Math.max(1, Number(source?.questRecurrenceFor) || 4));
-    el.questRepeatUnit.value = ["days","weeks","months"].includes(source?.questRecurrenceUnit) ? source.questRecurrenceUnit : "weeks";
-    el.questDialog.showModal();
-  }
+    el.questRepeatStart.value = basis?.questOccurrenceDate || state.selectedDate || isoDate(new Date());
+    el.questRepeatEvery.value = String(Math.max(1, Number(basis?.questRecurrenceEvery) || 1));
+    el.questRepeatFor.value = String(Math.max(1, Number(basis?.questRecurrenceFor) || 4));
+    el.questRepeatUnit.value = ["days","weeks","months"].includes(basis?.questRecurrenceUnit) ? basis.questRecurrenceUnit : "weeks";
 
-  function toggleBlockMode({ resetDuration = true } = {}) {
-    const q = questById(el.blockQuest.value);
-    const standalone = !q;
-    el.standaloneFields.hidden = !standalone;
-    el.blockName.required = standalone;
-    if (q && resetDuration) setBlockDurationInputs(q.defaultMinutes || 30);
+    // New/duplicate quests can create their first scheduled block in the same save flow.
+    el.questScheduleRow.hidden = Boolean(editing);
+    const sourceBlock = source ? state.blocks.filter(b => b.questId === source.id).sort((a,b) => String(a.date).localeCompare(String(b.date)) || a.start-b.start)[0] : null;
+    el.questScheduleEnabled.checked = Boolean(source && sourceBlock);
+    el.questScheduleFields.hidden = !el.questScheduleEnabled.checked || Boolean(editing);
+    el.questScheduleDate.value = sourceBlock?.date || state.selectedDate || isoDate(new Date());
+    el.questScheduleStart.value = sourceBlock ? timeFromMinutes(sourceBlock.start) : "09:00";
+    el.questDialog.showModal();
   }
 
   function openBlockDialog(questId = null, duplicateBlockId = null) {
@@ -3249,6 +3488,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
 
   function openFinishDialog(blockId) {
     const b = state.blocks.find(x => x.id === blockId);
+    const linkedQuest = questById(b?.questId);
+    if (linkedQuest && !isLeafQuest(linkedQuest)) { window.alert("This block belongs to a parent quest. Complete its leaf subtasks instead."); return; }
     if (!b) return;
     el.finishBlockId.value = b.id;
     el.finishTitle.textContent = blockTitle(b);
@@ -3357,8 +3598,15 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   el.activeQuestsSubtab.addEventListener("click", () => { currentQuestMode = "active"; renderQuests(); });
   el.completedQuestsSubtab.addEventListener("click", () => { currentQuestMode = "completed"; renderQuests(); });
 
+  el.calendarWheelMode.addEventListener("click", () => { state.wheelMode="calendar"; state.selectedDate=isoDate(new Date()); selectedBlockId=null; saveState(); render(); });
+  el.rollingWheelMode.addEventListener("click", () => { state.wheelMode="rolling"; selectedBlockId=null; saveState(); render(); });
+  el.prevWeekBtn.addEventListener("click", () => { state.selectedDate=isoDate(addDays(dateFromISO(state.selectedDate),-7)); saveState(); renderWeek(); });
+  el.nextWeekBtn.addEventListener("click", () => { state.selectedDate=isoDate(addDays(dateFromISO(state.selectedDate),7)); saveState(); renderWeek(); });
+  el.thisWeekBtn.addEventListener("click", () => { state.selectedDate=isoDate(new Date()); saveState(); renderWeek(); });
+
   $("todayBtn").addEventListener("click", () => {
     selectedBlockId = null;
+    state.wheelMode = "calendar";
     state.selectedDate = isoDate(new Date());
     saveState();
     render();
@@ -3366,7 +3614,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
 
   // Swipe interaction: follow the finger, then slide the old day out and the new day in.
   el.wheelWrap.addEventListener("pointerdown", event => {
-    if (swipeAnimating) return;
+    if (swipeAnimating || state.wheelMode === "rolling") return;
     swipeStart = { id: event.pointerId, x: event.clientX, y: event.clientY, dx: 0, horizontal: false };
     if (el.wheelWrap.setPointerCapture) el.wheelWrap.setPointerCapture(event.pointerId);
   });
@@ -3404,6 +3652,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   });
 
   el.wheelWrap.addEventListener("keydown", event => {
+    if (state.wheelMode === "rolling") return;
     if (event.key === "ArrowLeft") { event.preventDefault(); animateDayShift(-1); }
     if (event.key === "ArrowRight") { event.preventDefault(); animateDayShift(1); }
   });
@@ -3414,44 +3663,74 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   });
   $("cancelQuest").addEventListener("click", () => el.questDialog.close());
   el.questRepeatEnabled.addEventListener("change", () => { el.questRepeatFields.hidden = !el.questRepeatEnabled.checked; });
+  el.questScheduleEnabled.addEventListener("change", () => { el.questScheduleFields.hidden = !el.questScheduleEnabled.checked || Boolean(el.questEditId.value); });
   el.questForm.addEventListener("submit", event => {
     event.preventDefault();
     const name = el.questName.value.trim();
     if (!name) return;
     const duplicateSource = questById(el.questDuplicateSourceId.value);
+    const editing = questById(el.questEditId.value);
     const repeating = el.questRepeatEnabled.checked;
-    const repeatStart = /^\d{4}-\d{2}-\d{2}$/.test(el.questRepeatStart.value) ? el.questRepeatStart.value : isoDate(new Date());
+    const repeatStart = /^\d{4}-\d{2}-\d{2}$/.test(el.questRepeatStart.value) ? el.questRepeatStart.value : (editing?.questOccurrenceDate || isoDate(new Date()));
     const repeatEvery = repeating ? Math.max(1, Math.min(365, Number(el.questRepeatEvery.value) || 1)) : null;
     const repeatFor = repeating ? Math.max(1, Math.min(3650, Number(el.questRepeatFor.value) || 1)) : null;
     const repeatUnit = repeating && ["days","weeks","months"].includes(el.questRepeatUnit.value) ? el.questRepeatUnit.value : null;
+
+    if (editing) {
+      const oldSeriesId = editing.questSeriesId;
+      if (!repeating && oldSeriesId) state.quests.forEach(item => { if (item.questSeriesId === oldSeriesId) item.questSeriesStopped = true; });
+      editing.name = name;
+      editing.category = el.questCategory.value;
+      editing.defaultMinutes = Math.max(2, Math.min(600, Number(el.questDuration.value) || 30));
+      editing.color = selectedQuestColor;
+      editing.questSeriesId = repeating ? (oldSeriesId || uid("qseries")) : null;
+      editing.questRecurrenceEvery = repeatEvery;
+      editing.questRecurrenceFor = repeatFor;
+      editing.questRecurrenceUnit = repeatUnit;
+      editing.questRecurrenceLabel = repeating ? recurrenceLabel(repeatEvery, repeatFor, repeatUnit) : null;
+      editing.questOccurrenceDate = repeating ? repeatStart : null;
+      editing.questRecurrenceEndDate = repeating ? isoDate(addDuration(dateFromISO(repeatStart), repeatFor, repeatUnit)) : null;
+      editing.questSeriesStopped = false;
+      syncDerivedQuestCompletion();
+      saveState();
+      el.questDialog.close();
+      render();
+      return;
+    }
+
+    const scheduleNow = el.questScheduleEnabled.checked;
+    const scheduleDate = /^\d{4}-\d{2}-\d{2}$/.test(el.questScheduleDate.value) ? el.questScheduleDate.value : state.selectedDate;
+    const scheduleStart = /^\d{2}:\d{2}$/.test(el.questScheduleStart.value) ? el.questScheduleStart.value : "09:00";
+    const parentId = el.questParentId.value || null;
     const quest = {
-      id: uid("q"),
-      parentId: el.questParentId.value || null,
-      name,
-      category: el.questCategory.value,
-      defaultMinutes: Math.max(2, Math.min(600, Number(el.questDuration.value) || 30)),
-      color: selectedQuestColor,
-      completed: false,
-      archived: false,
-      createdAt: Date.now(),
+      id: uid("q"), parentId, name, category: el.questCategory.value,
+      defaultMinutes: Math.max(2, Math.min(600, Number(el.questDuration.value) || 30)), color: selectedQuestColor,
+      completed: false, archived: false, createdAt: Date.now(), sortOrder: nextQuestSortOrder(parentId),
       questSeriesId: repeating ? uid("qseries") : null,
-      questRecurrenceEvery: repeatEvery,
-      questRecurrenceFor: repeatFor,
-      questRecurrenceUnit: repeatUnit,
+      questRecurrenceEvery: repeatEvery, questRecurrenceFor: repeatFor, questRecurrenceUnit: repeatUnit,
       questRecurrenceLabel: repeating ? recurrenceLabel(repeatEvery, repeatFor, repeatUnit) : null,
       questOccurrenceDate: repeating ? repeatStart : null,
       questRecurrenceEndDate: repeating ? isoDate(addDuration(dateFromISO(repeatStart), repeatFor, repeatUnit)) : null,
-      questSeriesStopped: false
+      questSeriesStopped: false,
+      questAutoSchedule: Boolean(repeating && scheduleNow),
+      questAutoScheduleStart: repeating && scheduleNow ? scheduleStart : null
     };
     state.quests.push(quest);
     if (duplicateSource) {
       copyJarQuestLinks(duplicateSource.id, quest.id);
       cloneQuestBranch(duplicateSource.id, quest.id);
     }
+    if (scheduleNow) {
+      state.blocks.push({
+        id: uid("b"), questId: quest.id, name: null, category: quest.category, color: null, jarId: null,
+        date: scheduleDate, start: minutesFromTime(scheduleStart), minutes: quest.defaultMinutes,
+        completed: false, actualMinutes: null, reclaimed: 0, bankDelta: 0, seriesId: null, recurrenceLabel: null
+      });
+    }
+    syncDerivedQuestCompletion();
     saveState();
     el.questDialog.close();
     render();
-    if (duplicateSource && el.questDuplicateSchedule.checked) openBlockDialog(quest.id);
   });
 
   $("addBlockBtn").addEventListener("click", () => openBlockDialog());
@@ -3643,6 +3922,9 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     b.actualMinutes = actual;
     b.bankDelta = delta;
     b.reclaimed = Math.max(0, delta);
+    const linkedQuest = questById(b.questId);
+    if (linkedQuest && isLeafQuest(linkedQuest)) { linkedQuest.completed = true; linkedQuest.completedAt = Date.now(); }
+    syncDerivedQuestCompletion();
     state.bankLedger = Array.isArray(state.bankLedger) ? state.bankLedger : [];
     if (delta !== 0) {
       state.bankLedger.push({
@@ -3768,7 +4050,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./sw-v10.js", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw-v11.js", { updateViaCache: "none" });
         if (reg.update) reg.update().catch(() => {});
       } catch {}
     });
@@ -3779,7 +4061,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   setEditBlockColorPicker(categoryColor("personal"));
   setJarColorPicker(questPalette[0]);
   setInterval(() => {
-    if (state.selectedDate === isoDate(new Date()) && document.getElementById("dayView")?.classList.contains("active")) renderWheel();
+    if (document.getElementById("dayView")?.classList.contains("active") && (state.wheelMode === "rolling" || state.selectedDate === isoDate(new Date()))) { renderDateIdentity(); renderTimeline(); renderWheel(); renderSelectedBlockPanel(); }
   }, 30000);
 
   render();
