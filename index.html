@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Questwheel" />
-  <link rel="manifest" href="./manifest-v9.1.webmanifest" />
-  <link rel="apple-touch-icon" href="./icons/icon-v9.1-192.png" />
+  <link rel="manifest" href="./manifest-v9.2.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-v9.2-192.png" />
   <style>
 :root {
   color-scheme: dark;
@@ -496,8 +496,76 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
 .sun-settings-grid { display:grid; gap:11px; }
 .sun-preview { padding: 9px 11px; border:1px solid var(--border); border-radius:11px; background:var(--panel-2); color:var(--muted); font-size:11px; line-height:1.4; }
 
+
+/* v9.2: compact tape label + single jar target */
+.jar-card {
+  overflow: visible;
+}
+.jar-tape,
+.jar-label,
+.jar-label-button {
+  width: calc(100% - 12px) !important;
+  max-width: none !important;
+  left: 6px !important;
+  right: 6px !important;
+  min-height: 42px !important;
+  padding: 6px 8px !important;
+  transform: rotate(-1.5deg) !important;
+  display: grid !important;
+  place-items: center !important;
+  align-content: center !important;
+  gap: 1px !important;
+  overflow: hidden !important;
+}
+.jar-tape .jar-name,
+.jar-label .jar-name,
+.jar-label-button .jar-name {
+  font-size: 13px !important;
+  line-height: 1.05 !important;
+  font-weight: 800 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.jar-tape .jar-amount,
+.jar-label .jar-amount,
+.jar-label-button .jar-amount,
+.jar-tape .jar-progress,
+.jar-label .jar-progress,
+.jar-label-button .jar-progress {
+  font-size: 11px !important;
+  line-height: 1.05 !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+}
+.jar-tape .jar-extra,
+.jar-label .jar-extra,
+.jar-label-button .jar-extra,
+.jar-tape .jar-target-line,
+.jar-label .jar-target-line,
+.jar-label-button .jar-target-line,
+.jar-tape .jar-mode,
+.jar-label .jar-mode,
+.jar-label-button .jar-mode {
+  display: none !important;
+}
+
+
+.coord-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 78px;
+  gap: 8px;
+  align-items: center;
+}
+.coord-row select {
+  min-height: 46px;
+  text-align: center;
+  font-weight: 800;
+}
+
 </style>
-  <title>Questwheel v9.1</title>
+  <title>Questwheel v9.2</title>
 </head>
 <body>
   <div class="app-shell">
@@ -507,7 +575,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
           <span class="relative-label">Today</span>
           <span class="relative-date">Mon 24 Aug ’26</span>
         </div>
-        <h1>Questwheel <span class="build-tag">v9.1</span></h1>
+        <h1>Questwheel <span class="build-tag">v9.2</span></h1>
       </div>
       <button class="ghost compact" id="todayBtn" type="button">Today</button>
     </header>
@@ -678,7 +746,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
           <label>Hours<input id="blockHours" type="number" min="0" max="10" step="1" inputmode="numeric" value="0" /></label>
           <label>Minutes<input id="blockMinutes" type="number" min="0" max="59" step="1" inputmode="numeric" value="30" /></label>
         </div>
-        <p class="hint">2 minutes minimum · 10 hours maximum</p>
+        <p class="hint">2 minutes  10 hours maximum</p>
       </fieldset>
 
       <label class="repeat-toggle"><input id="repeatEnabled" type="checkbox" /><span>Repeat this block</span></label>
@@ -743,7 +811,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
           <label>Hours<input id="editBlockHours" type="number" min="0" max="10" step="1" inputmode="numeric" /></label>
           <label>Minutes<input id="editBlockMinutes" type="number" min="0" max="59" step="1" inputmode="numeric" /></label>
         </div>
-        <p class="hint">2 minutes minimum · 10 hours maximum</p>
+        <p class="hint">2 minutes  10 hours maximum</p>
       </fieldset>
 
       <div class="dialog-actions"><button class="ghost" value="cancel" type="button" id="cancelEditBlock">Cancel</button><button class="primary" value="default" type="submit">Save changes</button></div>
@@ -829,8 +897,18 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       </div>
       <label class="form-check"><input id="solarEnabled" type="checkbox" /> <span>Show daylight and twilight on the day wheel</span></label>
       <div class="sun-settings-grid">
-        <label>Latitude<input id="solarLatitude" type="number" min="-89.9" max="89.9" step="0.0001" inputmode="decimal" placeholder="e.g. 59.25" /></label>
-        <label>Longitude<input id="solarLongitude" type="number" min="-180" max="180" step="0.0001" inputmode="decimal" placeholder="west is negative" /></label>
+        <label>Latitude<div class="coord-row"><input<input id="solarLatitude" placeholder="e.g. 59.25" /> type="text" inputmode="decimal" pattern="[0-9]*[.]?[0-9]*" autocomplete="off" placeholder="0–90">
+      <select id="solarLatitudeHemisphere" aria-label="Latitude hemisphere">
+        <option value="N">N</option>
+        <option value="S">S</option>
+      </select>
+    </div></label>
+        <label>Longitude<div class="coord-row"><input<input id="solarLongitude" placeholder="west is negative" /> type="text" inputmode="decimal" pattern="[0-9]*[.]?[0-9]*" autocomplete="off" placeholder="0–180">
+      <select id="solarLongitudeHemisphere" aria-label="Longitude hemisphere">
+        <option value="W">W</option>
+        <option value="E">E</option>
+      </select>
+    </div></label>
       </div>
       <div id="solarPreview" class="sun-preview">Enter latitude and longitude. Questwheel uses your phone’s timezone; it never requests location permission.</div>
       <p class="hint">Longitude is needed as well as latitude because it determines where solar noon falls on your clock.</p>
@@ -864,7 +942,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   <script>
 (() => {
   const STORE = "questwheel-v1"; // Preserve all prior Questwheel local data.
-  const BUILD = "v9.1";
+  const BUILD = "v9.2";
 
   const categories = {
     business: { label: "Business", color: "#FFB000" },
@@ -985,7 +1063,9 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     solarForm: $("solarForm"),
     solarEnabled: $("solarEnabled"),
     solarLatitude: $("solarLatitude"),
+    solarLatitudeHemisphere: $("solarLatitudeHemisphere"),
     solarLongitude: $("solarLongitude"),
+    solarLongitudeHemisphere: $("solarLongitudeHemisphere"),
     solarPreview: $("solarPreview"),
     finishForm: $("finishForm"),
     questDialogEyebrow: $("questDialogEyebrow"),
@@ -2472,8 +2552,16 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
 
   function openSolarDialog() {
     el.solarEnabled.checked = Boolean(state.solar?.enabled);
-    el.solarLatitude.value = state.solar?.lat != null && Number.isFinite(Number(state.solar.lat)) ? String(state.solar.lat) : "";
-    el.solarLongitude.value = state.solar?.lon != null && Number.isFinite(Number(state.solar.lon)) ? String(state.solar.lon) : "";
+    {
+      const storedLat = Number(state.solar?.lat != null && Number.isFinite(Number(state.solar.lat)) ? String(state.solar.lat) : "") || 0;
+      el.solarLatitude.value = String(Math.abs(storedLat));
+      if (el.solarLatitudeHemisphere) el.solarLatitudeHemisphere.value = storedLat < 0 ? "S" : "N";
+    }
+    {
+      const storedLon = Number(state.solar?.lon != null && Number.isFinite(Number(state.solar.lon)) ? String(state.solar.lon) : "") || 0;
+      el.solarLongitude.value = String(Math.abs(storedLon));
+      if (el.solarLongitudeHemisphere) el.solarLongitudeHemisphere.value = storedLon > 0 ? "E" : "W";
+    }
     updateSolarPreview();
     el.solarDialog.showModal();
   }
@@ -3371,7 +3459,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./sw-v9.1.js", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw-v9.2.js", { updateViaCache: "none" });
         if (reg.update) reg.update().catch(() => {});
       } catch {}
     });
