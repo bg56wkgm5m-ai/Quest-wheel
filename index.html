@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Questwheel" />
-  <link rel="manifest" href="./manifest-v7.webmanifest" />
-  <link rel="apple-touch-icon" href="./icons/icon-v7-192.png" />
+  <link rel="manifest" href="./manifest-v8.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-v8-192.png" />
   <style>
 :root {
   color-scheme: dark;
@@ -390,8 +390,41 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   .jar-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
 }
 
+
+/* v8: label-driven jar editing + weekly jar types + series management */
+.jar-card-copy.jar-label-button {
+  appearance: none;
+  border: 1px solid rgba(83,65,35,.28);
+  font: inherit;
+  cursor: pointer;
+}
+.jar-card-copy.jar-label-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.jar-card-copy.jar-label-button:active { transform: rotate(0deg) scale(.98); }
+.jar-card:nth-child(even) .jar-card-copy.jar-label-button:active { transform: rotate(0deg) scale(.98); }
+.jar-quick-add { min-height: 29px; padding: 0 8px; font-size: 9px; border-radius: 9px; }
+.jar-period-chip {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 2px 5px;
+  border-radius: 999px;
+  color: #56482f;
+  background: rgba(255,255,255,.24);
+  font-size: 7.5px;
+  font-weight: 900;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.jar-link-note { margin-top: 2px; color: #65573d; font-size: 7.5px; line-height: 1.15; }
+.danger-zone { border-top: 1px solid var(--border); margin-top: 2px; padding-top: 12px; display: flex; justify-content: flex-start; }
+.danger-zone[hidden] { display: none; }
+.edit-recurrence-fields { display: grid; gap: 11px; padding: 12px; border: 1px solid var(--border); border-radius: 13px; background: rgba(143,184,221,.055); }
+.edit-recurrence-fields[hidden] { display: none; }
+
 </style>
-  <title>Questwheel v7</title>
+  <title>Questwheel v8</title>
 </head>
 <body>
   <div class="app-shell">
@@ -401,7 +434,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
           <span class="relative-label">Today</span>
           <span class="relative-date">Mon 24 Aug ’26</span>
         </div>
-        <h1>Questwheel <span class="build-tag">v7</span></h1>
+        <h1>Questwheel <span class="build-tag">v8</span></h1>
       </div>
       <button class="ghost compact" id="todayBtn" type="button">Today</button>
     </header>
@@ -602,6 +635,16 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         <p id="editSeriesNote" class="hint"></p>
       </div>
 
+      <div id="editRecurrenceFields" class="edit-recurrence-fields" hidden>
+        <span class="field-label">Future repetition pattern</span>
+        <div class="two-col">
+          <label>Every<div class="input-suffix"><input id="editRepeatEvery" type="number" min="1" max="365" step="1" value="1" /><span>days</span></div></label>
+          <label>For<input id="editRepeatFor" type="number" min="1" max="3650" step="1" value="7" /></label>
+        </div>
+        <label>Duration unit<select id="editRepeatUnit"><option value="days">Days</option><option value="weeks">Weeks</option><option value="months">Months</option></select></label>
+        <p class="hint">When saving “this and all future,” Questwheel rebuilds the remaining schedule from this occurrence using this pattern. Earlier occurrences stay untouched.</p>
+      </div>
+
       <label>Linked quest (optional)<select id="editBlockQuest"></select></label>
       <div id="editStandaloneFields" class="standalone-fields">
         <label>Block name<input id="editBlockName" maxlength="100" placeholder="e.g. Work shift" /></label>
@@ -632,6 +675,24 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     </form>
   </dialog>
 
+  <dialog id="deleteBlockDialog">
+    <form method="dialog" id="deleteBlockForm">
+      <div class="dialog-head">
+        <div><span class="eyebrow">DELETE BLOCK</span><h2 id="deleteBlockTitle">Delete block</h2></div>
+        <button class="icon-btn" value="cancel" aria-label="Close">×</button>
+      </div>
+      <input id="deleteBlockId" type="hidden" />
+      <div id="deleteSeriesScope" class="series-scope" hidden>
+        <span class="field-label">Delete</span>
+        <label class="scope-option"><input id="deleteScopeOne" name="deleteScope" type="radio" value="one" checked /><span>This occurrence only</span></label>
+        <label class="scope-option"><input id="deleteScopeFuture" name="deleteScope" type="radio" value="future" /><span>This and all future repetitions</span></label>
+        <p id="deleteSeriesNote" class="hint"></p>
+      </div>
+      <p class="hint">This removes schedule blocks. Banked free-time already earned from completed blocks is left in your bank.</p>
+      <div class="dialog-actions"><button class="ghost" value="cancel" type="button" id="cancelDeleteBlock">Cancel</button><button class="primary" style="background:var(--danger);color:#1b0808" value="default" type="submit">Delete</button></div>
+    </form>
+  </dialog>
+
   <dialog id="jarDialog">
     <form method="dialog" id="jarForm">
       <div class="dialog-head">
@@ -640,11 +701,24 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       </div>
       <input id="jarEditId" type="hidden" />
       <label>Jar name<input id="jarName" maxlength="60" required placeholder="e.g. Housework" /></label>
+      <label>Target period
+        <select id="jarPeriod">
+          <option value="daily">Daily target</option>
+          <option value="weekly">Weekly target</option>
+        </select>
+      </label>
+      <div id="jarWeeklyLinkFields" class="standalone-fields" hidden>
+        <label>Also count activity from
+          <select id="jarLinkedDailyId"></select>
+        </label>
+        <p class="hint">Optional. Link this weekly jar to a daily jar and anything credited to that daily jar also fills this weekly jar. Leave it standalone if it has no daily counterpart.</p>
+      </div>
       <div class="two-col">
-        <label>Daily minimum (minutes)<input id="jarMinMinutes" type="number" min="1" max="1440" step="1" value="30" inputmode="numeric" required /></label>
-        <label>Daily full target (minutes)<input id="jarMaxMinutes" type="number" min="1" max="1440" step="1" value="45" inputmode="numeric" required /></label>
+        <label><span id="jarMinLabel">Daily minimum (minutes)</span><input id="jarMinMinutes" type="number" min="1" max="10080" step="1" value="30" inputmode="numeric" required /></label>
+        <label><span id="jarMaxLabel">Daily full target (minutes)</span><input id="jarMaxMinutes" type="number" min="1" max="10080" step="1" value="45" inputmode="numeric" required /></label>
       </div>
       <label>Colour<div id="jarColorPicker" class="color-picker" role="radiogroup" aria-label="Jar colour"></div></label>
+      <div id="jarDangerZone" class="danger-zone" hidden><button class="small-btn danger" type="button" id="deleteJarFromDialog">Delete jar</button></div>
       <div class="dialog-actions"><button class="ghost" value="cancel" type="button" id="cancelJar">Cancel</button><button class="primary" value="default" type="submit">Save jar</button></div>
     </form>
   </dialog>
@@ -776,9 +850,16 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     jarDialogTitle: $("jarDialogTitle"),
     jarEditId: $("jarEditId"),
     jarName: $("jarName"),
+    jarPeriod: $("jarPeriod"),
+    jarWeeklyLinkFields: $("jarWeeklyLinkFields"),
+    jarLinkedDailyId: $("jarLinkedDailyId"),
+    jarMinLabel: $("jarMinLabel"),
+    jarMaxLabel: $("jarMaxLabel"),
     jarMinMinutes: $("jarMinMinutes"),
     jarMaxMinutes: $("jarMaxMinutes"),
     jarColorPicker: $("jarColorPicker"),
+    jarDangerZone: $("jarDangerZone"),
+    deleteJarFromDialog: $("deleteJarFromDialog"),
     manualJarDialog: $("manualJarDialog"),
     manualJarForm: $("manualJarForm"),
     manualJarTitle: $("manualJarTitle"),
@@ -820,6 +901,10 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     editScopeOne: $("editScopeOne"),
     editScopeFuture: $("editScopeFuture"),
     editSeriesNote: $("editSeriesNote"),
+    editRecurrenceFields: $("editRecurrenceFields"),
+    editRepeatEvery: $("editRepeatEvery"),
+    editRepeatFor: $("editRepeatFor"),
+    editRepeatUnit: $("editRepeatUnit"),
     editBlockQuest: $("editBlockQuest"),
     editStandaloneFields: $("editStandaloneFields"),
     editBlockName: $("editBlockName"),
@@ -830,6 +915,14 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     editBlockStart: $("editBlockStart"),
     editBlockHours: $("editBlockHours"),
     editBlockMinutes: $("editBlockMinutes"),
+    deleteBlockDialog: $("deleteBlockDialog"),
+    deleteBlockForm: $("deleteBlockForm"),
+    deleteBlockId: $("deleteBlockId"),
+    deleteBlockTitle: $("deleteBlockTitle"),
+    deleteSeriesScope: $("deleteSeriesScope"),
+    deleteScopeOne: $("deleteScopeOne"),
+    deleteScopeFuture: $("deleteScopeFuture"),
+    deleteSeriesNote: $("deleteSeriesNote"),
     finishBlockId: $("finishBlockId"),
     finishTitle: $("finishTitle"),
     plannedDurationLabel: $("plannedDurationLabel"),
@@ -922,8 +1015,10 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         jars: Array.isArray(parsed.jars) ? parsed.jars.map(j => ({
           id: j.id || uid("jar"),
           name: j.name || "Jar",
-          minMinutes: Math.max(1, Math.min(1440, Number(j.minMinutes) || 30)),
-          maxMinutes: Math.max(1, Math.min(1440, Number(j.maxMinutes) || 45)),
+          period: j.period === "weekly" ? "weekly" : "daily",
+          linkedDailyJarId: j.linkedDailyJarId || null,
+          minMinutes: Math.max(1, Math.min(10080, Number(j.minMinutes) || 30)),
+          maxMinutes: Math.max(1, Math.min(10080, Number(j.maxMinutes) || 45)),
           color: j.color || questPalette[0],
           createdAt: Number(j.createdAt) || 0
         })) : [],
@@ -982,7 +1077,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       .forEach(jar => {
         const opt = document.createElement("option");
         opt.value = jar.id;
-        opt.textContent = jar.name;
+        opt.textContent = `${jar.name} · ${jar.period === "weekly" ? "weekly" : "daily"}`;
         select.appendChild(opt);
       });
     if (selectedId && jarById(selectedId)) select.value = selectedId;
@@ -993,12 +1088,22 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     return Array.from({length: 7}, (_, i) => isoDate(addDays(start, i)));
   }
 
+  function jarSourceIds(jar) {
+    if (!jar) return [];
+    const ids = [jar.id];
+    if (jar.period === "weekly" && jar.linkedDailyJarId && jarById(jar.linkedDailyJarId)?.period === "daily") ids.push(jar.linkedDailyJarId);
+    return [...new Set(ids)];
+  }
+
   function jarMinutesForDate(jarId, dateISO) {
+    const jar = jarById(jarId);
+    if (!jar) return 0;
+    const sourceIds = jarSourceIds(jar);
     const blockMinutes = state.blocks
-      .filter(b => b.completed && b.jarId === jarId && b.date === dateISO)
+      .filter(b => b.completed && sourceIds.includes(b.jarId) && b.date === dateISO)
       .reduce((sum, b) => sum + (Number(b.minutes) || 0), 0);
     const manualMinutes = (state.jarEntries || [])
-      .filter(entry => entry.jarId === jarId && entry.date === dateISO)
+      .filter(entry => sourceIds.includes(entry.jarId) && entry.date === dateISO)
       .reduce((sum, entry) => sum + (Number(entry.minutes) || 0), 0);
     return blockMinutes + manualMinutes;
   }
@@ -1262,8 +1367,33 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   }
 
   function jarPeriodTargets(jar) {
-    const factor = activeJarPeriod === "weekly" ? 7 : 1;
-    return { min: jar.minMinutes * factor, max: jar.maxMinutes * factor };
+    if (activeJarPeriod === "weekly" && jar.period !== "weekly") return { min: jar.minMinutes * 7, max: jar.maxMinutes * 7 };
+    return { min: jar.minMinutes, max: jar.maxMinutes };
+  }
+
+  function populateLinkedDailyJarOptions(selectedId = null, excludeId = null) {
+    el.jarLinkedDailyId.innerHTML = "";
+    const standalone = document.createElement("option");
+    standalone.value = "";
+    standalone.textContent = "Standalone weekly jar";
+    el.jarLinkedDailyId.appendChild(standalone);
+    (state.jars || [])
+      .filter(jar => jar.period !== "weekly" && jar.id !== excludeId)
+      .sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0))
+      .forEach(jar => {
+        const opt = document.createElement("option");
+        opt.value = jar.id;
+        opt.textContent = jar.name;
+        el.jarLinkedDailyId.appendChild(opt);
+      });
+    if (selectedId && jarById(selectedId)?.period !== "weekly") el.jarLinkedDailyId.value = selectedId;
+  }
+
+  function syncJarPeriodEditor() {
+    const weekly = el.jarPeriod.value === "weekly";
+    el.jarWeeklyLinkFields.hidden = !weekly;
+    el.jarMinLabel.textContent = `${weekly ? "Weekly" : "Daily"} minimum (minutes)`;
+    el.jarMaxLabel.textContent = `${weekly ? "Weekly" : "Daily"} full target (minutes)`;
   }
 
   function openJarDialog(jarId = null) {
@@ -1272,10 +1402,26 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     el.jarDialogEyebrow.textContent = jar ? "EDIT JAR" : "NEW JAR";
     el.jarDialogTitle.textContent = jar ? `Modify ${jar.name}` : "Create category jar";
     el.jarName.value = jar?.name || "";
+    el.jarPeriod.value = jar?.period === "weekly" ? "weekly" : "daily";
+    populateLinkedDailyJarOptions(jar?.linkedDailyJarId || null, jar?.id || null);
     el.jarMinMinutes.value = String(jar?.minMinutes || 30);
     el.jarMaxMinutes.value = String(jar?.maxMinutes || 45);
     setJarColorPicker(jar?.color || questPalette[0]);
+    el.jarDangerZone.hidden = !jar;
+    syncJarPeriodEditor();
     el.jarDialog.showModal();
+  }
+
+  function deleteJar(jar) {
+    if (!jar) return;
+    if (!window.confirm(`Delete the ${jar.name} jar? Existing blocks will remain, but will no longer fill this jar.`)) return;
+    state.jars = state.jars.filter(item => item.id !== jar.id);
+    state.jarEntries = (state.jarEntries || []).filter(entry => entry.jarId !== jar.id);
+    state.blocks.forEach(block => { if (block.jarId === jar.id) block.jarId = null; });
+    state.jars.forEach(other => { if (other.linkedDailyJarId === jar.id) other.linkedDailyJarId = null; });
+    saveState();
+    el.jarDialog.close();
+    render();
   }
 
   function openManualJarDialog(jarId) {
@@ -1304,15 +1450,19 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     el.freeBankBalance.textContent = fmtSignedMinutes(balance, {zeroLabel: "0m"});
     el.freeBankBalance.classList.toggle("negative", balance < 0);
     el.freeBankPeriodNet.textContent = `${activeJarPeriod === "weekly" ? "This week" : "This day"} ${fmtSignedMinutes(net, {zeroLabel:"±0m"})}`;
-    const visualCapacity = 480; // 8h visual reservoir; overflow remains readable in the number.
+    const visualCapacity = 480;
     const bankPct = Math.min(100, Math.max(0, balance) / visualCapacity * 100);
     el.freeBankLiquid.style.height = `${bankPct}%`;
     el.freeBankDeficit.hidden = balance >= 0;
 
-    const jars = [...(state.jars || [])].sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
+    const jars = [...(state.jars || [])]
+      .filter(jar => activeJarPeriod === "weekly" || jar.period !== "weekly")
+      .sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
     if (!jars.length) {
       el.jarGrid.className = "jar-grid empty-state";
-      el.jarGrid.textContent = "No category jars yet. Create one for something like Housework or Hygiene.";
+      el.jarGrid.textContent = activeJarPeriod === "weekly"
+        ? "No jars yet. Weekly view can show seven-day totals for daily jars plus weekly-only jars."
+        : "No daily category jars yet. Create one for something like Housework or Hygiene.";
       return;
     }
     el.jarGrid.className = "jar-grid";
@@ -1336,11 +1486,17 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       shine.className = "jar-shine";
       vessel.append(liquid, shine);
 
-      const copy = document.createElement("div");
-      copy.className = "jar-card-copy";
+      const copy = document.createElement("button");
+      copy.type = "button";
+      copy.className = "jar-card-copy jar-label-button";
+      copy.setAttribute("aria-label", `Edit ${jar.name} jar`);
+      copy.addEventListener("click", () => openJarDialog(jar.id));
       const title = document.createElement("div");
       title.className = "jar-card-title";
       title.textContent = jar.name;
+      const periodChip = document.createElement("span");
+      periodChip.className = "jar-period-chip";
+      periodChip.textContent = jar.period === "weekly" ? "Weekly" : (activeJarPeriod === "weekly" ? "Daily × 7" : "Daily");
       const totalEl = document.createElement("div");
       totalEl.className = "jar-card-total";
       totalEl.textContent = fmtMinutes(total);
@@ -1352,23 +1508,19 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       if (total < target.min) status.textContent = `${fmtMinutes(target.min - total)} to minimum`;
       else if (total <= target.max) { status.textContent = "Minimum met"; status.classList.add("met"); }
       else { status.textContent = `${fmtMinutes(total - target.max)} over full target`; status.classList.add("met"); }
+      copy.append(title, periodChip, totalEl, targetEl, status);
+      if (jar.period === "weekly" && jar.linkedDailyJarId) {
+        const linked = jarById(jar.linkedDailyJarId);
+        if (linked) {
+          const note = document.createElement("div");
+          note.className = "jar-link-note";
+          note.textContent = `also counts ${linked.name}`;
+          copy.appendChild(note);
+        }
+      }
 
-      const actions = document.createElement("div");
-      actions.className = "jar-card-actions";
-      actions.append(
-        makeSmallButton("+ Time", "accent", () => openManualJarDialog(jar.id)),
-        makeSmallButton("Edit", "", () => openJarDialog(jar.id)),
-        makeSmallButton("Delete", "danger", () => {
-          if (!window.confirm(`Delete the ${jar.name} jar? Existing blocks will remain, but will no longer fill this jar.`)) return;
-          state.jars = state.jars.filter(item => item.id !== jar.id);
-          state.jarEntries = (state.jarEntries || []).filter(entry => entry.jarId !== jar.id);
-          state.blocks.forEach(block => { if (block.jarId === jar.id) block.jarId = null; });
-          saveState();
-          render();
-        })
-      );
-      copy.append(title, totalEl, targetEl, status, actions);
-      card.append(vessel, copy);
+      const quickAdd = makeSmallButton("+ Time", "accent jar-quick-add", () => openManualJarDialog(jar.id));
+      card.append(vessel, copy, quickAdd);
       el.jarGrid.appendChild(card);
     });
   }
@@ -1717,10 +1869,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
 
   function deleteSelectedBlock(block) {
     if (!block) return;
-    state.blocks = state.blocks.filter(item => item.id !== block.id);
-    selectedBlockId = null;
-    saveState();
-    render();
+    openDeleteBlockDialog(block.id);
   }
 
   function renderSelectedBlockPanel() {
@@ -1824,12 +1973,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       actions.className = "card-actions";
       actions.appendChild(makeSmallButton("Edit", "", () => openEditBlockDialog(b.id)));
       if (!b.completed) actions.appendChild(makeSmallButton("Finish", "accent", () => openFinishDialog(b.id)));
-      actions.appendChild(makeSmallButton("Delete", "danger", () => {
-        state.blocks = state.blocks.filter(x => x.id !== b.id);
-        if (selectedBlockId === b.id) selectedBlockId = null;
-        saveState();
-        render();
-      }));
+      actions.appendChild(makeSmallButton("Delete", "danger", () => openDeleteBlockDialog(b.id)));
 
       card.append(main, actions);
       el.timeline.appendChild(card);
@@ -2226,6 +2370,31 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     }
   }
 
+  function syncEditRecurrenceVisibility() {
+    const future = !el.editSeriesScope.hidden && el.editScopeFuture.checked;
+    el.editRecurrenceFields.hidden = !future;
+  }
+
+  function recurrenceLabel(every, duration, unit) {
+    return `every ${every} day${every === 1 ? "" : "s"} for ${duration} ${unit}`;
+  }
+
+  function openDeleteBlockDialog(blockId) {
+    const block = state.blocks.find(item => item.id === blockId);
+    if (!block) return;
+    el.deleteBlockId.value = block.id;
+    el.deleteBlockTitle.textContent = blockTitle(block);
+    const seriesBlocks = block.seriesId ? state.blocks.filter(item => item.seriesId === block.seriesId && item.date >= block.date) : [];
+    const hasFuture = seriesBlocks.some(item => item.id !== block.id);
+    el.deleteSeriesScope.hidden = !(block.seriesId && hasFuture);
+    el.deleteScopeOne.checked = true;
+    el.deleteScopeFuture.checked = false;
+    el.deleteSeriesNote.textContent = !el.deleteSeriesScope.hidden
+      ? `${seriesBlocks.length} occurrence${seriesBlocks.length === 1 ? "" : "s"} from this date onward can be removed together.`
+      : "";
+    el.deleteBlockDialog.showModal();
+  }
+
   function openEditBlockDialog(blockId) {
     const block = state.blocks.find(item => item.id === blockId);
     if (!block) return;
@@ -2248,12 +2417,16 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     el.editSeriesScope.hidden = !(block.seriesId && hasFuture);
     el.editScopeOne.checked = true;
     el.editScopeFuture.checked = false;
+    el.editRepeatEvery.value = String(Math.max(1, Number(block.recurrenceEvery) || 1));
+    el.editRepeatFor.value = String(Math.max(1, Number(block.recurrenceFor) || 1));
+    el.editRepeatUnit.value = ["days", "weeks", "months"].includes(block.recurrenceUnit) ? block.recurrenceUnit : "weeks";
     if (!el.editSeriesScope.hidden) {
       const futureCount = seriesBlocks.filter(item => item.date >= block.date).length;
       el.editSeriesNote.textContent = `${futureCount} occurrence${futureCount === 1 ? "" : "s"} from this date onward${block.recurrenceLabel ? ` · ${block.recurrenceLabel}` : ""}. Past occurrences will not change.`;
     } else {
       el.editSeriesNote.textContent = "";
     }
+    syncEditRecurrenceVisibility();
     el.editBlockDialog.showModal();
   }
 
@@ -2503,7 +2676,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       return;
     }
     let dates = [state.selectedDate];
-    let recurrenceLabel = null;
+    let recurrenceText = null;
     let seriesId = null;
 
     if (el.repeatEnabled.checked) {
@@ -2512,7 +2685,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       const unit = ["days", "weeks", "months"].includes(el.repeatUnit.value) ? el.repeatUnit.value : "days";
       const generated = recurrenceDates(state.selectedDate, every, duration, unit);
       dates = generated.dates;
-      recurrenceLabel = `every ${every} day${every === 1 ? "" : "s"} for ${duration} ${unit}`;
+      recurrenceText = recurrenceLabel(every, duration, unit);
       seriesId = uid("series");
       if (generated.truncated) window.alert("That repetition would create more than 1,200 blocks, so Questwheel created the first 1,200 only.");
     }
@@ -2532,7 +2705,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         actualMinutes: null,
         reclaimed: 0,
         seriesId,
-        recurrenceLabel,
+        recurrenceLabel: recurrenceText,
         recurrenceEvery: el.repeatEnabled.checked ? Math.max(1, Math.min(365, Number(el.repeatEvery.value) || 1)) : null,
         recurrenceFor: el.repeatEnabled.checked ? Math.max(1, Math.min(3650, Number(el.repeatFor.value) || 1)) : null,
         recurrenceUnit: el.repeatEnabled.checked ? el.repeatUnit.value : null
@@ -2545,6 +2718,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   });
 
   $("cancelEditBlock").addEventListener("click", () => el.editBlockDialog.close());
+  el.editScopeOne.addEventListener("change", syncEditRecurrenceVisibility);
+  el.editScopeFuture.addEventListener("change", syncEditRecurrenceVisibility);
   el.editBlockQuest.addEventListener("change", toggleEditBlockMode);
   el.editBlockCategory.addEventListener("change", () => setEditBlockColorPicker(categoryColor(el.editBlockCategory.value)));
   el.editBlockForm.addEventListener("submit", event => {
@@ -2570,16 +2745,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     const newStart = minutesFromTime(el.editBlockStart.value);
     const scopeFuture = !el.editSeriesScope.hidden && el.editScopeFuture.checked && source.seriesId;
     const originalDate = source.date;
-    const shiftDays = calendarDateDelta(originalDate, newDate);
 
-    let targets = [source];
-    if (scopeFuture) {
-      targets = state.blocks.filter(item => item.seriesId === source.seriesId && item.date >= originalDate);
-    }
-
-    targets.forEach(block => {
-      if (scopeFuture) block.date = isoDate(addDays(dateFromISO(block.date), shiftDays));
-      else block.date = newDate;
+    const applyFields = block => {
       block.start = newStart;
       block.minutes = minutes;
       block.questId = q?.id || null;
@@ -2588,10 +2755,67 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       block.color = standalone ? selectedEditBlockColor : null;
       block.jarId = jarById(el.editBlockJar.value) ? el.editBlockJar.value : null;
       refreshLedgerForBlock(block);
-    });
+    };
+
+    if (scopeFuture) {
+      const every = Math.max(1, Math.min(365, Number(el.editRepeatEvery.value) || 1));
+      const duration = Math.max(1, Math.min(3650, Number(el.editRepeatFor.value) || 1));
+      const unit = ["days", "weeks", "months"].includes(el.editRepeatUnit.value) ? el.editRepeatUnit.value : "days";
+      const generated = recurrenceDates(newDate, every, duration, unit);
+      const label = recurrenceLabel(every, duration, unit);
+      const seriesId = source.seriesId;
+
+      // Completed occurrences are historical records. Rebuild only the unfinished remainder.
+      const completedKept = state.blocks.filter(item => item.seriesId === seriesId && item.date >= originalDate && item.completed);
+      const completedDates = new Set(completedKept.map(item => item.date));
+      state.blocks = state.blocks.filter(item => !(item.seriesId === seriesId && item.date >= originalDate && !item.completed));
+
+      generated.dates.forEach(date => {
+        if (completedDates.has(date)) return;
+        state.blocks.push({
+          id: uid("b"),
+          questId: q?.id || null,
+          name: standalone ? name : null,
+          category: standalone ? el.editBlockCategory.value : (q?.category || "personal"),
+          color: standalone ? selectedEditBlockColor : null,
+          jarId: jarById(el.editBlockJar.value) ? el.editBlockJar.value : null,
+          date,
+          start: newStart,
+          minutes,
+          completed: false,
+          actualMinutes: null,
+          reclaimed: 0,
+          bankDelta: 0,
+          seriesId,
+          recurrenceLabel: label,
+          recurrenceEvery: every,
+          recurrenceFor: duration,
+          recurrenceUnit: unit
+        });
+      });
+      if (generated.truncated) window.alert("That repetition would create more than 1,200 blocks, so Questwheel created the first 1,200 only.");
+      selectedBlockId = null;
+    } else {
+      source.date = newDate;
+      applyFields(source);
+    }
 
     saveState();
     el.editBlockDialog.close();
+    render();
+  });
+
+  $("cancelDeleteBlock").addEventListener("click", () => el.deleteBlockDialog.close());
+  el.deleteBlockForm.addEventListener("submit", event => {
+    event.preventDefault();
+    const source = state.blocks.find(item => item.id === el.deleteBlockId.value);
+    if (!source) return;
+    const scopeFuture = !el.deleteSeriesScope.hidden && el.deleteScopeFuture.checked && source.seriesId;
+    if (scopeFuture) state.blocks = state.blocks.filter(item => !(item.seriesId === source.seriesId && item.date >= source.date));
+    else state.blocks = state.blocks.filter(item => item.id !== source.id);
+    if (selectedBlockId && !state.blocks.some(item => item.id === selectedBlockId)) selectedBlockId = null;
+    saveState();
+    el.deleteBlockDialog.close();
     render();
   });
 
@@ -2646,21 +2870,32 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
 
   $("addJarBtn").addEventListener("click", () => openJarDialog());
   $("cancelJar").addEventListener("click", () => el.jarDialog.close());
+  el.jarPeriod.addEventListener("change", syncJarPeriodEditor);
+  el.deleteJarFromDialog.addEventListener("click", () => deleteJar(jarById(el.jarEditId.value)));
   el.jarForm.addEventListener("submit", event => {
     event.preventDefault();
     const name = el.jarName.value.trim();
     if (!name) return;
-    let minMinutes = Math.max(1, Math.min(1440, Number(el.jarMinMinutes.value) || 1));
-    let maxMinutes = Math.max(1, Math.min(1440, Number(el.jarMaxMinutes.value) || 1));
+    const period = el.jarPeriod.value === "weekly" ? "weekly" : "daily";
+    const limit = period === "weekly" ? 10080 : 1440;
+    let minMinutes = Math.max(1, Math.min(limit, Number(el.jarMinMinutes.value) || 1));
+    let maxMinutes = Math.max(1, Math.min(limit, Number(el.jarMaxMinutes.value) || 1));
     if (maxMinutes < minMinutes) [minMinutes, maxMinutes] = [maxMinutes, minMinutes];
+    const linkedCandidate = jarById(el.jarLinkedDailyId.value);
+    const linkedDailyJarId = period === "weekly" && linkedCandidate?.period !== "weekly" ? linkedCandidate.id : null;
     const existing = jarById(el.jarEditId.value);
     if (existing) {
       existing.name = name;
+      existing.period = period;
+      existing.linkedDailyJarId = linkedDailyJarId;
       existing.minMinutes = minMinutes;
       existing.maxMinutes = maxMinutes;
       existing.color = selectedJarColor;
+      if (period === "weekly") state.jars.forEach(other => {
+        if (other.id !== existing.id && other.period === "weekly" && other.linkedDailyJarId === existing.id) other.linkedDailyJarId = null;
+      });
     } else {
-      state.jars.push({ id: uid("jar"), name, minMinutes, maxMinutes, color: selectedJarColor, createdAt: Date.now() });
+      state.jars.push({ id: uid("jar"), name, period, linkedDailyJarId, minMinutes, maxMinutes, color: selectedJarColor, createdAt: Date.now() });
     }
     saveState();
     el.jarDialog.close();
@@ -2701,7 +2936,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./sw-v7.js", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw-v8.js", { updateViaCache: "none" });
         if (reg.update) reg.update().catch(() => {});
       } catch {}
     });

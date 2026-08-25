@@ -1,21 +1,16 @@
-# Questwheel v7
+# Questwheel v8
 
-## v7 changes
-- Smoother day-wheel swipe transition: outgoing and incoming wheels move together instead of leaving a blank/jump frame.
-- Continuous cross-midnight blocks:
-  - Example: an 8-hour Sleep block starting at 23:30 shows 23:30–00:00 on the first day.
-  - The same block continues as 00:00–07:30 on the following day's wheel.
-  - A separate block beginning later on that following day still displays normally.
-  - Tapping the carry-over segment selects the original block for editing/finishing.
-- Weekly mini-wheels use the same cross-midnight logic.
-- Category jars are compressed into a side-by-side shelf layout.
-- Jar information is shown on compact tape-style labels.
-- Jar fills are textured coloured sand rather than flat liquid.
-- The large Free Time jar uses gold sand.
-- Existing Questwheel local data remains compatible.
+## v8 changes
+- Jar tape labels are now the edit controls; no separate Edit/Delete buttons on jar cards.
+- Jar deletion moved inside the jar editor.
+- Weekly-only jars with their own weekly minimum/full targets.
+- Weekly jars can optionally link to a daily jar, so daily credits also count toward the weekly target. Weekly jars can also stand alone and receive blocks/manual fills directly.
+- Weekly view still aggregates daily jars across seven days.
+- Editing a repeating block with “this and all future” now exposes Every / For / Unit controls and rebuilds the unfinished remainder of the series.
+- Deleting a repeating block now offers “this occurrence only” or “this and all future repetitions.”
+- Existing v7 data remains compatible; older jars default to Daily.
 
 ## Update
-Upload every file in this folder to the same GitHub Pages repository and replace `index.html`.
-Then open the site once in Safari with `?v=7` appended.
+Upload the v8 files to the same GitHub Pages repository and replace index.html. Then open the site once with `?v=8`.
 
-Do not clear Safari website data; Questwheel's saved data is stored there.
+Do not clear Safari website data; Questwheel saves your planner data there.
