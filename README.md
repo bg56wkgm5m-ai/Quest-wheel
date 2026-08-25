@@ -1,18 +1,20 @@
-# Questwheel v9.2
+# Questwheel v9.3
 
-## Changes
-- Jar tape labels are simplified to just:
-  - jar name
+## Fixes
+- Fixed the broken Sun & twilight coordinate fields. They are now real text/decimal inputs again.
+- Enter positive latitude/longitude numbers and choose N/S or E/W separately.
+- Hemisphere selector changes update the solar preview immediately.
+
+## Jar refinement
+- Jars are narrower and taller.
+- The label is now a smaller translucent masking-tape strip that stays within the glass silhouette rather than looking like a paper card in front.
+- Jar label shows only:
+  - name
   - current / target
-- The target is the previous minimum target. The separate max/full target is no longer used in the jar display.
-- Tape labels are narrower/shorter and fitted to the jar body.
-- Solar coordinate entry no longer requires typing a minus sign:
-  - latitude: positive number + N/S
-  - longitude: positive number + E/W
-  - example western longitude: 106.5 + W
-- Existing signed latitude/longitude settings are converted into the matching hemisphere selector when the dialog opens.
+- Jar target is a single value. The old separate max/full value is no longer used for filling or display.
+- Existing jars keep their old minimum value as the new single target.
 
 ## Update
-Upload v9.2 directly to the same GitHub Pages repository, replace index.html, then open the site once with ?v=9.2 appended.
+Upload v9.3 to the same GitHub Pages repository, replace index.html, and open once with ?v=9.3.
 
-Do not clear Safari website data; that contains your saved Questwheel data.
+Do not clear Safari website data; that stores your Questwheel data.

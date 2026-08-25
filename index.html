@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Questwheel" />
-  <link rel="manifest" href="./manifest-v9.2.webmanifest" />
-  <link rel="apple-touch-icon" href="./icons/icon-v9.2-192.png" />
+  <link rel="manifest" href="./manifest-v9.3.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-v9.3-192.png" />
   <style>
 :root {
   color-scheme: dark;
@@ -564,8 +564,118 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   font-weight: 800;
 }
 
+
+/* v9.3: taller/narrower jars and tape that visually adheres to the glass */
+.jar-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 7px;
+  row-gap: 10px;
+}
+.jar-card {
+  min-height: 181px !important;
+  padding: 6px 3px 7px !important;
+}
+.jar-vessel-wrap {
+  width: 70px !important;
+  height: 134px !important;
+}
+.jar-card .jar-vessel {
+  width: 70px !important;
+  height: 134px !important;
+  border-radius: 10px 10px 21px 21px;
+}
+.jar-card .jar-vessel::before {
+  left: 12px;
+  right: 12px;
+}
+.jar-card .jar-shine {
+  left: 8px;
+  top: 14px;
+  bottom: 16px;
+  width: 7px;
+}
+
+/* The edit button is the tape itself. It stays inside the jar silhouette. */
+.jar-card-copy,
+.jar-card-copy.jar-label-button {
+  position: absolute !important;
+  top: 61px !important;
+  left: 50% !important;
+  right: auto !important;
+  width: 64px !important;
+  max-width: 64px !important;
+  min-height: 34px !important;
+  height: 34px !important;
+  padding: 4px 4px 3px !important;
+  margin: 0 !important;
+  transform: translateX(-50%) rotate(-1.2deg) !important;
+  color: #292319 !important;
+  background:
+    repeating-linear-gradient(0deg, rgba(97,77,43,.055) 0 1px, transparent 1px 4px),
+    linear-gradient(90deg,
+      rgba(255,255,255,.20) 0%,
+      rgba(220,201,157,.82) 10%,
+      rgba(216,196,151,.86) 88%,
+      rgba(121,94,50,.10) 100%) !important;
+  border: 0 !important;
+  border-radius: 1px !important;
+  box-shadow:
+    0 1px 1px rgba(0,0,0,.18),
+    inset 0 1px rgba(255,255,255,.18),
+    inset 0 -1px rgba(91,69,35,.08) !important;
+  clip-path: polygon(1% 10%, 98% 2%, 100% 88%, 96% 98%, 3% 94%, 0 14%) !important;
+  opacity: .92;
+  backdrop-filter: blur(.3px);
+  -webkit-backdrop-filter: blur(.3px);
+  display: grid !important;
+  place-items: center !important;
+  align-content: center !important;
+  gap: 0 !important;
+  overflow: hidden !important;
+  z-index: 7;
+}
+.jar-card:nth-child(even) .jar-card-copy,
+.jar-card:nth-child(even) .jar-card-copy.jar-label-button {
+  transform: translateX(-50%) rotate(.9deg) !important;
+}
+.jar-card-copy.jar-label-button:active,
+.jar-card:nth-child(even) .jar-card-copy.jar-label-button:active {
+  transform: translateX(-50%) rotate(0deg) scale(.97) !important;
+}
+.jar-card-title {
+  font-size: 10px !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+  max-width: 56px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.jar-card-total {
+  display: block !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  margin: 2px 0 0 !important;
+  font-weight: 800;
+}
+.jar-card-target {
+  display: none !important;
+}
+.jar-level-marker {
+  right: -13px !important;
+}
+.jar-quick-add {
+  margin-top: 0 !important;
+}
+@media (max-width: 350px) {
+  .jar-grid { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 4px; }
+  .jar-vessel-wrap { width: 64px !important; height: 128px !important; }
+  .jar-card .jar-vessel { width: 64px !important; height: 128px !important; }
+  .jar-card-copy, .jar-card-copy.jar-label-button { width: 58px !important; max-width: 58px !important; }
+}
+
 </style>
-  <title>Questwheel v9.2</title>
+  <title>Questwheel v9.3</title>
 </head>
 <body>
   <div class="app-shell">
@@ -575,7 +685,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
           <span class="relative-label">Today</span>
           <span class="relative-date">Mon 24 Aug ’26</span>
         </div>
-        <h1>Questwheel <span class="build-tag">v9.2</span></h1>
+        <h1>Questwheel <span class="build-tag">v9.3</span></h1>
       </div>
       <button class="ghost compact" id="todayBtn" type="button">Today</button>
     </header>
@@ -856,10 +966,9 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         </label>
         <p class="hint">Optional. Link this weekly jar to a daily jar and anything credited to that daily jar also fills this weekly jar. Leave it standalone if it has no daily counterpart.</p>
       </div>
-      <div class="two-col">
-        <label><span id="jarMinLabel">Daily minimum (minutes)</span><input id="jarMinMinutes" type="number" min="1" max="10080" step="1" value="30" inputmode="numeric" required /></label>
-        <label><span id="jarMaxLabel">Daily full target (minutes)</span><input id="jarMaxMinutes" type="number" min="1" max="10080" step="1" value="45" inputmode="numeric" required /></label>
-      </div>
+      <label><span id="jarMinLabel">Daily target (minutes)</span><input id="jarMinMinutes" type="number" min="1" max="10080" step="1" value="30" inputmode="numeric" required /></label>
+      <input id="jarMaxMinutes" type="hidden" value="30" />
+      <span id="jarMaxLabel" hidden></span>
       <label>Colour<div id="jarColorPicker" class="color-picker" role="radiogroup" aria-label="Jar colour"></div></label>
       <label>Auto-fill from completed quests / activities
         <div id="jarQuestLinks" class="quest-link-box"></div>
@@ -897,18 +1006,24 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       </div>
       <label class="form-check"><input id="solarEnabled" type="checkbox" /> <span>Show daylight and twilight on the day wheel</span></label>
       <div class="sun-settings-grid">
-        <label>Latitude<div class="coord-row"><input<input id="solarLatitude" placeholder="e.g. 59.25" /> type="text" inputmode="decimal" pattern="[0-9]*[.]?[0-9]*" autocomplete="off" placeholder="0–90">
-      <select id="solarLatitudeHemisphere" aria-label="Latitude hemisphere">
-        <option value="N">N</option>
-        <option value="S">S</option>
-      </select>
-    </div></label>
-        <label>Longitude<div class="coord-row"><input<input id="solarLongitude" placeholder="west is negative" /> type="text" inputmode="decimal" pattern="[0-9]*[.]?[0-9]*" autocomplete="off" placeholder="0–180">
-      <select id="solarLongitudeHemisphere" aria-label="Longitude hemisphere">
-        <option value="W">W</option>
-        <option value="E">E</option>
-      </select>
-    </div></label>
+        <label>Latitude
+          <div class="coord-row">
+            <input id="solarLatitude" type="text" inputmode="decimal" autocomplete="off" placeholder="e.g. 59.25" aria-label="Latitude degrees" />
+            <select id="solarLatitudeHemisphere" aria-label="Latitude hemisphere">
+              <option value="N">N</option>
+              <option value="S">S</option>
+            </select>
+          </div>
+        </label>
+        <label>Longitude
+          <div class="coord-row">
+            <input id="solarLongitude" type="text" inputmode="decimal" autocomplete="off" placeholder="e.g. 106.5" aria-label="Longitude degrees" />
+            <select id="solarLongitudeHemisphere" aria-label="Longitude hemisphere">
+              <option value="W">W</option>
+              <option value="E">E</option>
+            </select>
+          </div>
+        </label>
       </div>
       <div id="solarPreview" class="sun-preview">Enter latitude and longitude. Questwheel uses your phone’s timezone; it never requests location permission.</div>
       <p class="hint">Longitude is needed as well as latitude because it determines where solar noon falls on your clock.</p>
@@ -942,7 +1057,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   <script>
 (() => {
   const STORE = "questwheel-v1"; // Preserve all prior Questwheel local data.
-  const BUILD = "v9.2";
+  const BUILD = "v9.3";
 
   const categories = {
     business: { label: "Business", color: "#FFB000" },
@@ -1626,8 +1741,9 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   }
 
   function jarPeriodTargets(jar) {
-    if (activeJarPeriod === "weekly" && jar.period !== "weekly") return { min: jar.minMinutes * 7, max: jar.maxMinutes * 7 };
-    return { min: jar.minMinutes, max: jar.maxMinutes };
+    const target = Math.max(1, Number(jar.minMinutes) || 1);
+    if (activeJarPeriod === "weekly" && jar.period !== "weekly") return { min: target * 7, max: target * 7 };
+    return { min: target, max: target };
   }
 
   function populateLinkedDailyJarOptions(selectedId = null, excludeId = null) {
@@ -1651,8 +1767,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   function syncJarPeriodEditor() {
     const weekly = el.jarPeriod.value === "weekly";
     el.jarWeeklyLinkFields.hidden = !weekly;
-    el.jarMinLabel.textContent = `${weekly ? "Weekly" : "Daily"} minimum (minutes)`;
-    el.jarMaxLabel.textContent = `${weekly ? "Weekly" : "Daily"} full target (minutes)`;
+    el.jarMinLabel.textContent = `${weekly ? "Weekly" : "Daily"} target (minutes)`;
   }
 
   function renderJarQuestLinks(selectedIds = []) {
@@ -1721,7 +1836,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     el.jarPeriod.value = jar?.period === "weekly" ? "weekly" : "daily";
     populateLinkedDailyJarOptions(jar?.linkedDailyJarId || null, jar?.id || null);
     el.jarMinMinutes.value = String(jar?.minMinutes || 30);
-    el.jarMaxMinutes.value = String(jar?.maxMinutes || 45);
+    el.jarMaxMinutes.value = String(jar?.minMinutes || 30);
     setJarColorPicker(jar?.color || questPalette[0]);
     renderJarQuestLinks(jar?.linkedQuestIds || []);
     renderJarManualHistory(jar?.id || null);
@@ -1792,7 +1907,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     jars.forEach(jar => {
       const total = jarMinutesForPeriod(jar.id);
       const target = jarPeriodTargets(jar);
-      const pct = target.max > 0 ? total / target.max * 100 : 0;
+      const pct = target.min > 0 ? total / target.min * 100 : 0;
       const card = document.createElement("article");
       card.className = "jar-card";
 
@@ -1823,11 +1938,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       title.textContent = jar.name;
       const totalEl = document.createElement("span");
       totalEl.className = "jar-card-total";
-      totalEl.textContent = fmtMinutes(total);
-      const targetEl = document.createElement("span");
-      targetEl.className = "jar-card-target";
-      targetEl.textContent = `min ${fmtMinutes(target.min)} · max ${fmtMinutes(target.max)}`;
-      copy.append(title, totalEl, targetEl);
+      totalEl.textContent = `${fmtMinutes(total)} / ${fmtMinutes(target.min)}`;
+      copy.append(title, totalEl);
 
       const quickAdd = makeSmallButton("+ Time", "accent jar-quick-add", () => openManualJarDialog(jar.id));
       card.append(vesselWrap, copy, quickAdd);
@@ -2566,11 +2678,19 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     el.solarDialog.showModal();
   }
 
+  function coordinateValue(input, hemisphere, max, negativeDirection) {
+    const cleaned = String(input?.value || "").trim().replace(",", ".");
+    if (!/^\d+(?:\.\d+)?$/.test(cleaned)) return NaN;
+    const magnitude = Number(cleaned);
+    if (!Number.isFinite(magnitude) || magnitude < 0 || magnitude > max) return NaN;
+    return hemisphere?.value === negativeDirection ? -magnitude : magnitude;
+  }
+
   function updateSolarPreview() {
-    const latRaw = el.solarLatitude.value.trim(), lonRaw = el.solarLongitude.value.trim();
-    const lat = latRaw === "" ? NaN : Number(latRaw), lon = lonRaw === "" ? NaN : Number(lonRaw);
-    if (!Number.isFinite(lat) || Math.abs(lat) > 89.9 || !Number.isFinite(lon) || Math.abs(lon) > 180) {
-      el.solarPreview.textContent = "Enter valid latitude (−89.9 to 89.9) and longitude (−180 to 180). West longitude is negative.";
+    const lat = coordinateValue(el.solarLatitude, el.solarLatitudeHemisphere, 89.9, "S");
+    const lon = coordinateValue(el.solarLongitude, el.solarLongitudeHemisphere, 180, "W");
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      el.solarPreview.textContent = "Enter latitude and longitude as positive numbers, then choose N/S and E/W.";
       return;
     }
     const old = state.solar;
@@ -3370,13 +3490,15 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   $("cancelSolar").addEventListener("click", () => el.solarDialog.close());
   el.solarLatitude.addEventListener("input", updateSolarPreview);
   el.solarLongitude.addEventListener("input", updateSolarPreview);
+  el.solarLatitudeHemisphere.addEventListener("change", updateSolarPreview);
+  el.solarLongitudeHemisphere.addEventListener("change", updateSolarPreview);
   el.solarEnabled.addEventListener("change", updateSolarPreview);
   el.solarForm.addEventListener("submit", event => {
     event.preventDefault();
     const enabled = el.solarEnabled.checked;
-    const latRaw = el.solarLatitude.value.trim(), lonRaw = el.solarLongitude.value.trim();
-    const lat = latRaw === "" ? NaN : Number(latRaw), lon = lonRaw === "" ? NaN : Number(lonRaw);
-    if (enabled && (!Number.isFinite(lat) || Math.abs(lat) > 89.9 || !Number.isFinite(lon) || Math.abs(lon) > 180)) {
+    const lat = coordinateValue(el.solarLatitude, el.solarLatitudeHemisphere, 89.9, "S");
+    const lon = coordinateValue(el.solarLongitude, el.solarLongitudeHemisphere, 180, "W");
+    if (enabled && (!Number.isFinite(lat) || !Number.isFinite(lon))) {
       updateSolarPreview();
       return;
     }
@@ -3397,9 +3519,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     if (!name) return;
     const period = el.jarPeriod.value === "weekly" ? "weekly" : "daily";
     const limit = period === "weekly" ? 10080 : 1440;
-    let minMinutes = Math.max(1, Math.min(limit, Number(el.jarMinMinutes.value) || 1));
-    let maxMinutes = Math.max(1, Math.min(limit, Number(el.jarMaxMinutes.value) || 1));
-    if (maxMinutes < minMinutes) [minMinutes, maxMinutes] = [maxMinutes, minMinutes];
+    const minMinutes = Math.max(1, Math.min(limit, Number(el.jarMinMinutes.value) || 1));
+    const maxMinutes = minMinutes;
     const linkedCandidate = jarById(el.jarLinkedDailyId.value);
     const linkedDailyJarId = period === "weekly" && linkedCandidate?.period !== "weekly" ? linkedCandidate.id : null;
     const existing = jarById(el.jarEditId.value);
@@ -3459,7 +3580,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./sw-v9.2.js", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw-v9.3.js", { updateViaCache: "none" });
         if (reg.update) reg.update().catch(() => {});
       } catch {}
     });
