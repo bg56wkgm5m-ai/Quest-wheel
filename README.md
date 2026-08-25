@@ -1,20 +1,14 @@
-# Questwheel v9.3
+# Questwheel v9.4
 
-## Fixes
-- Fixed the broken Sun & twilight coordinate fields. They are now real text/decimal inputs again.
-- Enter positive latitude/longitude numbers and choose N/S or E/W separately.
-- Hemisphere selector changes update the solar preview immediately.
+## Daylight-ring refinement
+- The main daylight/twilight ring is thicker.
+- Its outer edge now sits almost directly against the inside of the schedule ring, reducing the visual jump between solar conditions and the clock/hour scale.
+- Twilight band boundaries have a very subtle edge to make adjacent dark bands easier to distinguish.
+- Weekly mini-wheel daylight rings are also slightly thicker and moved outward.
 
-## Jar refinement
-- Jars are narrower and taller.
-- The label is now a smaller translucent masking-tape strip that stays within the glass silhouette rather than looking like a paper card in front.
-- Jar label shows only:
-  - name
-  - current / target
-- Jar target is a single value. The old separate max/full value is no longer used for filling or display.
-- Existing jars keep their old minimum value as the new single target.
+All v9.3 features and saved data remain compatible.
 
 ## Update
-Upload v9.3 to the same GitHub Pages repository, replace index.html, and open once with ?v=9.3.
+Upload v9.4 to the same GitHub Pages repository, replace index.html, and open once with ?v=9.4.
 
 Do not clear Safari website data; that stores your Questwheel data.
