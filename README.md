@@ -1,27 +1,37 @@
-# Questwheel v12 — Theme Engine
+# Questwheel v13
 
-## Theme engine
-- Questwheel Original remains built in.
-- New built-in theme: **Tanglang · Red Velvet** (deep red velvet, gold trim, brocade motif, traditional serif typography).
-- Tap the new **Theme** control beside Today to switch themes.
-- Personal themes live entirely in local Questwheel data; adding one does not require a GitHub Pages update.
-- Theme manager supports Use, Duplicate, Edit, Delete (personal themes), Export, and Import.
-- Exported files use the `.qtheme` extension.
-- `.qtheme` files are JSON data only; Questwheel does not execute CSS or JavaScript from imported themes.
-- Supported theme properties include core colors, panel levels, accent, free-time color, safe surface materials, motifs, typography, corner roundness, and optional wheel colors.
+## Theme engine v2
+Questwheel themes can now carry safe embedded decorative artwork in addition to colours/material settings. Supported artwork slots are:
+- background texture
+- corner ornament
+- wheel-center emblem
+- cloud/decorative overlay
+- top-right constellation/ornament
 
-### .qtheme format
-Current format is `qthemeVersion: 1`. This engine is deliberately constrained for safety and stability. A future app update can expose additional themeable components without invalidating existing v1 themes.
+Imported artwork is restricted to embedded PNG/JPEG/WebP data. Themes still cannot execute CSS or JavaScript.
 
-## Weekly jar bug fix
-- Fixed the crash that prevented a standalone Weekly jar from saving when it was not linked to a Daily jar.
-- Daily-jar behavior is unchanged.
+The built-in Tanglang skin has been upgraded to **Tanglang · New Year** with a stronger Seven Star Praying Mantis identity: red velvet/crimson, gold trim, mantis emblem, Big Dipper ornament, cloud flourishes, corner detail and brocade-like texture.
 
-## iOS date/time layout follow-up
-- Phone-width date/time pairs remain vertically stacked.
-- Native iOS date/time controls now constrain the outer box while explicitly giving the internal displayed value full width, reducing the clipping introduced by v11.2.
+### Theme import compatibility
+The iOS Files picker is no longer filtered by `.qtheme` MIME/extension. Pick any file; Questwheel validates its JSON contents after selection. This fixes `.qtheme` files appearing greyed out on iPhone.
+
+Older v1 `.qtheme` files remain importable. New exports use qthemeVersion 2 and can include artwork.
+
+## Collapsible quest trees
+- Parent quests now have an expand/collapse chevron.
+- Collapsing a parent hides every descendant while leaving the parent progress summary visible.
+- Nested parents can be collapsed independently.
+- Collapsed/expanded state is remembered locally across launches.
+
+## Jar hours + minutes
+- Daily and weekly jar targets now accept hours + minutes.
+- Manual `+ Time` entries also accept hours + minutes.
+- Questwheel continues storing/calculating jar time internally in minutes, so existing data remains compatible.
+
+## Recurrence default
+New recurrence forms now default the `For X` duration unit to **Days** instead of Weeks. Days, Weeks and Months remain selectable. Existing recurrence settings are not changed.
 
 ## Update
-Upload v12 over the same GitHub Pages repository, replace `index.html`, and open once with `?v=12`.
+Upload all v13 files to the same GitHub Pages repository, replace `index.html`, and open once with `?v=13`.
 
-Do not clear Safari website data; that stores Questwheel data and personal themes.
+Do not clear Safari website data; that contains your Questwheel data and personal themes.
