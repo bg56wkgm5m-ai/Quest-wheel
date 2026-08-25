@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Questwheel" />
-  <link rel="manifest" href="./manifest-v11.webmanifest" />
-  <link rel="apple-touch-icon" href="./icons/icon-v11-192.png" />
+  <link rel="manifest" href="./manifest-v11.1.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-v11.1-192.png" />
   <style>
 :root {
   color-scheme: dark;
@@ -701,8 +701,34 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   .order-btn { min-width:35px; }
 }
 
+
+/* v11.1: iOS form fit */
+.two-col {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+.two-col > *,
+.two-col > label,
+.quest-schedule-fields,
+.repeat-fields,
+.input-suffix {
+  min-width: 0;
+}
+.two-col input,
+.two-col select,
+.quest-schedule-fields input,
+.quest-schedule-fields select,
+.repeat-fields input,
+.repeat-fields select {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+}
+@media (max-width: 460px) {
+  .two-col { gap: 8px; }
+}
+
 </style>
-  <title>Questwheel v11</title>
+  <title>Questwheel v11.1</title>
 </head>
 <body>
   <div class="app-shell">
@@ -712,7 +738,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
           <span class="relative-label">Today</span>
           <span class="relative-date">Mon 24 Aug ’26</span>
         </div>
-        <h1>Questwheel <span class="build-tag">v11</span></h1>
+        <h1>Questwheel <span class="build-tag">v11.1</span></h1>
       </div>
       <button class="ghost compact" id="todayBtn" type="button">Today</button>
     </header>
@@ -1122,7 +1148,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   <script>
 (() => {
   const STORE = "questwheel-v1"; // Preserve all prior Questwheel local data.
-  const BUILD = "v11";
+  const BUILD = "v11.1";
 
   const categories = {
     business: { label: "Business", color: "#FFB000" },
@@ -1934,7 +1960,13 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
 
   function rollingWindow() {
     const now = new Date();
-    return { now, start: new Date(now.getTime() - 12*60*60*1000), end: new Date(now.getTime() + 12*60*60*1000) };
+    return {
+      now,
+      pastHours: 6,
+      futureHours: 18,
+      start: new Date(now.getTime() - 6*60*60*1000),
+      end: new Date(now.getTime() + 18*60*60*1000)
+    };
   }
 
   function rollingWheelBlocks() {
@@ -1984,17 +2016,61 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     segments.forEach(seg => {
       if (!seg.band || seg.end<=seg.start) return;
       const p=document.createElementNS("http://www.w3.org/2000/svg","path");
-      p.setAttribute("d",arcPath(cx,cy,57,42,seg.start/1440*360,seg.end/1440*360)); p.setAttribute("fill",solarColors[seg.band]); p.setAttribute("opacity",seg.band==="day"?".94":".97"); p.setAttribute("pointer-events","none"); svg.appendChild(p);
+      p.setAttribute("d",arcPath(cx,cy,57,42,-90+seg.start/1440*360,-90+seg.end/1440*360)); p.setAttribute("fill",solarColors[seg.band]); p.setAttribute("opacity",seg.band==="day"?".94":".97"); p.setAttribute("pointer-events","none"); svg.appendChild(p);
     });
   }
 
   function appendRollingNowOverlay(svg, cx, cy, ro, inner) {
-    const minute=720;
-    const shade=document.createElementNS("http://www.w3.org/2000/svg","path");
-    shade.setAttribute("d",arcPath(cx,cy,ro,inner,0,minute/1440*360)); shade.setAttribute("fill","#090b0f"); shade.setAttribute("opacity",".38"); shade.setAttribute("pointer-events","none"); svg.appendChild(shade);
-    const angle=minute/1440*360, p1=polar(cx,cy,Math.max(36,inner-4),angle), p2=polar(cx,cy,ro+2,angle);
-    const line=document.createElementNS("http://www.w3.org/2000/svg","line"); line.setAttribute("x1",p1.x);line.setAttribute("y1",p1.y);line.setAttribute("x2",p2.x);line.setAttribute("y2",p2.y);line.setAttribute("stroke","#ef4d4d");line.setAttribute("stroke-width","2.2");line.setAttribute("stroke-linecap","round"); svg.appendChild(line);
-    const dot=document.createElementNS("http://www.w3.org/2000/svg","circle");dot.setAttribute("cx",p2.x);dot.setAttribute("cy",p2.y);dot.setAttribute("r","4");dot.setAttribute("fill","#ef4d4d");dot.setAttribute("stroke","#270808");dot.setAttribute("stroke-width","1");svg.appendChild(dot);
+    const NS="http://www.w3.org/2000/svg";
+
+    // The rolling window begins six hours ago at 9 o'clock and reaches "now"
+    // at 12 o'clock. Only that quarter-circle is historical.
+    const pastStartAngle=-90, nowAngle=0;
+
+    const shade=document.createElementNS(NS,"path");
+    shade.setAttribute("d",arcPath(cx,cy,ro,inner,pastStartAngle,nowAngle));
+    shade.setAttribute("fill","#090b0f");
+    shade.setAttribute("opacity",".38");
+    shade.setAttribute("pointer-events","none");
+    svg.appendChild(shade);
+
+    // Six-hours-ago cutoff marker.
+    const cutoffInner=polar(cx,cy,Math.max(38,inner-2),pastStartAngle);
+    const cutoffOuter=polar(cx,cy,ro+1,pastStartAngle);
+    const cutoffLine=document.createElementNS(NS,"line");
+    cutoffLine.setAttribute("x1",cutoffInner.x); cutoffLine.setAttribute("y1",cutoffInner.y);
+    cutoffLine.setAttribute("x2",cutoffOuter.x); cutoffLine.setAttribute("y2",cutoffOuter.y);
+    cutoffLine.setAttribute("stroke","#8f97a4"); cutoffLine.setAttribute("stroke-width","1.8");
+    cutoffLine.setAttribute("stroke-linecap","round"); cutoffLine.setAttribute("pointer-events","none");
+    svg.appendChild(cutoffLine);
+
+    const cutoffDot=document.createElementNS(NS,"circle");
+    cutoffDot.setAttribute("cx",cutoffOuter.x); cutoffDot.setAttribute("cy",cutoffOuter.y);
+    cutoffDot.setAttribute("r","3"); cutoffDot.setAttribute("fill","#8f97a4");
+    cutoffDot.setAttribute("pointer-events","none"); svg.appendChild(cutoffDot);
+
+    const cutoffTextPos=polar(cx,cy,ro+22,pastStartAngle);
+    const cutoffText=document.createElementNS(NS,"text");
+    cutoffText.setAttribute("x",cutoffTextPos.x); cutoffText.setAttribute("y",cutoffTextPos.y+3);
+    cutoffText.setAttribute("fill","#8f97a4"); cutoffText.setAttribute("font-size","8");
+    cutoffText.setAttribute("font-weight","700"); cutoffText.setAttribute("text-anchor","middle");
+    cutoffText.setAttribute("pointer-events","none"); cutoffText.textContent="−6h";
+    svg.appendChild(cutoffText);
+
+    // Live "now" marker fixed at 12 o'clock.
+    const p1=polar(cx,cy,Math.max(36,inner-4),nowAngle), p2=polar(cx,cy,ro+2,nowAngle);
+    const line=document.createElementNS(NS,"line");
+    line.setAttribute("x1",p1.x);line.setAttribute("y1",p1.y);
+    line.setAttribute("x2",p2.x);line.setAttribute("y2",p2.y);
+    line.setAttribute("stroke","#ef4d4d");line.setAttribute("stroke-width","2.2");
+    line.setAttribute("stroke-linecap","round"); line.setAttribute("pointer-events","none");
+    svg.appendChild(line);
+
+    const dot=document.createElementNS(NS,"circle");
+    dot.setAttribute("cx",p2.x);dot.setAttribute("cy",p2.y);dot.setAttribute("r","4");
+    dot.setAttribute("fill","#ef4d4d");dot.setAttribute("stroke","#270808");
+    dot.setAttribute("stroke-width","1");dot.setAttribute("pointer-events","none");
+    svg.appendChild(dot);
   }
 
   function selectedBlocks() {
@@ -2107,7 +2183,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     const exact = document.createElement("span"); exact.className = "relative-date"; exact.textContent = compactDate(displayDate);
     el.dayLabel.append(relative, exact);
     el.selectedDateHeading.textContent = state.wheelMode === "rolling" ? "Rolling 24 hours" : displayDate.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
-    el.wheelHint.textContent = state.wheelMode === "rolling" ? "12 hours past · now · 12 hours ahead" : "Swipe the wheel to move between days";
+    el.wheelHint.textContent = state.wheelMode === "rolling" ? "6 hours past · now at top · 18 hours ahead" : "Swipe the wheel to move between days";
     el.calendarWheelMode.classList.toggle("active", state.wheelMode !== "rolling");
     el.rollingWheelMode.classList.toggle("active", state.wheelMode === "rolling");
     el.calendarWheelMode.setAttribute("aria-selected", state.wheelMode !== "rolling" ? "true" : "false");
@@ -2880,7 +2956,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     return { gap, band, inner: ro - total };
   }
 
-  function appendWheelBlocks(svg, blocks, cx, cy, ro, minInner, strokeWidth = 1.5, interactive = false) {
+  function appendWheelBlocks(svg, blocks, cx, cy, ro, minInner, strokeWidth = 1.5, interactive = false, angleOffset = 0) {
     const NS = "http://www.w3.org/2000/svg";
     const layout = assignLanes(blocks);
     const geo = laneGeometry(layout.laneCount, ro, minInner);
@@ -2899,7 +2975,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       }
       const visibleEnd = Math.min(1440, b.start + b.minutes);
       if (visibleEnd <= b.start || laneOuter <= laneInner) return;
-      const startA = b.start / 1440 * 360, endA = visibleEnd / 1440 * 360;
+      const startA = angleOffset + b.start / 1440 * 360, endA = angleOffset + visibleEnd / 1440 * 360;
       const path = document.createElementNS(NS, "path");
       path.setAttribute("d", arcPath(cx, cy, laneOuter, laneInner, startA, endA));
       path.setAttribute("fill", blockColor(b));
@@ -2943,7 +3019,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         if (freeEndOriginal > freeStartOriginal) {
           const freeStart = b.start + (freeStartOriginal - fragmentStartOriginal), freeEnd = b.start + (freeEndOriginal - fragmentStartOriginal);
           const free = document.createElementNS(NS, "path");
-          free.setAttribute("d", arcPath(cx, cy, laneOuter, laneInner, freeStart/1440*360, freeEnd/1440*360));
+          free.setAttribute("d", arcPath(cx, cy, laneOuter, laneInner, angleOffset + freeStart/1440*360, angleOffset + freeEnd/1440*360));
           free.setAttribute("fill", "#3d424d"); free.setAttribute("stroke", "#d9b55b"); free.setAttribute("stroke-width", String(strokeWidth));
           if (interactive) {
             free.classList.add("wheel-block-segment"); free.setAttribute("tabindex", "0"); free.setAttribute("role", "button");
@@ -3138,12 +3214,12 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     const layout=assignLanes(blocks), geo=laneGeometry(layout.laneCount,ro,58);
     const base=document.createElementNS(NS,"circle");base.setAttribute("cx",cx);base.setAttribute("cy",cy);base.setAttribute("r",(ro+geo.inner)/2);base.setAttribute("fill","none");base.setAttribute("stroke","#252a33");base.setAttribute("stroke-width",ro-geo.inner);svg.appendChild(base);
     if (rolling) appendRollingSolarRing(svg,cx,cy); else appendSolarRing(svg,state.selectedDate,cx,cy);
-    appendWheelBlocks(svg,blocks,cx,cy,ro,58,1.4,true);
+    appendWheelBlocks(svg,blocks,cx,cy,ro,58,1.4,true,rolling?-90:0);
     if (rolling) appendRollingNowOverlay(svg,cx,cy,ro,geo.inner); else appendNowOverlay(svg,state.selectedDate,cx,cy,ro,geo.inner);
 
     const rollingStart=rolling?rollingWindow().start:null;
     for(let h=0;h<24;h+=1){
-      const a=h/24*360,p1=polar(cx,cy,ro-1,a),p2=polar(cx,cy,ro-(h%6===0?15:9),a);
+      const a=(rolling?-90:0)+h/24*360,p1=polar(cx,cy,ro-1,a),p2=polar(cx,cy,ro-(h%6===0?15:9),a);
       const line=document.createElementNS(NS,"line");line.setAttribute("x1",p1.x);line.setAttribute("y1",p1.y);line.setAttribute("x2",p2.x);line.setAttribute("y2",p2.y);line.setAttribute("stroke",h%6===0?"#d1d5dc":"#777f8d");line.setAttribute("stroke-width",h%6===0?"1.8":"1");svg.appendChild(line);
       if(h%3===0){const tp=polar(cx,cy,ro+11,a),text=document.createElementNS(NS,"text");text.setAttribute("x",tp.x);text.setAttribute("y",tp.y+3.5);text.setAttribute("fill","#a5abb6");text.setAttribute("font-size","9.5");text.setAttribute("font-weight","650");text.setAttribute("text-anchor","middle");
         if(rolling){const t=new Date(rollingStart.getTime()+h*60*60000);text.textContent=String(t.getHours()).padStart(2,"0");} else text.textContent=String(h).padStart(2,"0");svg.appendChild(text);}
@@ -3281,6 +3357,16 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     }
   }
 
+  function syncQuestInlineScheduleDate() {
+    const repeating = Boolean(el.questRepeatEnabled?.checked);
+    if (repeating && /^\d{4}-\d{2}-\d{2}$/.test(el.questRepeatStart?.value || "")) {
+      el.questScheduleDate.value = el.questRepeatStart.value;
+    }
+    // While a quest repeats, its first scheduled block belongs to that exact
+    // occurrence; prevent the two dates from drifting apart.
+    el.questScheduleDate.disabled = repeating;
+  }
+
   function openQuestDialog(parentId = null, duplicateSourceId = null, editQuestId = null) {
     const source = duplicateSourceId ? questById(duplicateSourceId) : null;
     const editing = editQuestId ? questById(editQuestId) : null;
@@ -3314,8 +3400,11 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     const sourceBlock = source ? state.blocks.filter(b => b.questId === source.id).sort((a,b) => String(a.date).localeCompare(String(b.date)) || a.start-b.start)[0] : null;
     el.questScheduleEnabled.checked = Boolean(source && sourceBlock);
     el.questScheduleFields.hidden = !el.questScheduleEnabled.checked || Boolean(editing);
-    el.questScheduleDate.value = sourceBlock?.date || state.selectedDate || isoDate(new Date());
+    el.questScheduleDate.value = repeating
+      ? el.questRepeatStart.value
+      : (sourceBlock?.date || state.selectedDate || isoDate(new Date()));
     el.questScheduleStart.value = sourceBlock ? timeFromMinutes(sourceBlock.start) : "09:00";
+    syncQuestInlineScheduleDate();
     el.questDialog.showModal();
   }
 
@@ -3662,8 +3751,16 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     if (!el.questParentId.value) setQuestColorPicker(categoryColor(el.questCategory.value));
   });
   $("cancelQuest").addEventListener("click", () => el.questDialog.close());
-  el.questRepeatEnabled.addEventListener("change", () => { el.questRepeatFields.hidden = !el.questRepeatEnabled.checked; });
-  el.questScheduleEnabled.addEventListener("change", () => { el.questScheduleFields.hidden = !el.questScheduleEnabled.checked || Boolean(el.questEditId.value); });
+  el.questRepeatEnabled.addEventListener("change", () => {
+    el.questRepeatFields.hidden = !el.questRepeatEnabled.checked;
+    syncQuestInlineScheduleDate();
+  });
+  el.questRepeatStart.addEventListener("change", syncQuestInlineScheduleDate);
+  el.questRepeatStart.addEventListener("input", syncQuestInlineScheduleDate);
+  el.questScheduleEnabled.addEventListener("change", () => {
+    el.questScheduleFields.hidden = !el.questScheduleEnabled.checked || Boolean(el.questEditId.value);
+    syncQuestInlineScheduleDate();
+  });
   el.questForm.addEventListener("submit", event => {
     event.preventDefault();
     const name = el.questName.value.trim();
@@ -3699,7 +3796,9 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     }
 
     const scheduleNow = el.questScheduleEnabled.checked;
-    const scheduleDate = /^\d{4}-\d{2}-\d{2}$/.test(el.questScheduleDate.value) ? el.questScheduleDate.value : state.selectedDate;
+    const scheduleDate = repeating
+      ? repeatStart
+      : (/^\d{4}-\d{2}-\d{2}$/.test(el.questScheduleDate.value) ? el.questScheduleDate.value : state.selectedDate);
     const scheduleStart = /^\d{2}:\d{2}$/.test(el.questScheduleStart.value) ? el.questScheduleStart.value : "09:00";
     const parentId = el.questParentId.value || null;
     const quest = {
@@ -4050,7 +4149,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./sw-v11.js", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw-v11.1.js", { updateViaCache: "none" });
         if (reg.update) reg.update().catch(() => {});
       } catch {}
     });
