@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Questwheel" />
-  <link rel="manifest" href="./manifest-v11.2.webmanifest" />
-  <link rel="apple-touch-icon" href="./icons/icon-v11.2-192.png" />
+  <link rel="manifest" href="./manifest-v12.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-v12-192.png" />
   <style>
 :root {
   color-scheme: dark;
@@ -739,8 +739,102 @@ input[type="date"], input[type="time"] {
 @media (max-width: 560px) { .date-time-pair { grid-template-columns: minmax(0,1fr) !important; gap: 10px !important; } }
 .quest-inherited-note { color: #8fb8dd; }
 
+
+/* v12 theme engine ------------------------------------------------------- */
+:root {
+  --theme-font-stack: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  --theme-radius: 18px;
+  --accent-ink: #18130a;
+  --wheel-base: #252a33;
+  --wheel-major: #d1d5dc;
+  --wheel-minor: #777f8d;
+  --wheel-text: #a5abb6;
+  --theme-nav-bg: rgba(23,26,32,.95);
+}
+html, body { font-family: var(--theme-font-stack); }
+body { background-color: var(--bg); }
+.panel { border-radius: var(--theme-radius); }
+.primary { color: var(--accent-ink); }
+.tabbar { background: var(--theme-nav-bg); }
+.topbar-actions { display:flex; align-items:center; gap:7px; flex:0 0 auto; }
+.theme-trigger { display:inline-flex; gap:6px; align-items:center; justify-content:center; }
+
+/* Safe material presets. These are the only surface effects a .qtheme may request. */
+html[data-theme-surface="velvet"] body {
+  background-image:
+    radial-gradient(circle at 22% 0%, color-mix(in srgb, var(--bg) 78%, var(--accent) 22%), transparent 34%),
+    repeating-linear-gradient(92deg, rgba(255,255,255,.018) 0 1px, rgba(0,0,0,.035) 1px 3px);
+}
+html[data-theme-surface="velvet"] .panel,
+html[data-theme-surface="velvet"] dialog,
+html[data-theme-surface="velvet"] .tabbar {
+  background-image: radial-gradient(circle at 25% 0%, rgba(255,255,255,.035), transparent 40%), repeating-linear-gradient(92deg, rgba(255,255,255,.014) 0 1px, rgba(0,0,0,.025) 1px 3px);
+  box-shadow: inset 0 1px rgba(255,255,255,.025), inset 0 -1px rgba(0,0,0,.20);
+}
+html[data-theme-surface="lacquer"] body { background-image: linear-gradient(145deg, rgba(255,255,255,.025), transparent 22%, rgba(0,0,0,.18) 65%), radial-gradient(circle at 20% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 40%); }
+html[data-theme-surface="lacquer"] .panel,
+html[data-theme-surface="lacquer"] dialog { box-shadow: inset 0 1px rgba(255,255,255,.055), inset 0 -8px 22px rgba(0,0,0,.15); }
+html[data-theme-surface="parchment"] body { background-image: repeating-radial-gradient(circle at 0 0, rgba(80,55,25,.035) 0 1px, transparent 1px 4px); }
+html[data-theme-surface="ink"] body { background-image: radial-gradient(ellipse at 12% 12%, rgba(255,255,255,.025), transparent 24%), radial-gradient(ellipse at 85% 28%, rgba(0,0,0,.18), transparent 30%); }
+
+body::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.09; background-repeat:repeat; }
+.app-shell { position:relative; z-index:1; }
+html[data-theme-motif="none"] body::before { display:none; }
+html[data-theme-motif="brocade"] body::before {
+  background-size: 38px 38px;
+  background-image: repeating-conic-gradient(from 45deg, transparent 0 12.5%, color-mix(in srgb, var(--accent) 70%, transparent) 12.5% 13.5%, transparent 13.5% 25%);
+}
+html[data-theme-motif="bamboo"] body::before {
+  background-size: 88px 140px;
+  background-image: linear-gradient(78deg, transparent 44%, color-mix(in srgb, var(--accent) 42%, transparent) 45% 46%, transparent 47%), linear-gradient(18deg, transparent 60%, color-mix(in srgb, var(--accent) 30%, transparent) 61% 62%, transparent 63%);
+}
+html[data-theme-motif="ink"] body::before { background-size: 180px 150px; background-image: radial-gradient(ellipse at 30% 30%, color-mix(in srgb, var(--text) 24%, transparent), transparent 35%), radial-gradient(ellipse at 70% 70%, color-mix(in srgb, var(--text) 14%, transparent), transparent 28%); }
+html[data-theme-motif="mantis"] body::before {
+  opacity:.055; background-size:120px 120px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23d9b55b' stroke-width='2' stroke-linecap='round' opacity='.9'%3E%3Cellipse cx='61' cy='54' rx='8' ry='17'/%3E%3Ccircle cx='61' cy='32' r='5'/%3E%3Cpath d='M56 41 43 31 35 18M66 41 79 31 88 20M55 58 39 70 28 88M67 58 82 71 93 90M58 71 50 96M64 71 72 98'/%3E%3C/g%3E%3C/svg%3E");
+}
+html[data-theme-font="serif"] { --theme-font-stack: ui-serif, Georgia, "Times New Roman", serif; }
+html[data-theme-font="mono"] { --theme-font-stack: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+
+.theme-list { display:grid; gap:10px; }
+.theme-card { display:grid; gap:9px; padding:12px; border:1px solid var(--border); border-radius:14px; background:var(--panel-2); }
+.theme-card.active { border-color:var(--accent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent); }
+.theme-card-head { display:flex; gap:10px; align-items:center; min-width:0; }
+.theme-swatches { display:flex; flex:0 0 auto; }
+.theme-swatch-dot { width:20px; height:20px; border-radius:50%; border:2px solid var(--panel-2); margin-left:-5px; box-shadow:0 0 0 1px var(--border); }
+.theme-swatch-dot:first-child { margin-left:0; }
+.theme-card-title { min-width:0; flex:1; }
+.theme-card-title strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.theme-card-title span { display:block; color:var(--muted); font-size:10px; margin-top:2px; }
+.theme-card-actions { display:flex; flex-wrap:wrap; gap:6px; }
+.theme-manager-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.theme-style-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px; }
+.theme-color-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+.theme-color-grid label { display:grid; grid-template-columns:1fr 48px; align-items:center; gap:8px; padding:7px 9px; border:1px solid var(--border); border-radius:11px; background:var(--panel-2); }
+.theme-color-grid input[type="color"] { width:44px; min-height:36px; height:36px; padding:2px; border-radius:8px; }
+
+/* v12 iOS native date/time repair: constrain the control box, not its displayed value. */
+@media (max-width: 540px) {
+  .date-time-pair { grid-template-columns:1fr !important; }
+  input[type="date"], input[type="time"] {
+    width:100% !important; min-width:0 !important; max-width:100% !important;
+    padding-left:7px !important; padding-right:7px !important;
+    overflow:visible !important; text-align:center;
+  }
+  input[type="date"]::-webkit-date-and-time-value,
+  input[type="time"]::-webkit-date-and-time-value {
+    min-width:0 !important; width:100% !important; margin:0 !important; padding:0 !important; text-align:center;
+  }
+  input[type="date"]::-webkit-datetime-edit,
+  input[type="time"]::-webkit-datetime-edit { min-width:0 !important; padding:0 !important; }
+}
+@media (max-width: 390px) {
+  .theme-trigger-label { display:none; }
+  .theme-manager-actions, .theme-style-grid, .theme-color-grid { grid-template-columns:1fr; }
+}
+
 </style>
-  <title>Questwheel v11.2</title>
+  <title>Questwheel v12</title>
 </head>
 <body>
   <div class="app-shell">
@@ -750,9 +844,12 @@ input[type="date"], input[type="time"] {
           <span class="relative-label">Today</span>
           <span class="relative-date">Mon 24 Aug ’26</span>
         </div>
-        <h1>Questwheel <span class="build-tag">v11.2</span></h1>
+        <h1>Questwheel <span class="build-tag">v12</span></h1>
       </div>
-      <button class="ghost compact" id="todayBtn" type="button">Today</button>
+      <div class="topbar-actions">
+        <button class="ghost compact theme-trigger" id="themeBtn" type="button" aria-label="Themes"><span aria-hidden="true">◈</span><span class="theme-trigger-label">Theme</span></button>
+        <button class="ghost compact" id="todayBtn" type="button">Today</button>
+      </div>
     </header>
 
     <main>
@@ -1101,6 +1198,74 @@ input[type="date"], input[type="time"] {
     </form>
   </dialog>
 
+  <dialog id="themeDialog">
+    <form method="dialog" id="themeManagerForm">
+      <div class="dialog-head">
+        <div><span class="eyebrow">APPEARANCE</span><h2>Themes</h2></div>
+        <button class="icon-btn" value="cancel" aria-label="Close">×</button>
+      </div>
+      <p class="hint">Themes change Questwheel's appearance only. Imported <strong>.qtheme</strong> files are local data and cannot run code.</p>
+      <div id="themeList" class="theme-list"></div>
+      <input id="themeImportInput" type="file" accept=".qtheme,application/json" hidden />
+      <div class="theme-manager-actions">
+        <button id="newThemeBtn" class="ghost" type="button">+ New custom</button>
+        <button id="importThemeBtn" class="ghost" type="button">Import .qtheme</button>
+      </div>
+      <div class="dialog-actions"><button class="primary" value="cancel" type="button" id="closeThemes">Done</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="themeEditorDialog">
+    <form method="dialog" id="themeEditorForm">
+      <div class="dialog-head">
+        <div><span class="eyebrow">CUSTOM THEME</span><h2 id="themeEditorTitle">Edit theme</h2></div>
+        <button class="icon-btn" value="cancel" aria-label="Close">×</button>
+      </div>
+      <input id="themeEditId" type="hidden" />
+      <label>Theme name<input id="themeName" maxlength="60" required /></label>
+      <div class="theme-style-grid">
+        <label>Surface
+          <select id="themeSurface">
+            <option value="flat">Clean / flat</option>
+            <option value="velvet">Velvet</option>
+            <option value="lacquer">Lacquer</option>
+            <option value="parchment">Parchment</option>
+            <option value="ink">Ink wash</option>
+          </select>
+        </label>
+        <label>Motif
+          <select id="themeMotif">
+            <option value="none">None</option>
+            <option value="brocade">Brocade</option>
+            <option value="bamboo">Bamboo</option>
+            <option value="ink">Ink texture</option>
+            <option value="mantis">Mantis marks</option>
+          </select>
+        </label>
+      </div>
+      <div class="theme-style-grid">
+        <label>Typography
+          <select id="themeFont"><option value="system">Modern</option><option value="serif">Traditional serif</option><option value="mono">Technical mono</option></select>
+        </label>
+        <label>Corner roundness<input id="themeRadius" type="range" min="4" max="26" step="1" value="18" /></label>
+      </div>
+      <div class="theme-color-grid">
+        <label>Background<input id="themeBg" type="color" /></label>
+        <label>Main panel<input id="themePanel" type="color" /></label>
+        <label>Raised panel<input id="themePanel2" type="color" /></label>
+        <label>Deep panel<input id="themePanel3" type="color" /></label>
+        <label>Text<input id="themeText" type="color" /></label>
+        <label>Muted text<input id="themeMuted" type="color" /></label>
+        <label>Border / trim<input id="themeBorder" type="color" /></label>
+        <label>Accent<input id="themeAccent" type="color" /></label>
+        <label>Danger<input id="themeDanger" type="color" /></label>
+        <label>Free time<input id="themeFree" type="color" /></label>
+      </div>
+      <p class="hint">For more elaborate skins, a .qtheme can also provide optional wheel colours. The engine deliberately does not allow arbitrary CSS or JavaScript.</p>
+      <div class="dialog-actions"><button class="ghost" type="button" id="cancelThemeEdit">Cancel</button><button class="primary" type="submit">Save theme</button></div>
+    </form>
+  </dialog>
+
   <dialog id="solarDialog">
     <form method="dialog" id="solarForm">
       <div class="dialog-head">
@@ -1160,7 +1325,7 @@ input[type="date"], input[type="time"] {
   <script>
 (() => {
   const STORE = "questwheel-v1"; // Preserve all prior Questwheel local data.
-  const BUILD = "v11.2";
+  const BUILD = "v12";
 
   const categories = {
     business: { label: "Business", color: "#FFB000" },
@@ -1187,6 +1352,25 @@ input[type="date"], input[type="time"] {
     "#90A4AE"  // slate
   ];
 
+  const QTHEME_VERSION = 1;
+  const BUILTIN_THEMES = [
+    {
+      id: "questwheel-original", name: "Questwheel Original", builtIn: true,
+      surface: "flat", motif: "none", font: "system", radius: 18,
+      colors: { bg:"#0e1014", panel:"#171a20", panel2:"#1e222a", panel3:"#242933", text:"#f2f3f5", muted:"#969daa", border:"#2b303a", accent:"#d9b55b", danger:"#ef6a67", free:"#3d424d", wheelBase:"#252a33", wheelMajor:"#d1d5dc", wheelMinor:"#777f8d", wheelText:"#a5abb6" }
+    },
+    {
+      id: "tanglang-red-velvet", name: "Tanglang · Red Velvet", builtIn: true,
+      surface: "velvet", motif: "brocade", font: "serif", radius: 14,
+      colors: { bg:"#160403", panel:"#2a0807", panel2:"#3a0d0a", panel3:"#4a1510", text:"#fff1cf", muted:"#c9a986", border:"#7a4d24", accent:"#e5bd5d", danger:"#ff6b5f", free:"#4a2a20", wheelBase:"#4a1710", wheelMajor:"#e5bd5d", wheelMinor:"#9b7141", wheelText:"#f1d798" }
+    }
+  ];
+
+  const THEME_SURFACES = new Set(["flat","velvet","lacquer","parchment","ink"]);
+  const THEME_MOTIFS = new Set(["none","brocade","bamboo","ink","mantis"]);
+  const THEME_FONTS = new Set(["system","serif","mono"]);
+
+
   let selectedQuestColor = questPalette[0];
   let selectedBlockColor = categories.personal.color;
   let selectedEditBlockColor = categories.personal.color;
@@ -1205,6 +1389,8 @@ input[type="date"], input[type="time"] {
     jars: [],
     jarEntries: [],
     solar: { enabled: false, lat: null, lon: null },
+    themeId: "questwheel-original",
+    customThemes: [],
     selectedDate: isoDate(new Date()),
     wheelMode: "calendar"
   };
@@ -1294,6 +1480,34 @@ input[type="date"], input[type="time"] {
     solarLongitude: $("solarLongitude"),
     solarLongitudeHemisphere: $("solarLongitudeHemisphere"),
     solarPreview: $("solarPreview"),
+    themeBtn: $("themeBtn"),
+    themeDialog: $("themeDialog"),
+    themeManagerForm: $("themeManagerForm"),
+    themeList: $("themeList"),
+    themeImportInput: $("themeImportInput"),
+    importThemeBtn: $("importThemeBtn"),
+    newThemeBtn: $("newThemeBtn"),
+    closeThemes: $("closeThemes"),
+    themeEditorDialog: $("themeEditorDialog"),
+    themeEditorForm: $("themeEditorForm"),
+    themeEditorTitle: $("themeEditorTitle"),
+    themeEditId: $("themeEditId"),
+    themeName: $("themeName"),
+    themeSurface: $("themeSurface"),
+    themeMotif: $("themeMotif"),
+    themeFont: $("themeFont"),
+    themeRadius: $("themeRadius"),
+    themeBg: $("themeBg"),
+    themePanel: $("themePanel"),
+    themePanel2: $("themePanel2"),
+    themePanel3: $("themePanel3"),
+    themeText: $("themeText"),
+    themeMuted: $("themeMuted"),
+    themeBorder: $("themeBorder"),
+    themeAccent: $("themeAccent"),
+    themeDanger: $("themeDanger"),
+    themeFree: $("themeFree"),
+    cancelThemeEdit: $("cancelThemeEdit"),
     finishForm: $("finishForm"),
     questDialogEyebrow: $("questDialogEyebrow"),
     questDialogTitle: $("questDialogTitle"),
@@ -1452,6 +1666,130 @@ input[type="date"], input[type="time"] {
     };
   }
 
+
+  function themeHex(value, fallback) {
+    const s = String(value || "").trim();
+    return /^#[0-9a-fA-F]{6}$/.test(s) ? s.toLowerCase() : fallback;
+  }
+
+  function sanitizeTheme(raw, { preserveId=false } = {}) {
+    if (!raw || typeof raw !== "object") return null;
+    const base = BUILTIN_THEMES[0];
+    const c = raw.colors || {};
+    const idRaw = preserveId && typeof raw.id === "string" ? raw.id : `custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`;
+    const safeId = String(idRaw).replace(/[^a-zA-Z0-9_-]/g,"-").slice(0,80) || `custom-${Date.now().toString(36)}`;
+    return {
+      id: safeId,
+      name: String(raw.name || "Custom theme").trim().slice(0,60) || "Custom theme",
+      builtIn: false,
+      surface: THEME_SURFACES.has(raw.surface) ? raw.surface : "flat",
+      motif: THEME_MOTIFS.has(raw.motif) ? raw.motif : "none",
+      font: THEME_FONTS.has(raw.font) ? raw.font : "system",
+      radius: Math.max(4, Math.min(26, Number(raw.radius) || 18)),
+      colors: {
+        bg: themeHex(c.bg, base.colors.bg), panel: themeHex(c.panel, base.colors.panel), panel2: themeHex(c.panel2, base.colors.panel2), panel3: themeHex(c.panel3, base.colors.panel3),
+        text: themeHex(c.text, base.colors.text), muted: themeHex(c.muted, base.colors.muted), border: themeHex(c.border, base.colors.border), accent: themeHex(c.accent, base.colors.accent),
+        danger: themeHex(c.danger, base.colors.danger), free: themeHex(c.free, base.colors.free),
+        wheelBase: themeHex(c.wheelBase, c.panel3 || base.colors.wheelBase), wheelMajor: themeHex(c.wheelMajor, c.accent || base.colors.wheelMajor),
+        wheelMinor: themeHex(c.wheelMinor, c.muted || base.colors.wheelMinor), wheelText: themeHex(c.wheelText, c.muted || base.colors.wheelText)
+      }
+    };
+  }
+
+  function allThemes() { return [...BUILTIN_THEMES, ...(state?.customThemes || [])]; }
+  function themeById(id) { return allThemes().find(theme => theme.id === id) || BUILTIN_THEMES[0]; }
+  function currentTheme() { return themeById(state?.themeId); }
+
+  function colorLuma(hex) {
+    const n = parseInt(String(hex).slice(1),16);
+    const r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+    return (0.2126*r + 0.7152*g + 0.0722*b)/255;
+  }
+
+  function applyTheme() {
+    const theme = currentTheme();
+    if (!theme || !state) return;
+    if (!allThemes().some(item => item.id === state.themeId)) state.themeId = BUILTIN_THEMES[0].id;
+    const c = theme.colors;
+    const root = document.documentElement;
+    const vars = {"--bg":c.bg,"--panel":c.panel,"--panel-2":c.panel2,"--panel-3":c.panel3,"--text":c.text,"--muted":c.muted,"--border":c.border,"--accent":c.accent,"--danger":c.danger,"--free":c.free,"--wheel-base":c.wheelBase,"--wheel-major":c.wheelMajor,"--wheel-minor":c.wheelMinor,"--wheel-text":c.wheelText,"--theme-radius":`${theme.radius}px`,"--accent-ink":colorLuma(c.accent)>.58?"#1a1208":"#fff8e7"};
+    Object.entries(vars).forEach(([key,value]) => root.style.setProperty(key,value));
+    root.dataset.themeSurface = theme.surface;
+    root.dataset.themeMotif = theme.motif;
+    root.dataset.themeFont = theme.font;
+    root.dataset.themeId = theme.id;
+    root.style.setProperty("--theme-nav-bg", `${c.panel}f2`);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", c.panel);
+  }
+
+  function cssVar(name, fallback) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback; }
+
+  function themeExportPayload(theme) {
+    return { qthemeVersion: QTHEME_VERSION, kind:"questwheel-theme", name:theme.name, surface:theme.surface, motif:theme.motif, font:theme.font, radius:theme.radius, colors:{...theme.colors} };
+  }
+
+  function downloadTheme(theme) {
+    const payload = themeExportPayload(theme);
+    const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${theme.name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "questwheel-theme"}.qtheme`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1200);
+  }
+
+  function renderThemeList() {
+    if (!el.themeList) return;
+    el.themeList.innerHTML = "";
+    allThemes().forEach(theme => {
+      const card = document.createElement("article");
+      card.className = `theme-card${theme.id===state.themeId?" active":""}`;
+      const head = document.createElement("div"); head.className="theme-card-head";
+      const swatches=document.createElement("div"); swatches.className="theme-swatches";
+      [theme.colors.bg,theme.colors.panel,theme.colors.accent].forEach(color=>{const dot=document.createElement("span");dot.className="theme-swatch-dot";dot.style.background=color;swatches.appendChild(dot);});
+      const title=document.createElement("div");title.className="theme-card-title";title.innerHTML=`<strong></strong><span>${theme.builtIn?"Built in":"Personal"} · ${theme.surface} · ${theme.motif}</span>`; title.querySelector("strong").textContent=theme.name;
+      head.append(swatches,title); card.appendChild(head);
+      const actions=document.createElement("div"); actions.className="theme-card-actions";
+      const use=document.createElement("button");use.type="button";use.className="small-btn accent";use.textContent=theme.id===state.themeId?"Using":"Use";use.disabled=theme.id===state.themeId;use.addEventListener("click",()=>{state.themeId=theme.id;saveState();applyTheme();renderThemeList();render();});actions.appendChild(use);
+      const duplicate=document.createElement("button");duplicate.type="button";duplicate.className="small-btn";duplicate.textContent="Duplicate";duplicate.addEventListener("click",()=>duplicateTheme(theme));actions.appendChild(duplicate);
+      const exp=document.createElement("button");exp.type="button";exp.className="small-btn";exp.textContent="Export";exp.addEventListener("click",()=>downloadTheme(theme));actions.appendChild(exp);
+      if (!theme.builtIn) {
+        const edit=document.createElement("button");edit.type="button";edit.className="small-btn";edit.textContent="Edit";edit.addEventListener("click",()=>openThemeEditor(theme.id));actions.appendChild(edit);
+        const del=document.createElement("button");del.type="button";del.className="small-btn danger";del.textContent="Delete";del.addEventListener("click",()=>deleteCustomTheme(theme.id));actions.appendChild(del);
+      }
+      card.appendChild(actions); el.themeList.appendChild(card);
+    });
+  }
+
+  function openThemeManager() { renderThemeList(); el.themeDialog.showModal(); }
+
+  function createCustomFrom(theme, name=null) {
+    const copy = sanitizeTheme({...theme, id:null, name:name || `${theme.name} Copy`, builtIn:false});
+    state.customThemes = Array.isArray(state.customThemes) ? state.customThemes : [];
+    while (allThemes().some(t=>t.id===copy.id)) copy.id=`custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`;
+    state.customThemes.push(copy); return copy;
+  }
+
+  function duplicateTheme(theme) { const copy=createCustomFrom(theme); state.themeId=copy.id; saveState(); applyTheme(); renderThemeList(); openThemeEditor(copy.id); }
+
+  function deleteCustomTheme(id) {
+    const theme=(state.customThemes||[]).find(t=>t.id===id); if(!theme) return;
+    if(!window.confirm(`Delete the ${theme.name} theme?`)) return;
+    state.customThemes=state.customThemes.filter(t=>t.id!==id);
+    if(state.themeId===id) state.themeId=BUILTIN_THEMES[0].id;
+    saveState();applyTheme();renderThemeList();render();
+  }
+
+  function openThemeEditor(id) {
+    const theme=themeById(id); if(!theme || theme.builtIn) return;
+    el.themeEditId.value=theme.id; el.themeEditorTitle.textContent=`Edit ${theme.name}`; el.themeName.value=theme.name;
+    el.themeSurface.value=theme.surface;el.themeMotif.value=theme.motif;el.themeFont.value=theme.font;el.themeRadius.value=String(theme.radius);
+    const c=theme.colors; el.themeBg.value=c.bg;el.themePanel.value=c.panel;el.themePanel2.value=c.panel2;el.themePanel3.value=c.panel3;el.themeText.value=c.text;el.themeMuted.value=c.muted;el.themeBorder.value=c.border;el.themeAccent.value=c.accent;el.themeDanger.value=c.danger;el.themeFree.value=c.free;
+    el.themeEditorDialog.showModal();
+  }
+
   function loadState() {
     try {
       const raw = localStorage.getItem(STORE);
@@ -1498,6 +1836,8 @@ input[type="date"], input[type="time"] {
           lat: parsed.solar?.lat != null && Number.isFinite(Number(parsed.solar.lat)) ? Number(parsed.solar.lat) : null,
           lon: parsed.solar?.lon != null && Number.isFinite(Number(parsed.solar.lon)) ? Number(parsed.solar.lon) : null
         },
+        themeId: typeof parsed.themeId === "string" ? parsed.themeId : "questwheel-original",
+        customThemes: Array.isArray(parsed.customThemes) ? parsed.customThemes.map(theme => sanitizeTheme(theme, { preserveId:true })).filter(Boolean) : [],
         selectedDate: isoDate(new Date()),
         wheelMode: parsed.wheelMode === "rolling" ? "rolling" : "calendar"
       };
@@ -1507,6 +1847,7 @@ input[type="date"], input[type="time"] {
   }
 
   let state = loadState();
+  applyTheme();
 
   function saveState() {
     localStorage.setItem(STORE, JSON.stringify(state));
@@ -2629,6 +2970,7 @@ input[type="date"], input[type="time"] {
   }
 
   function render() {
+    applyTheme();
     syncDerivedQuestCompletion();
     const inheritedChanged = inheritRecurrenceDefaults();
     const blocksChanged = prepopulateRecurringQuestBlocks();
@@ -3210,7 +3552,7 @@ input[type="date"], input[type="time"] {
       const linkedQuest = questById(b.questId);
       const effectiveDone = b.completed || Boolean(linkedQuest?.completed);
       path.setAttribute("opacity", b._manualJarEntry ? ".72" : (effectiveDone ? ".52" : (overlayDepth ? ".96" : ".93")));
-      const nestedStroke = overlayDepth ? "rgba(242,243,245,.58)" : "#0e1014";
+      const nestedStroke = overlayDepth ? "rgba(242,243,245,.58)" : cssVar("--bg", "#0e1014");
       path.setAttribute("stroke", b._manualJarEntry ? "rgba(242,243,245,.8)" : (b.id === selectedBlockId && interactive ? "#f2f3f5" : nestedStroke));
       path.setAttribute("stroke-width", String(b.id === selectedBlockId && interactive && !b._manualJarEntry ? Math.max(2.8, strokeWidth * 2) : strokeWidth));
       if (overlayDepth) path.setAttribute("stroke-dasharray", overlayDepth > 1 ? "2.2 1.6" : "none");
@@ -3248,7 +3590,7 @@ input[type="date"], input[type="time"] {
           const freeStart = b.start + (freeStartOriginal - fragmentStartOriginal), freeEnd = b.start + (freeEndOriginal - fragmentStartOriginal);
           const free = document.createElementNS(NS, "path");
           free.setAttribute("d", arcPath(cx, cy, laneOuter, laneInner, angleOffset + freeStart/1440*360, angleOffset + freeEnd/1440*360));
-          free.setAttribute("fill", "#3d424d"); free.setAttribute("stroke", "#d9b55b"); free.setAttribute("stroke-width", String(strokeWidth));
+          free.setAttribute("fill", cssVar("--free", "#3d424d")); free.setAttribute("stroke", cssVar("--accent", "#d9b55b")); free.setAttribute("stroke-width", String(strokeWidth));
           if (interactive) {
             free.classList.add("wheel-block-segment"); free.setAttribute("tabindex", "0"); free.setAttribute("role", "button");
             const activateFree = event => { if (suppressBlockClick) return; event.stopPropagation(); selectBlock(b.id); };
@@ -3440,7 +3782,7 @@ input[type="date"], input[type="time"] {
     const rolling=state.wheelMode==="rolling";
     const blocks=rolling?rollingWheelBlocks():wheelBlocksFor(state.selectedDate);
     const layout=assignLanes(blocks), geo=laneGeometry(layout.laneCount,ro,58);
-    const base=document.createElementNS(NS,"circle");base.setAttribute("cx",cx);base.setAttribute("cy",cy);base.setAttribute("r",(ro+geo.inner)/2);base.setAttribute("fill","none");base.setAttribute("stroke","#252a33");base.setAttribute("stroke-width",ro-geo.inner);svg.appendChild(base);
+    const base=document.createElementNS(NS,"circle");base.setAttribute("cx",cx);base.setAttribute("cy",cy);base.setAttribute("r",(ro+geo.inner)/2);base.setAttribute("fill","none");base.setAttribute("stroke",cssVar("--wheel-base","#252a33"));base.setAttribute("stroke-width",ro-geo.inner);svg.appendChild(base);
     if (rolling) appendRollingSolarRing(svg,cx,cy); else appendSolarRing(svg,state.selectedDate,cx,cy);
     appendWheelBlocks(svg,blocks,cx,cy,ro,58,1.4,true,rolling?-90:0);
     if (rolling) appendRollingNowOverlay(svg,cx,cy,ro,geo.inner); else appendNowOverlay(svg,state.selectedDate,cx,cy,ro,geo.inner);
@@ -3448,8 +3790,8 @@ input[type="date"], input[type="time"] {
     const rollingStart=rolling?rollingWindow().start:null;
     for(let h=0;h<24;h+=1){
       const a=(rolling?-90:0)+h/24*360,p1=polar(cx,cy,ro-1,a),p2=polar(cx,cy,ro-(h%6===0?15:9),a);
-      const line=document.createElementNS(NS,"line");line.setAttribute("x1",p1.x);line.setAttribute("y1",p1.y);line.setAttribute("x2",p2.x);line.setAttribute("y2",p2.y);line.setAttribute("stroke",h%6===0?"#d1d5dc":"#777f8d");line.setAttribute("stroke-width",h%6===0?"1.8":"1");svg.appendChild(line);
-      if(h%3===0){const tp=polar(cx,cy,ro+11,a),text=document.createElementNS(NS,"text");text.setAttribute("x",tp.x);text.setAttribute("y",tp.y+3.5);text.setAttribute("fill","#a5abb6");text.setAttribute("font-size","9.5");text.setAttribute("font-weight","650");text.setAttribute("text-anchor","middle");
+      const line=document.createElementNS(NS,"line");line.setAttribute("x1",p1.x);line.setAttribute("y1",p1.y);line.setAttribute("x2",p2.x);line.setAttribute("y2",p2.y);line.setAttribute("stroke",h%6===0?cssVar("--wheel-major","#d1d5dc"):cssVar("--wheel-minor","#777f8d"));line.setAttribute("stroke-width",h%6===0?"1.8":"1");svg.appendChild(line);
+      if(h%3===0){const tp=polar(cx,cy,ro+11,a),text=document.createElementNS(NS,"text");text.setAttribute("x",tp.x);text.setAttribute("y",tp.y+3.5);text.setAttribute("fill",cssVar("--wheel-text","#a5abb6"));text.setAttribute("font-size","9.5");text.setAttribute("font-weight","650");text.setAttribute("text-anchor","middle");
         if(rolling){const t=new Date(rollingStart.getTime()+h*60*60000);text.textContent=String(t.getHours()).padStart(2,"0");} else text.textContent=String(h).padStart(2,"0");svg.appendChild(text);}
     }
     el.wheelScheduled.textContent=fmtMinutes(blocks.filter(b=>!b._manualJarEntry).reduce((s,b)=>s+b.minutes,0));
@@ -3480,7 +3822,7 @@ input[type="date"], input[type="time"] {
     base.setAttribute("cy", cy);
     base.setAttribute("r", (ro + geo.inner) / 2);
     base.setAttribute("fill", "none");
-    base.setAttribute("stroke", "#252a33");
+    base.setAttribute("stroke", cssVar("--wheel-base", "#252a33"));
     base.setAttribute("stroke-width", ro - geo.inner);
     svg.appendChild(base);
     if (dateISO && solarSettingsValid()) {
@@ -4348,6 +4690,37 @@ input[type="date"], input[type="time"] {
   });
 
 
+  el.themeBtn.addEventListener("click", openThemeManager);
+  el.closeThemes.addEventListener("click", () => el.themeDialog.close());
+  el.importThemeBtn.addEventListener("click", () => { el.themeImportInput.value=""; el.themeImportInput.click(); });
+  el.newThemeBtn.addEventListener("click", () => { const copy=createCustomFrom(currentTheme(), "My Theme"); state.themeId=copy.id; saveState(); applyTheme(); renderThemeList(); openThemeEditor(copy.id); });
+  el.cancelThemeEdit.addEventListener("click", () => el.themeEditorDialog.close());
+  el.themeImportInput.addEventListener("change", async () => {
+    const file=el.themeImportInput.files?.[0]; if(!file) return;
+    try {
+      if(file.size>1024*1024) throw new Error("Theme file is larger than 1 MB.");
+      const raw=JSON.parse(await file.text());
+      if(raw.qthemeVersion!==QTHEME_VERSION || raw.kind!=="questwheel-theme") throw new Error("This is not a supported Questwheel .qtheme file.");
+      const theme=sanitizeTheme(raw); if(!theme) throw new Error("Theme data is invalid.");
+      theme.name=String(raw.name||theme.name).slice(0,60);
+      state.customThemes=Array.isArray(state.customThemes)?state.customThemes:[];
+      while(allThemes().some(t=>t.id===theme.id)) theme.id=`custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`;
+      state.customThemes.push(theme);state.themeId=theme.id;saveState();applyTheme();renderThemeList();render();
+    } catch(err) { window.alert(`Could not import theme: ${err?.message || "invalid file"}`); }
+  });
+  el.themeEditorForm.addEventListener("submit", event => {
+    event.preventDefault();
+    const theme=(state.customThemes||[]).find(t=>t.id===el.themeEditId.value); if(!theme) return;
+    theme.name=el.themeName.value.trim().slice(0,60)||"Custom theme";
+    theme.surface=THEME_SURFACES.has(el.themeSurface.value)?el.themeSurface.value:"flat";
+    theme.motif=THEME_MOTIFS.has(el.themeMotif.value)?el.themeMotif.value:"none";
+    theme.font=THEME_FONTS.has(el.themeFont.value)?el.themeFont.value:"system";
+    theme.radius=Math.max(4,Math.min(26,Number(el.themeRadius.value)||18));
+    theme.colors={...theme.colors,bg:themeHex(el.themeBg.value,"#0e1014"),panel:themeHex(el.themePanel.value,"#171a20"),panel2:themeHex(el.themePanel2.value,"#1e222a"),panel3:themeHex(el.themePanel3.value,"#242933"),text:themeHex(el.themeText.value,"#f2f3f5"),muted:themeHex(el.themeMuted.value,"#969daa"),border:themeHex(el.themeBorder.value,"#2b303a"),accent:themeHex(el.themeAccent.value,"#d9b55b"),danger:themeHex(el.themeDanger.value,"#ef6a67"),free:themeHex(el.themeFree.value,"#3d424d")};
+    theme.colors.wheelBase=theme.colors.panel3; theme.colors.wheelMajor=theme.colors.accent; theme.colors.wheelMinor=theme.colors.muted; theme.colors.wheelText=theme.colors.muted;
+    state.themeId=theme.id;saveState();applyTheme();el.themeEditorDialog.close();renderThemeList();render();
+  });
+
   el.sunSettingsBtn.addEventListener("click", openSolarDialog);
   $("cancelSolar").addEventListener("click", () => el.solarDialog.close());
   el.solarLatitude.addEventListener("input", updateSolarPreview);
@@ -4384,7 +4757,7 @@ input[type="date"], input[type="time"] {
     const minMinutes = Math.max(1, Math.min(limit, Number(el.jarMinMinutes.value) || 1));
     const maxMinutes = minMinutes;
     const linkedCandidate = jarById(el.jarLinkedDailyId.value);
-    const linkedDailyJarId = period === "weekly" && linkedCandidate?.period !== "weekly" ? linkedCandidate.id : null;
+    const linkedDailyJarId = period === "weekly" && linkedCandidate && linkedCandidate.period !== "weekly" ? linkedCandidate.id : null;
     const existing = jarById(el.jarEditId.value);
     if (existing) {
       existing.name = name;
@@ -4442,7 +4815,7 @@ input[type="date"], input[type="time"] {
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./sw-v11.2.js", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw-v12.js", { updateViaCache: "none" });
         if (reg.update) reg.update().catch(() => {});
       } catch {}
     });
