@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Questwheel" />
-  <link rel="manifest" href="./manifest-v8.webmanifest" />
-  <link rel="apple-touch-icon" href="./icons/icon-v8-192.png" />
+  <link rel="manifest" href="./manifest-v9.1.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-v9.1-192.png" />
   <style>
 :root {
   color-scheme: dark;
@@ -423,8 +423,81 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
 .edit-recurrence-fields { display: grid; gap: 11px; padding: 12px; border: 1px solid var(--border); border-radius: 13px; background: rgba(143,184,221,.055); }
 .edit-recurrence-fields[hidden] { display: none; }
 
+
+/* v9: linked jar activities, compact tape labels, live day hand, solar/twilight ring */
+
+/* v9.1: retrospective manual jar entries on the wheel */
+.manual-wheel-segment {
+  opacity: .72 !important;
+  stroke: rgba(242,243,245,.8) !important;
+  stroke-dasharray: 3 2;
+}
+
+.wheel-panel { position: relative; }
+.sun-settings-btn {
+  position: absolute; right: 12px; top: 12px; z-index: 4;
+  width: 38px; min-height: 38px; padding: 0; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--panel-2); color: var(--muted);
+  font-size: 18px;
+}
+.sun-settings-btn.active { color: #dfbf68; border-color: rgba(223,191,104,.55); }
+.solar-legend { margin-top: 7px; text-align: center; color: var(--muted); font-size: 9.5px; line-height: 1.35; }
+.solar-legend[hidden] { display: none; }
+.solar-key { display: inline-flex; gap: 7px; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: 3px; }
+.solar-key-item { display: inline-flex; align-items: center; gap: 3px; }
+.solar-key-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+/* Shorter, rough-edged tape labels; the lower glass stays visible. */
+.jar-card { min-height: 158px; }
+.jar-vessel-wrap { position: relative; width: 84px; height: 112px; }
+.jar-card .jar-vessel { position: absolute; inset: 0; }
+.jar-card-copy {
+  position: absolute;
+  top: 55px;
+  left: 50%;
+  width: 101px;
+  min-height: 0;
+  margin: 0;
+  padding: 5px 6px 4px;
+  transform: translateX(-50%) rotate(-1.2deg);
+  background:
+    repeating-linear-gradient(0deg, rgba(105,84,46,.045) 0 1px, transparent 1px 4px),
+    linear-gradient(90deg, rgba(255,255,255,.13), transparent 18%, transparent 82%, rgba(80,57,24,.06)),
+    #d8c79e;
+  border: 0;
+  border-radius: 1px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.24);
+  clip-path: polygon(2% 7%, 97% 1%, 100% 91%, 95% 100%, 4% 96%, 0 12%);
+}
+.jar-card:nth-child(even) .jar-card-copy { transform: translateX(-50%) rotate(.9deg); }
+.jar-card-copy.jar-label-button:active { transform: translateX(-50%) rotate(0deg) scale(.98); }
+.jar-card:nth-child(even) .jar-card-copy.jar-label-button:active { transform: translateX(-50%) rotate(0deg) scale(.98); }
+.jar-card-title { font-size: 10px; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jar-card-total { display: inline; font-size: 12px; line-height: 1; margin: 0 4px 0 0; }
+.jar-card-target { display: inline; font-size: 7.5px; line-height: 1; color: #5c4e34; }
+.jar-card-status, .jar-period-chip, .jar-link-note { display: none !important; }
+.jar-quick-add { margin-top: 2px; }
+.jar-level-marker {
+  position: absolute; right: -14px; width: 12px; height: 2px;
+  background: #e64e4e; border-radius: 2px; z-index: 9;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.25);
+  transform: translateY(50%);
+}
+.jar-level-marker::after { content:""; position:absolute; right:-2px; top:-2px; width:6px; height:6px; border-radius:50%; background:#e64e4e; }
+
+.quest-link-box { display: grid; gap: 5px; max-height: 190px; overflow: auto; padding: 8px; border: 1px solid var(--border); border-radius: 11px; background: rgba(255,255,255,.02); }
+.quest-link-row { display: grid; grid-template-columns: 22px minmax(0,1fr); gap: 7px; align-items: center; min-height: 34px; color: var(--text); font-size: 12px; font-weight: 550; }
+.quest-link-row input { width: 20px; min-height: 20px; margin: 0; }
+.manual-history { display: grid; gap: 6px; }
+.manual-history[hidden] { display:none; }
+.manual-entry { padding: 7px 9px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel-2); }
+.manual-entry strong { display:block; font-size: 11px; }
+.manual-entry span { display:block; margin-top:2px; color:var(--muted); font-size:10px; }
+.sun-settings-grid { display:grid; gap:11px; }
+.sun-preview { padding: 9px 11px; border:1px solid var(--border); border-radius:11px; background:var(--panel-2); color:var(--muted); font-size:11px; line-height:1.4; }
+
 </style>
-  <title>Questwheel v8</title>
+  <title>Questwheel v9.1</title>
 </head>
 <body>
   <div class="app-shell">
@@ -434,7 +507,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
           <span class="relative-label">Today</span>
           <span class="relative-date">Mon 24 Aug ’26</span>
         </div>
-        <h1>Questwheel <span class="build-tag">v8</span></h1>
+        <h1>Questwheel <span class="build-tag">v9.1</span></h1>
       </div>
       <button class="ghost compact" id="todayBtn" type="button">Today</button>
     </header>
@@ -442,6 +515,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     <main>
       <section class="view active" id="dayView" aria-labelledby="dayTab">
         <section class="panel wheel-panel">
+          <button id="sunSettingsBtn" class="sun-settings-btn" type="button" aria-label="Daylight and twilight settings">☀︎</button>
           <div class="day-heading">
             <span class="eyebrow">DAY MAP</span>
             <h2 id="selectedDateHeading">Monday, August 24</h2>
@@ -463,6 +537,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
             <div class="bank-time-badge"><span>Banked free time</span><strong id="bankedTimeTotal">0m</strong></div>
           </div>
           <div class="legend" id="wheelLegend"></div>
+          <div id="solarLegend" class="solar-legend" hidden></div>
 
           <section id="selectedBlockPanel" class="selected-block-panel" hidden aria-live="polite">
             <div class="selected-block-main">
@@ -718,6 +793,11 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         <label><span id="jarMaxLabel">Daily full target (minutes)</span><input id="jarMaxMinutes" type="number" min="1" max="10080" step="1" value="45" inputmode="numeric" required /></label>
       </div>
       <label>Colour<div id="jarColorPicker" class="color-picker" role="radiogroup" aria-label="Jar colour"></div></label>
+      <label>Auto-fill from completed quests / activities
+        <div id="jarQuestLinks" class="quest-link-box"></div>
+      </label>
+      <p class="hint">When a linked quest block is completed, its full planned duration fills this jar automatically. A block explicitly assigned to a jar still works too.</p>
+      <div id="jarManualHistory" class="manual-history" hidden></div>
       <div id="jarDangerZone" class="danger-zone" hidden><button class="small-btn danger" type="button" id="deleteJarFromDialog">Delete jar</button></div>
       <div class="dialog-actions"><button class="ghost" value="cancel" type="button" id="cancelJar">Cancel</button><button class="primary" value="default" type="submit">Save jar</button></div>
     </form>
@@ -730,10 +810,31 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         <button class="icon-btn" value="cancel" aria-label="Close">×</button>
       </div>
       <input id="manualJarId" type="hidden" />
-      <label>Date<input id="manualJarDate" type="date" required /></label>
+      <label>What did you do?<input id="manualJarWhat" maxlength="120" required placeholder="e.g. Took a shower" /></label>
+      <div class="two-col">
+        <label>Date<input id="manualJarDate" type="date" required /></label>
+        <label>Time<input id="manualJarTime" type="time" required /></label>
+      </div>
       <label>Minutes to add<input id="manualJarMinutes" type="number" min="1" max="1440" step="1" value="5" inputmode="numeric" required /></label>
-      <p class="hint">Use this for activity you did without scheduling a block first.</p>
+      <p class="hint">Manual sand always records what you did and when you did it.</p>
       <div class="dialog-actions"><button class="ghost" value="cancel" type="button" id="cancelManualJar">Cancel</button><button class="primary" value="default" type="submit">Add time</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="solarDialog">
+    <form method="dialog" id="solarForm">
+      <div class="dialog-head">
+        <div><span class="eyebrow">DAYLIGHT RING</span><h2>Sun & twilight</h2></div>
+        <button class="icon-btn" value="cancel" aria-label="Close">×</button>
+      </div>
+      <label class="form-check"><input id="solarEnabled" type="checkbox" /> <span>Show daylight and twilight on the day wheel</span></label>
+      <div class="sun-settings-grid">
+        <label>Latitude<input id="solarLatitude" type="number" min="-89.9" max="89.9" step="0.0001" inputmode="decimal" placeholder="e.g. 59.25" /></label>
+        <label>Longitude<input id="solarLongitude" type="number" min="-180" max="180" step="0.0001" inputmode="decimal" placeholder="west is negative" /></label>
+      </div>
+      <div id="solarPreview" class="sun-preview">Enter latitude and longitude. Questwheel uses your phone’s timezone; it never requests location permission.</div>
+      <p class="hint">Longitude is needed as well as latitude because it determines where solar noon falls on your clock.</p>
+      <div class="dialog-actions"><button class="ghost" value="cancel" type="button" id="cancelSolar">Cancel</button><button class="primary" value="default" type="submit">Save</button></div>
     </form>
   </dialog>
 
@@ -763,7 +864,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   <script>
 (() => {
   const STORE = "questwheel-v1"; // Preserve all prior Questwheel local data.
-  const BUILD = "v7";
+  const BUILD = "v9.1";
 
   const categories = {
     business: { label: "Business", color: "#FFB000" },
@@ -807,6 +908,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     bankLedger: [],
     jars: [],
     jarEntries: [],
+    solar: { enabled: false, lat: null, lon: null },
     selectedDate: isoDate(new Date())
   };
 
@@ -864,8 +966,12 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     manualJarForm: $("manualJarForm"),
     manualJarTitle: $("manualJarTitle"),
     manualJarId: $("manualJarId"),
+    manualJarWhat: $("manualJarWhat"),
     manualJarDate: $("manualJarDate"),
+    manualJarTime: $("manualJarTime"),
     manualJarMinutes: $("manualJarMinutes"),
+    jarQuestLinks: $("jarQuestLinks"),
+    jarManualHistory: $("jarManualHistory"),
     questDialog: $("questDialog"),
     blockDialog: $("blockDialog"),
     editBlockDialog: $("editBlockDialog"),
@@ -873,6 +979,14 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     questForm: $("questForm"),
     blockForm: $("blockForm"),
     editBlockForm: $("editBlockForm"),
+    sunSettingsBtn: $("sunSettingsBtn"),
+    solarLegend: $("solarLegend"),
+    solarDialog: $("solarDialog"),
+    solarForm: $("solarForm"),
+    solarEnabled: $("solarEnabled"),
+    solarLatitude: $("solarLatitude"),
+    solarLongitude: $("solarLongitude"),
+    solarPreview: $("solarPreview"),
     finishForm: $("finishForm"),
     questDialogEyebrow: $("questDialogEyebrow"),
     questDialogTitle: $("questDialogTitle"),
@@ -1017,6 +1131,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
           name: j.name || "Jar",
           period: j.period === "weekly" ? "weekly" : "daily",
           linkedDailyJarId: j.linkedDailyJarId || null,
+          linkedQuestIds: Array.isArray(j.linkedQuestIds) ? [...new Set(j.linkedQuestIds.filter(Boolean))] : [],
           minMinutes: Math.max(1, Math.min(10080, Number(j.minMinutes) || 30)),
           maxMinutes: Math.max(1, Math.min(10080, Number(j.maxMinutes) || 45)),
           color: j.color || questPalette[0],
@@ -1027,8 +1142,15 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
           jarId: e.jarId || null,
           date: /^\d{4}-\d{2}-\d{2}$/.test(e.date || "") ? e.date : isoDate(new Date()),
           minutes: Math.max(1, Math.min(1440, Number(e.minutes) || 1)),
+          what: typeof e.what === "string" ? e.what : "",
+          time: /^\d{2}:\d{2}$/.test(e.time || "") ? e.time : "",
           createdAt: Number(e.createdAt) || 0
         })) : [],
+        solar: {
+          enabled: Boolean(parsed.solar?.enabled),
+          lat: parsed.solar?.lat != null && Number.isFinite(Number(parsed.solar.lat)) ? Number(parsed.solar.lat) : null,
+          lon: parsed.solar?.lon != null && Number.isFinite(Number(parsed.solar.lon)) ? Number(parsed.solar.lon) : null
+        },
         selectedDate: isoDate(new Date())
       };
     } catch {
@@ -1095,12 +1217,23 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     return [...new Set(ids)];
   }
 
+  function blockCreditsJar(block, jar) {
+    if (!block?.completed || !jar) return false;
+    const sourceIds = jarSourceIds(jar);
+    if (block.jarId && sourceIds.includes(block.jarId)) return true;
+    if (!block.questId) return false;
+    return sourceIds.some(id => {
+      const source = jarById(id);
+      return Array.isArray(source?.linkedQuestIds) && source.linkedQuestIds.includes(block.questId);
+    });
+  }
+
   function jarMinutesForDate(jarId, dateISO) {
     const jar = jarById(jarId);
     if (!jar) return 0;
     const sourceIds = jarSourceIds(jar);
     const blockMinutes = state.blocks
-      .filter(b => b.completed && sourceIds.includes(b.jarId) && b.date === dateISO)
+      .filter(b => b.date === dateISO && blockCreditsJar(b, jar))
       .reduce((sum, b) => sum + (Number(b.minutes) || 0), 0);
     const manualMinutes = (state.jarEntries || [])
       .filter(entry => sourceIds.includes(entry.jarId) && entry.date === dateISO)
@@ -1214,8 +1347,33 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     return state.blocks.filter(b => b.date === date).sort((a, b) => a.start - b.start || a.minutes - b.minutes);
   }
 
+  // Turn a manual jar fill into a retrospective completed wheel segment.
+  // It is visual history only: it does not enter the Free Time bank and jar credit
+  // continues to come from the jar entry itself, avoiding double-counting.
+  function manualEntryAsWheelBlock(entry, startOverride = null, minutesOverride = null, part = "start") {
+    const jar = jarById(entry.jarId);
+    return {
+      id: `manual-wheel-${entry.id}`,
+      name: entry.what || "Manual jar entry",
+      questId: null,
+      jarId: entry.jarId || null,
+      category: "personal",
+      color: jar?.color || categories.personal.color,
+      date: entry.date,
+      start: startOverride == null ? minutesFromTime(entry.time || "00:00") : startOverride,
+      minutes: minutesOverride == null ? (Number(entry.minutes) || 1) : minutesOverride,
+      completed: true,
+      actualMinutes: Number(entry.minutes) || 1,
+      reclaimed: 0,
+      bankDelta: 0,
+      _manualJarEntry: true,
+      _manualJarEntryId: entry.id,
+      _displayPart: part
+    };
+  }
+
   // Return only the portion of each continuous block that physically lies in this calendar day.
-  // This lets a block beginning before midnight continue naturally onto the next wheel.
+  // This lets scheduled blocks and retrospective manual jar entries cross midnight naturally.
   function wheelBlocksFor(date) {
     const visible = [];
     const current = blocksFor(date);
@@ -1227,7 +1385,16 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       }
     });
 
+    (state.jarEntries || [])
+      .filter(entry => entry.date === date && /^\d{2}:\d{2}$/.test(entry.time || ""))
+      .forEach(entry => {
+        const start = minutesFromTime(entry.time);
+        const minutesHere = Math.max(0, Math.min(Number(entry.minutes) || 1, 1440 - start));
+        if (minutesHere > 0) visible.push(manualEntryAsWheelBlock(entry, start, minutesHere, "start"));
+      });
+
     const previousISO = isoDate(addDays(dateFromISO(date), -1));
+
     blocksFor(previousISO).forEach(block => {
       const spill = Math.max(0, block.start + block.minutes - 1440);
       if (spill > 0) {
@@ -1240,6 +1407,18 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         });
       }
     });
+
+    (state.jarEntries || [])
+      .filter(entry => entry.date === previousISO && /^\d{2}:\d{2}$/.test(entry.time || ""))
+      .forEach(entry => {
+        const start = minutesFromTime(entry.time);
+        const spill = Math.max(0, start + (Number(entry.minutes) || 1) - 1440);
+        if (spill > 0) {
+          const block = manualEntryAsWheelBlock(entry, 0, Math.min(1440, spill), "carry");
+          block._sourceDate = entry.date;
+          visible.push(block);
+        }
+      });
 
     return visible.sort((a, b) => a.start - b.start || a.minutes - b.minutes);
   }
@@ -1396,6 +1575,63 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     el.jarMaxLabel.textContent = `${weekly ? "Weekly" : "Daily"} full target (minutes)`;
   }
 
+  function renderJarQuestLinks(selectedIds = []) {
+    const selected = new Set(selectedIds || []);
+    el.jarQuestLinks.innerHTML = "";
+    const quests = [];
+    const walk = (parentId, depth) => {
+      childrenOf(parentId)
+        .filter(q => !q.archived && !ancestorArchived(q))
+        .sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0))
+        .forEach(q => { quests.push({q,depth}); walk(q.id, depth+1); });
+    };
+    walk(null, 0);
+    if (!quests.length) {
+      const empty = document.createElement("span");
+      empty.className = "hint";
+      empty.textContent = "No active quests to link yet.";
+      el.jarQuestLinks.appendChild(empty);
+      return;
+    }
+    quests.forEach(({ q, depth }) => {
+      const label = document.createElement("label");
+      label.className = "quest-link-row";
+      label.style.paddingLeft = `${Math.min(depth, 4) * 10}px`;
+      const check = document.createElement("input");
+      check.type = "checkbox";
+      check.value = q.id;
+      check.checked = selected.has(q.id);
+      const text = document.createElement("span");
+      text.textContent = `${depth ? "↳ ".repeat(Math.min(depth, 2)) : ""}${q.name}${q.completed ? " ✓" : ""}`;
+      label.append(check, text);
+      el.jarQuestLinks.appendChild(label);
+    });
+  }
+
+  function selectedJarQuestIds() {
+    return [...el.jarQuestLinks.querySelectorAll('input[type="checkbox"]:checked')].map(input => input.value);
+  }
+
+  function renderJarManualHistory(jarId) {
+    const entries = (state.jarEntries || [])
+      .filter(entry => entry.jarId === jarId)
+      .sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0))
+      .slice(0, 5);
+    el.jarManualHistory.innerHTML = "";
+    el.jarManualHistory.hidden = !entries.length;
+    entries.forEach(entry => {
+      const row = document.createElement("div");
+      row.className = "manual-entry";
+      const strong = document.createElement("strong");
+      strong.textContent = `${entry.what || "Manual entry"} · ${fmtMinutes(entry.minutes)}`;
+      const meta = document.createElement("span");
+      const d = dateFromISO(entry.date);
+      meta.textContent = `${d.toLocaleDateString(undefined,{month:"short",day:"numeric"})}${entry.time ? ` · ${entry.time}` : ""}`;
+      row.append(strong, meta);
+      el.jarManualHistory.appendChild(row);
+    });
+  }
+
   function openJarDialog(jarId = null) {
     const jar = jarById(jarId);
     el.jarEditId.value = jar?.id || "";
@@ -1407,6 +1643,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     el.jarMinMinutes.value = String(jar?.minMinutes || 30);
     el.jarMaxMinutes.value = String(jar?.maxMinutes || 45);
     setJarColorPicker(jar?.color || questPalette[0]);
+    renderJarQuestLinks(jar?.linkedQuestIds || []);
+    renderJarManualHistory(jar?.id || null);
     el.jarDangerZone.hidden = !jar;
     syncJarPeriodEditor();
     el.jarDialog.showModal();
@@ -1429,7 +1667,10 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     if (!jar) return;
     el.manualJarId.value = jar.id;
     el.manualJarTitle.textContent = `Add time to ${jar.name}`;
+    el.manualJarWhat.value = "";
     el.manualJarDate.value = state.selectedDate;
+    const now = new Date();
+    el.manualJarTime.value = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
     el.manualJarMinutes.value = "5";
     el.manualJarDialog.showModal();
   }
@@ -1475,6 +1716,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       const card = document.createElement("article");
       card.className = "jar-card";
 
+      const vesselWrap = document.createElement("div");
+      vesselWrap.className = "jar-vessel-wrap";
       const vessel = document.createElement("div");
       vessel.className = "jar-vessel";
       vessel.style.setProperty("--jar-color", jar.color);
@@ -1484,7 +1727,11 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       setJarLiquid(liquid, pct, jar.color);
       const shine = document.createElement("div");
       shine.className = "jar-shine";
+      const marker = document.createElement("span");
+      marker.className = "jar-level-marker";
+      marker.style.bottom = `${Math.max(1, Math.min(99, pct))}%`;
       vessel.append(liquid, shine);
+      vesselWrap.append(vessel, marker);
 
       const copy = document.createElement("button");
       copy.type = "button";
@@ -1494,33 +1741,16 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       const title = document.createElement("div");
       title.className = "jar-card-title";
       title.textContent = jar.name;
-      const periodChip = document.createElement("span");
-      periodChip.className = "jar-period-chip";
-      periodChip.textContent = jar.period === "weekly" ? "Weekly" : (activeJarPeriod === "weekly" ? "Daily × 7" : "Daily");
-      const totalEl = document.createElement("div");
+      const totalEl = document.createElement("span");
       totalEl.className = "jar-card-total";
       totalEl.textContent = fmtMinutes(total);
-      const targetEl = document.createElement("div");
+      const targetEl = document.createElement("span");
       targetEl.className = "jar-card-target";
-      targetEl.textContent = `${fmtMinutes(target.min)} minimum · ${fmtMinutes(target.max)} full`;
-      const status = document.createElement("div");
-      status.className = "jar-card-status";
-      if (total < target.min) status.textContent = `${fmtMinutes(target.min - total)} to minimum`;
-      else if (total <= target.max) { status.textContent = "Minimum met"; status.classList.add("met"); }
-      else { status.textContent = `${fmtMinutes(total - target.max)} over full target`; status.classList.add("met"); }
-      copy.append(title, periodChip, totalEl, targetEl, status);
-      if (jar.period === "weekly" && jar.linkedDailyJarId) {
-        const linked = jarById(jar.linkedDailyJarId);
-        if (linked) {
-          const note = document.createElement("div");
-          note.className = "jar-link-note";
-          note.textContent = `also counts ${linked.name}`;
-          copy.appendChild(note);
-        }
-      }
+      targetEl.textContent = `min ${fmtMinutes(target.min)} · max ${fmtMinutes(target.max)}`;
+      copy.append(title, totalEl, targetEl);
 
       const quickAdd = makeSmallButton("+ Time", "accent jar-quick-add", () => openManualJarDialog(jar.id));
-      card.append(vessel, copy, quickAdd);
+      card.append(vesselWrap, copy, quickAdd);
       el.jarGrid.appendChild(card);
     });
   }
@@ -2044,10 +2274,15 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       const path = document.createElementNS(NS, "path");
       path.setAttribute("d", arcPath(cx, cy, laneOuter, laneInner, startA, endA));
       path.setAttribute("fill", blockColor(b));
-      path.setAttribute("opacity", b.completed ? ".48" : ".93");
-      path.setAttribute("stroke", b.id === selectedBlockId && interactive ? "#f2f3f5" : "#0e1014");
-      path.setAttribute("stroke-width", String(b.id === selectedBlockId && interactive ? Math.max(2.8, strokeWidth * 2) : strokeWidth));
-      if (interactive) {
+      path.setAttribute("opacity", b._manualJarEntry ? ".72" : (b.completed ? ".48" : ".93"));
+      path.setAttribute("stroke", b._manualJarEntry ? "rgba(242,243,245,.8)" : (b.id === selectedBlockId && interactive ? "#f2f3f5" : "#0e1014"));
+      path.setAttribute("stroke-width", String(b.id === selectedBlockId && interactive && !b._manualJarEntry ? Math.max(2.8, strokeWidth * 2) : strokeWidth));
+      if (b._manualJarEntry) {
+        path.classList.add("manual-wheel-segment");
+        path.setAttribute("pointer-events", "none");
+        const carryPrefix = b._displayPart === "carry" ? "Continues from previous day, " : "";
+        path.setAttribute("aria-label", `${carryPrefix}Manual log: ${blockTitle(b)}, ${timeFromMinutes(b.start)} to ${timeFromMinutes(b.start + b.minutes)}, ${fmtMinutes(b.minutes)}`);
+      } else if (interactive) {
         path.classList.add("wheel-block-segment");
         if (b.id === selectedBlockId) path.classList.add("selected");
         path.setAttribute("tabindex", "0");
@@ -2101,6 +2336,161 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     return geo;
   }
 
+  const solarColors = {
+    night: "#171b24",
+    astronomical: "#263143",
+    nautical: "#34485f",
+    civil: "#68758a",
+    day: "#c9ad68"
+  };
+
+  function solarSettingsValid() {
+    const lat = Number(state.solar?.lat);
+    const lon = Number(state.solar?.lon);
+    return Boolean(state.solar?.enabled && Number.isFinite(lat) && Math.abs(lat) <= 89.9 && Number.isFinite(lon) && Math.abs(lon) <= 180);
+  }
+
+  function dayOfYear(date) {
+    const start = new Date(date.getFullYear(), 0, 0);
+    return Math.floor((date - start) / 86400000);
+  }
+
+  function solarAltitude(dateISO, localMinute, latDeg, lonDeg) {
+    const date = dateFromISO(dateISO);
+    const n = dayOfYear(date);
+    const hour = localMinute / 60;
+    const gamma = 2 * Math.PI / 365 * (n - 1 + (hour - 12) / 24);
+    const eqtime = 229.18 * (0.000075 + 0.001868*Math.cos(gamma) - 0.032077*Math.sin(gamma) - 0.014615*Math.cos(2*gamma) - 0.040849*Math.sin(2*gamma));
+    const decl = 0.006918 - 0.399912*Math.cos(gamma) + 0.070257*Math.sin(gamma) - 0.006758*Math.cos(2*gamma) + 0.000907*Math.sin(2*gamma) - 0.002697*Math.cos(3*gamma) + 0.00148*Math.sin(3*gamma);
+    const tzOffsetMinutes = date.getTimezoneOffset();
+    let trueSolar = (localMinute + eqtime + 4*lonDeg + tzOffsetMinutes) % 1440;
+    if (trueSolar < 0) trueSolar += 1440;
+    let haDeg = trueSolar / 4 - 180;
+    if (haDeg < -180) haDeg += 360;
+    const lat = latDeg * Math.PI / 180;
+    const ha = haDeg * Math.PI / 180;
+    const cosZenith = Math.sin(lat)*Math.sin(decl) + Math.cos(lat)*Math.cos(decl)*Math.cos(ha);
+    const zenith = Math.acos(Math.max(-1, Math.min(1, cosZenith)));
+    return 90 - zenith * 180 / Math.PI;
+  }
+
+  function solarBand(altitude) {
+    if (altitude >= -0.833) return "day";
+    if (altitude >= -6) return "civil";
+    if (altitude >= -12) return "nautical";
+    if (altitude >= -18) return "astronomical";
+    return "night";
+  }
+
+  function appendSolarRing(svg, dateISO, cx, cy) {
+    if (!solarSettingsValid()) return;
+    const lat = Number(state.solar.lat), lon = Number(state.solar.lon);
+    const step = 5;
+    let start = 0;
+    let current = solarBand(solarAltitude(dateISO, step/2, lat, lon));
+    const segments = [];
+    for (let minute = step; minute <= 1440; minute += step) {
+      const probe = Math.min(1439, minute + step/2);
+      const band = minute >= 1440 ? null : solarBand(solarAltitude(dateISO, probe, lat, lon));
+      if (band !== current || minute >= 1440) {
+        segments.push({ start, end: minute, band: current });
+        start = minute;
+        current = band;
+      }
+    }
+    segments.forEach(seg => {
+      if (!seg.band || seg.end <= seg.start) return;
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", arcPath(cx, cy, 53, 43, seg.start/1440*360, seg.end/1440*360));
+      path.setAttribute("fill", solarColors[seg.band]);
+      path.setAttribute("opacity", seg.band === "day" ? ".9" : ".95");
+      path.setAttribute("pointer-events", "none");
+      svg.appendChild(path);
+    });
+  }
+
+  function solarRiseSetSummary(dateISO) {
+    if (!solarSettingsValid()) return "";
+    const lat = Number(state.solar.lat), lon = Number(state.solar.lon);
+    let previous = solarAltitude(dateISO, 0, lat, lon) >= -0.833;
+    const crossings = [];
+    for (let minute = 2; minute < 1440; minute += 2) {
+      const above = solarAltitude(dateISO, minute, lat, lon) >= -0.833;
+      if (above !== previous) crossings.push({ minute, rising: above });
+      previous = above;
+    }
+    const fmt = minute => {
+      const m = Math.max(0, Math.min(1439, Math.round(minute)));
+      return `${String(Math.floor(m/60)).padStart(2,"0")}:${String(m%60).padStart(2,"0")}`;
+    };
+    const rise = crossings.find(x => x.rising);
+    const set = crossings.find(x => !x.rising);
+    if (rise || set) return `${rise ? `Sunrise ≈ ${fmt(rise.minute)}` : ""}${rise && set ? " · " : ""}${set ? `Sunset ≈ ${fmt(set.minute)}` : ""}`;
+    const noonAbove = solarAltitude(dateISO, 720, lat, lon) >= -0.833;
+    return noonAbove ? "Sun above the horizon all day" : "Sun below the horizon all day";
+  }
+
+  function renderSolarLegend() {
+    if (!solarSettingsValid()) {
+      el.solarLegend.hidden = true;
+      el.solarLegend.innerHTML = "";
+      el.sunSettingsBtn.classList.remove("active");
+      return;
+    }
+    el.sunSettingsBtn.classList.add("active");
+    el.solarLegend.hidden = false;
+    el.solarLegend.innerHTML = `<div>${solarRiseSetSummary(state.selectedDate)}</div><div class="solar-key">` +
+      [["night","Night"],["astronomical","Astro"],["nautical","Nautical"],["civil","Civil"],["day","Day"]]
+        .map(([key,label]) => `<span class="solar-key-item"><span class="solar-key-dot" style="background:${solarColors[key]}"></span>${label}</span>`).join("") + `</div>`;
+  }
+
+  function appendNowOverlay(svg, dateISO, cx, cy, ro, inner) {
+    if (dateISO !== isoDate(new Date())) return;
+    const now = new Date();
+    const minute = now.getHours()*60 + now.getMinutes() + now.getSeconds()/60;
+    if (minute > 0.2) {
+      const shade = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      shade.setAttribute("d", arcPath(cx,cy,ro,inner,0,minute/1440*360));
+      shade.setAttribute("fill", "#090b0f");
+      shade.setAttribute("opacity", ".38");
+      shade.setAttribute("pointer-events", "none");
+      svg.appendChild(shade);
+    }
+    const angle = minute/1440*360;
+    const p1 = polar(cx,cy,Math.max(36,inner-4),angle);
+    const p2 = polar(cx,cy,ro+2,angle);
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1",p1.x); line.setAttribute("y1",p1.y); line.setAttribute("x2",p2.x); line.setAttribute("y2",p2.y);
+    line.setAttribute("stroke","#ef4d4d"); line.setAttribute("stroke-width","2.2");
+    line.setAttribute("stroke-linecap","round"); line.setAttribute("pointer-events","none");
+    svg.appendChild(line);
+    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    dot.setAttribute("cx",p2.x); dot.setAttribute("cy",p2.y); dot.setAttribute("r","4");
+    dot.setAttribute("fill","#ef4d4d"); dot.setAttribute("stroke","#270808"); dot.setAttribute("stroke-width","1");
+    dot.setAttribute("pointer-events","none"); svg.appendChild(dot);
+  }
+
+  function openSolarDialog() {
+    el.solarEnabled.checked = Boolean(state.solar?.enabled);
+    el.solarLatitude.value = state.solar?.lat != null && Number.isFinite(Number(state.solar.lat)) ? String(state.solar.lat) : "";
+    el.solarLongitude.value = state.solar?.lon != null && Number.isFinite(Number(state.solar.lon)) ? String(state.solar.lon) : "";
+    updateSolarPreview();
+    el.solarDialog.showModal();
+  }
+
+  function updateSolarPreview() {
+    const latRaw = el.solarLatitude.value.trim(), lonRaw = el.solarLongitude.value.trim();
+    const lat = latRaw === "" ? NaN : Number(latRaw), lon = lonRaw === "" ? NaN : Number(lonRaw);
+    if (!Number.isFinite(lat) || Math.abs(lat) > 89.9 || !Number.isFinite(lon) || Math.abs(lon) > 180) {
+      el.solarPreview.textContent = "Enter valid latitude (−89.9 to 89.9) and longitude (−180 to 180). West longitude is negative.";
+      return;
+    }
+    const old = state.solar;
+    state.solar = { enabled: true, lat, lon };
+    el.solarPreview.textContent = `${solarRiseSetSummary(state.selectedDate)} · ${Intl.DateTimeFormat().resolvedOptions().timeZone || "phone timezone"}`;
+    state.solar = old;
+  }
+
   function renderWheel() {
     const svg = el.dayWheel;
     svg.innerHTML = "";
@@ -2119,7 +2509,9 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     base.setAttribute("stroke-width", ro - geo.inner);
     svg.appendChild(base);
 
+    appendSolarRing(svg, state.selectedDate, cx, cy);
     appendWheelBlocks(svg, blocks, cx, cy, ro, 58, 1.4, true);
+    appendNowOverlay(svg, state.selectedDate, cx, cy, ro, geo.inner);
 
     // Hour ticks point inward so they no longer get clipped by the SVG edge.
     for (let h = 0; h < 24; h += 1) {
@@ -2149,7 +2541,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       }
     }
 
-    el.wheelScheduled.textContent = fmtMinutes(blocks.reduce((s, b) => s + b.minutes, 0));
+    el.wheelScheduled.textContent = fmtMinutes(blocks.filter(b => !b._manualJarEntry).reduce((s, b) => s + b.minutes, 0));
     el.wheelLegend.innerHTML = "";
     const seen = new Set();
     blocks.forEach(b => {
@@ -2162,12 +2554,19 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       item.appendChild(document.createTextNode(blockTitle(b)));
       el.wheelLegend.appendChild(item);
     });
+    if (blocks.some(b => b._manualJarEntry)) {
+      const item = document.createElement("span");
+      item.className = "legend-item";
+      item.innerHTML = `<span class="legend-dot" style="background:#7a808b;border:1px dashed #f2f3f5"></span>Manual log`;
+      el.wheelLegend.appendChild(item);
+    }
     if (blocks.some(b => b.reclaimed > 0)) {
       const item = document.createElement("span");
       item.className = "legend-item";
       item.innerHTML = `<span class="legend-dot" style="background:#3d424d;border:1px solid #d9b55b"></span>Reclaimed`;
       el.wheelLegend.appendChild(item);
     }
+    renderSolarLegend();
   }
 
   function startOfWeek(date) {
@@ -2178,7 +2577,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     return d;
   }
 
-  function renderMiniWheel(svg, blocks) {
+  function renderMiniWheel(svg, blocks, dateISO) {
     svg.innerHTML = "";
     const NS = "http://www.w3.org/2000/svg";
     const cx = 50, cy = 50, ro = 44;
@@ -2192,6 +2591,17 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     base.setAttribute("stroke", "#252a33");
     base.setAttribute("stroke-width", ro - geo.inner);
     svg.appendChild(base);
+    if (dateISO && solarSettingsValid()) {
+      const lat = Number(state.solar.lat), lon = Number(state.solar.lon);
+      const step = 15;
+      for (let minute = 0; minute < 1440; minute += step) {
+        const band = solarBand(solarAltitude(dateISO, minute + step/2, lat, lon));
+        const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+        path.setAttribute("d", arcPath(cx,cy,13,9,minute/1440*360,(minute+step)/1440*360));
+        path.setAttribute("fill",solarColors[band]); path.setAttribute("opacity",".9");
+        svg.appendChild(path);
+      }
+    }
     appendWheelBlocks(svg, blocks, cx, cy, ro, 15, .7);
 
     [0, 6, 12, 18].forEach(h => {
@@ -2221,7 +2631,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       const d = addDays(start, i);
       const iso = isoDate(d);
       const blocks = wheelBlocksFor(iso);
-      const total = blocks.reduce((s, b) => s + b.minutes, 0);
+      const total = blocks.filter(b => !b._manualJarEntry).reduce((s, b) => s + b.minutes, 0);
       // Bank changes are credited on the day the original block begins, not again on carry-over fragments.
       const reclaimed = blocksFor(iso).reduce((s, b) => s + blockBankDelta(b), 0);
       const box = document.createElement("div");
@@ -2237,7 +2647,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       svg.setAttribute("class", "mini-wheel");
       svg.setAttribute("viewBox", "0 0 100 100");
       svg.setAttribute("aria-label", `${d.toLocaleDateString(undefined, { weekday: "long" })} 24 hour schedule`);
-      renderMiniWheel(svg, blocks);
+      renderMiniWheel(svg, blocks, iso);
 
       const summary = document.createElement("div");
       summary.className = "week-quests";
@@ -2868,6 +3278,27 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   });
 
 
+  el.sunSettingsBtn.addEventListener("click", openSolarDialog);
+  $("cancelSolar").addEventListener("click", () => el.solarDialog.close());
+  el.solarLatitude.addEventListener("input", updateSolarPreview);
+  el.solarLongitude.addEventListener("input", updateSolarPreview);
+  el.solarEnabled.addEventListener("change", updateSolarPreview);
+  el.solarForm.addEventListener("submit", event => {
+    event.preventDefault();
+    const enabled = el.solarEnabled.checked;
+    const latRaw = el.solarLatitude.value.trim(), lonRaw = el.solarLongitude.value.trim();
+    const lat = latRaw === "" ? NaN : Number(latRaw), lon = lonRaw === "" ? NaN : Number(lonRaw);
+    if (enabled && (!Number.isFinite(lat) || Math.abs(lat) > 89.9 || !Number.isFinite(lon) || Math.abs(lon) > 180)) {
+      updateSolarPreview();
+      return;
+    }
+    state.solar = { enabled, lat: Number.isFinite(lat) ? lat : null, lon: Number.isFinite(lon) ? lon : null };
+    saveState();
+    el.solarDialog.close();
+    renderWheel();
+    renderWeek();
+  });
+
   $("addJarBtn").addEventListener("click", () => openJarDialog());
   $("cancelJar").addEventListener("click", () => el.jarDialog.close());
   el.jarPeriod.addEventListener("change", syncJarPeriodEditor);
@@ -2891,11 +3322,12 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       existing.minMinutes = minMinutes;
       existing.maxMinutes = maxMinutes;
       existing.color = selectedJarColor;
+      existing.linkedQuestIds = selectedJarQuestIds();
       if (period === "weekly") state.jars.forEach(other => {
         if (other.id !== existing.id && other.period === "weekly" && other.linkedDailyJarId === existing.id) other.linkedDailyJarId = null;
       });
     } else {
-      state.jars.push({ id: uid("jar"), name, period, linkedDailyJarId, minMinutes, maxMinutes, color: selectedJarColor, createdAt: Date.now() });
+      state.jars.push({ id: uid("jar"), name, period, linkedDailyJarId, linkedQuestIds: selectedJarQuestIds(), minMinutes, maxMinutes, color: selectedJarColor, createdAt: Date.now() });
     }
     saveState();
     el.jarDialog.close();
@@ -2907,10 +3339,13 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     event.preventDefault();
     const jar = jarById(el.manualJarId.value);
     if (!jar) return;
+    const what = el.manualJarWhat.value.trim();
+    if (!what) return;
     const minutes = Math.max(1, Math.min(1440, Number(el.manualJarMinutes.value) || 1));
     const date = /^\d{4}-\d{2}-\d{2}$/.test(el.manualJarDate.value) ? el.manualJarDate.value : state.selectedDate;
+    const time = /^\d{2}:\d{2}$/.test(el.manualJarTime.value) ? el.manualJarTime.value : "00:00";
     state.jarEntries = Array.isArray(state.jarEntries) ? state.jarEntries : [];
-    state.jarEntries.push({ id: uid("jar-entry"), jarId: jar.id, date, minutes, createdAt: Date.now() });
+    state.jarEntries.push({ id: uid("jar-entry"), jarId: jar.id, date, time, what, minutes, createdAt: Date.now() });
     saveState();
     el.manualJarDialog.close();
     render();
@@ -2936,7 +3371,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./sw-v8.js", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw-v9.1.js", { updateViaCache: "none" });
         if (reg.update) reg.update().catch(() => {});
       } catch {}
     });
@@ -2946,6 +3381,10 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   setBlockColorPicker(categoryColor("personal"));
   setEditBlockColorPicker(categoryColor("personal"));
   setJarColorPicker(questPalette[0]);
+  setInterval(() => {
+    if (state.selectedDate === isoDate(new Date()) && document.getElementById("dayView")?.classList.contains("active")) renderWheel();
+  }, 30000);
+
   render();
 })();
 
