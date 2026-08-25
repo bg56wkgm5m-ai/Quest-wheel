@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Questwheel" />
-  <link rel="manifest" href="./manifest-v6.webmanifest" />
-  <link rel="apple-touch-icon" href="./icons/icon-v6-192.png" />
+  <link rel="manifest" href="./manifest-v7.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-v7-192.png" />
   <style>
 :root {
   color-scheme: dark;
@@ -263,8 +263,135 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   .jar-vessel-large { width: 92px; height: 132px; }
 }
 
+
+/* v7: continuous day transitions, cross-midnight wheels, compact sand jars */
+.wheel-slide.animating {
+  transition: transform 285ms cubic-bezier(.22,.78,.24,1);
+}
+.wheel-slide-clone {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  will-change: transform;
+  z-index: 2;
+}
+.wheel-slide-clone.animating {
+  transition: transform 285ms cubic-bezier(.22,.78,.24,1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .wheel-slide.animating, .wheel-slide-clone.animating { transition: none; }
+}
+
+/* Sand replaces flat liquid. Multiple tiny gradients make a dry, granular fill. */
+.jar-liquid {
+  --jar-color: var(--accent);
+  opacity: 1;
+  background-color: var(--jar-color) !important;
+  background-image:
+    radial-gradient(circle at 18% 24%, rgba(255,255,255,.32) 0 1px, transparent 1.3px),
+    radial-gradient(circle at 72% 63%, rgba(0,0,0,.20) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 43% 82%, rgba(255,255,255,.20) 0 .8px, transparent 1.2px),
+    radial-gradient(circle at 86% 18%, rgba(0,0,0,.13) 0 .8px, transparent 1.2px);
+  background-size: 9px 8px, 11px 10px, 7px 7px, 13px 11px;
+  box-shadow: inset 0 5px 7px rgba(255,255,255,.07), inset 0 -5px 8px rgba(0,0,0,.16);
+}
+.jar-liquid::before {
+  top: -3px;
+  height: 7px;
+  border-radius: 50% 50% 42% 58%;
+  background-color: var(--jar-color);
+  background-image:
+    radial-gradient(circle at 25% 50%, rgba(255,255,255,.25) 0 1px, transparent 1.2px),
+    radial-gradient(circle at 70% 40%, rgba(0,0,0,.16) 0 1px, transparent 1.3px);
+  background-size: 8px 7px, 10px 8px;
+}
+.free-liquid { --jar-color: #d9b55b; background-color: #d9b55b !important; }
+
+/* Category jars become a shelf of compact labelled vessels. */
+.jar-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  align-items: start;
+}
+.jar-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: 6px;
+  padding: 8px 5px 7px;
+  background: transparent;
+  border: 0;
+  border-radius: 12px;
+  overflow: visible;
+}
+.jar-card .jar-vessel {
+  width: 84px;
+  height: 112px;
+}
+.jar-card-copy {
+  position: relative;
+  width: min(100%, 104px);
+  min-height: 62px;
+  margin-top: -40px;
+  z-index: 6;
+  padding: 7px 6px 6px;
+  text-align: center;
+  color: #2c261a;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.08), transparent 22%, transparent 78%, rgba(0,0,0,.05)),
+    #d7c49a;
+  border: 1px solid rgba(83,65,35,.28);
+  border-radius: 3px;
+  box-shadow: 0 2px 4px rgba(0,0,0,.28);
+  transform: rotate(-1deg);
+}
+.jar-card:nth-child(even) .jar-card-copy { transform: rotate(1deg); }
+.jar-card-title {
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.05;
+  color: #261f14;
+}
+.jar-card-total {
+  font-size: 15px;
+  line-height: 1.05;
+  margin: 4px 0 2px;
+  color: #261f14;
+}
+.jar-card-target {
+  font-size: 8.5px;
+  line-height: 1.15;
+  color: #5e5138;
+}
+.jar-card-status {
+  font-size: 8px;
+  line-height: 1.15;
+  margin-top: 3px;
+  color: #66583d;
+}
+.jar-card-status.met { color: #3f6245; }
+.jar-card-actions {
+  justify-content: center;
+  gap: 3px;
+  margin-top: 1px;
+}
+.jar-card-actions .small-btn {
+  min-height: 30px;
+  padding: 0 6px;
+  font-size: 9px;
+  border-radius: 8px;
+}
+.jar-shine { left: 9px; top: 13px; bottom: 14px; width: 8px; }
+
+@media (max-width: 350px) {
+  .jar-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+
 </style>
-  <title>Questwheel v6</title>
+  <title>Questwheel v7</title>
 </head>
 <body>
   <div class="app-shell">
@@ -274,7 +401,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
           <span class="relative-label">Today</span>
           <span class="relative-date">Mon 24 Aug ’26</span>
         </div>
-        <h1>Questwheel <span class="build-tag">v6</span></h1>
+        <h1>Questwheel <span class="build-tag">v7</span></h1>
       </div>
       <button class="ghost compact" id="todayBtn" type="button">Today</button>
     </header>
@@ -562,7 +689,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   <script>
 (() => {
   const STORE = "questwheel-v1"; // Preserve all prior Questwheel local data.
-  const BUILD = "v6";
+  const BUILD = "v7";
 
   const categories = {
     business: { label: "Business", color: "#FFB000" },
@@ -982,6 +1109,36 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     return state.blocks.filter(b => b.date === date).sort((a, b) => a.start - b.start || a.minutes - b.minutes);
   }
 
+  // Return only the portion of each continuous block that physically lies in this calendar day.
+  // This lets a block beginning before midnight continue naturally onto the next wheel.
+  function wheelBlocksFor(date) {
+    const visible = [];
+    const current = blocksFor(date);
+
+    current.forEach(block => {
+      const minutesHere = Math.max(0, Math.min(block.minutes, 1440 - block.start));
+      if (minutesHere > 0) {
+        visible.push({ ...block, minutes: minutesHere, _displayPart: "start" });
+      }
+    });
+
+    const previousISO = isoDate(addDays(dateFromISO(date), -1));
+    blocksFor(previousISO).forEach(block => {
+      const spill = Math.max(0, block.start + block.minutes - 1440);
+      if (spill > 0) {
+        visible.push({
+          ...block,
+          start: 0,
+          minutes: Math.min(1440, spill),
+          _displayPart: "carry",
+          _sourceDate: block.date
+        });
+      }
+    });
+
+    return visible.sort((a, b) => a.start - b.start || a.minutes - b.minutes);
+  }
+
   function selectedBlocks() {
     return blocksFor(state.selectedDate);
   }
@@ -1101,7 +1258,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
 
   function setJarLiquid(liquid, percent, color) {
     liquid.style.height = `${Math.max(0, Math.min(100, percent))}%`;
-    liquid.style.background = color;
+    liquid.style.setProperty("--jar-color", color);
   }
 
   function jarPeriodTargets(jar) {
@@ -1751,7 +1908,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         if (b.id === selectedBlockId) path.classList.add("selected");
         path.setAttribute("tabindex", "0");
         path.setAttribute("role", "button");
-        path.setAttribute("aria-label", `${blockTitle(b)}, ${timeFromMinutes(b.start)} to ${timeFromMinutes(b.start + b.minutes)}, ${fmtMinutes(b.minutes)}`);
+        const carryPrefix = b._displayPart === "carry" ? "Continues from previous day, " : "";
+        path.setAttribute("aria-label", `${carryPrefix}${blockTitle(b)}, ${timeFromMinutes(b.start)} to ${timeFromMinutes(b.start + b.minutes)}, ${fmtMinutes(b.minutes)} visible today`);
         const activate = event => {
           if (suppressBlockClick) return;
           event.stopPropagation();
@@ -1765,11 +1923,21 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       svg.appendChild(path);
 
       if (b.completed && b.reclaimed > 0 && b.actualMinutes != null) {
-        const freeStart = Math.min(1440, b.start + b.actualMinutes);
-        const plannedEnd = Math.min(1440, b.start + b.minutes);
-        if (plannedEnd > freeStart) {
+        // Reclaimed time belongs to the tail of the original planned block. Project only the part
+        // that lands inside this visible calendar-day fragment.
+        const original = state.blocks.find(item => item.id === b.id) || b;
+        const originalPlannedEnd = original.start + original.minutes;
+        const originalActualEnd = original.start + original.actualMinutes;
+        const dayOffset = b._displayPart === "carry" ? 1440 : 0;
+        const fragmentStartOriginal = dayOffset + b.start;
+        const fragmentEndOriginal = fragmentStartOriginal + b.minutes;
+        const freeStartOriginal = Math.max(originalActualEnd, fragmentStartOriginal);
+        const freeEndOriginal = Math.min(originalPlannedEnd, fragmentEndOriginal);
+        if (freeEndOriginal > freeStartOriginal) {
+          const freeStart = b.start + (freeStartOriginal - fragmentStartOriginal);
+          const freeEnd = b.start + (freeEndOriginal - fragmentStartOriginal);
           const free = document.createElementNS(NS, "path");
-          free.setAttribute("d", arcPath(cx, cy, laneOuter, laneInner, freeStart / 1440 * 360, plannedEnd / 1440 * 360));
+          free.setAttribute("d", arcPath(cx, cy, laneOuter, laneInner, freeStart / 1440 * 360, freeEnd / 1440 * 360));
           free.setAttribute("fill", "#3d424d");
           free.setAttribute("stroke", "#d9b55b");
           free.setAttribute("stroke-width", String(strokeWidth));
@@ -1794,7 +1962,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     svg.innerHTML = "";
     const NS = "http://www.w3.org/2000/svg";
     const cx = 180, cy = 180, ro = 148;
-    const blocks = selectedBlocks();
+    const blocks = wheelBlocksFor(state.selectedDate);
     const lanes = assignLanes(blocks);
     const geo = laneGeometry(lanes.laneCount, ro, 58);
 
@@ -1908,9 +2076,10 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     for (let i = 0; i < 7; i += 1) {
       const d = addDays(start, i);
       const iso = isoDate(d);
-      const blocks = blocksFor(iso);
+      const blocks = wheelBlocksFor(iso);
       const total = blocks.reduce((s, b) => s + b.minutes, 0);
-      const reclaimed = blocks.reduce((s, b) => s + blockBankDelta(b), 0);
+      // Bank changes are credited on the day the original block begins, not again on carry-over fragments.
+      const reclaimed = blocksFor(iso).reduce((s, b) => s + blockBankDelta(b), 0);
       const box = document.createElement("div");
       box.className = "week-day" + (iso === today ? " today" : "");
 
@@ -2152,40 +2321,56 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     render();
   }
 
+  function stripIds(node) {
+    if (node.nodeType === 1) node.removeAttribute("id");
+    node.querySelectorAll?.("[id]").forEach(child => child.removeAttribute("id"));
+  }
+
   function animateDayShift(delta) {
     if (swipeAnimating || !delta) return;
     selectedBlockId = null;
     swipeAnimating = true;
-    const slide = el.wheelSlide;
-    const outgoing = delta > 0 ? -112 : 112;
-    const incoming = -outgoing;
 
+    const slide = el.wheelSlide;
+    const width = Math.max(240, el.wheelWrap.clientWidth || 360);
+    const dragTransform = slide.style.transform || "translateX(0px)";
+
+    // Keep a frozen copy of the outgoing wheel while the real slide is rerendered
+    // as the incoming day. Both then move at once, eliminating the blank/jump frame.
+    const outgoing = slide.cloneNode(true);
+    stripIds(outgoing);
+    outgoing.classList.remove("animating");
+    outgoing.classList.add("wheel-slide-clone");
+    outgoing.style.transform = dragTransform;
+    outgoing.style.opacity = "1";
+    el.wheelWrap.appendChild(outgoing);
+
+    const d = dateFromISO(state.selectedDate);
+    d.setDate(d.getDate() + delta);
+    state.selectedDate = isoDate(d);
+    saveState();
+    render();
+
+    const incomingStart = delta > 0 ? width : -width;
+    const outgoingEnd = delta > 0 ? -width : width;
+
+    slide.classList.remove("animating");
+    slide.style.transform = `translateX(${incomingStart}px)`;
+    slide.style.opacity = "1";
+    void slide.offsetWidth;
+
+    outgoing.classList.add("animating");
     slide.classList.add("animating");
-    slide.style.transform = `translateX(${outgoing}%)`;
-    slide.style.opacity = "0.15";
+    outgoing.style.transform = `translateX(${outgoingEnd}px)`;
+    slide.style.transform = "translateX(0px)";
 
     window.setTimeout(() => {
-      const d = dateFromISO(state.selectedDate);
-      d.setDate(d.getDate() + delta);
-      state.selectedDate = isoDate(d);
-      saveState();
-      render();
-
+      outgoing.remove();
       slide.classList.remove("animating");
-      slide.style.transform = `translateX(${incoming}%)`;
-      slide.style.opacity = "0.15";
-      void slide.offsetWidth;
-      slide.classList.add("animating");
-      slide.style.transform = "translateX(0)";
-      slide.style.opacity = "1";
-
-      window.setTimeout(() => {
-        slide.classList.remove("animating");
-        slide.style.transform = "";
-        slide.style.opacity = "";
-        swipeAnimating = false;
-      }, 185);
-    }, 175);
+      slide.style.transform = "";
+      slide.style.opacity = "";
+      swipeAnimating = false;
+    }, 310);
   }
 
   function snapWheelBack() {
@@ -2196,7 +2381,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       el.wheelSlide.classList.remove("animating");
       el.wheelSlide.style.transform = "";
       el.wheelSlide.style.opacity = "";
-    }, 180);
+    }, 295);
   }
 
   function recurrenceDates(startDate, everyDays, durationAmount, durationUnit) {
@@ -2516,7 +2701,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./sw-v6.js", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw-v7.js", { updateViaCache: "none" });
         if (reg.update) reg.update().catch(() => {});
       } catch {}
     });
