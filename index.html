@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Questwheel" />
-  <link rel="manifest" href="./manifest-v9.4.webmanifest" />
-  <link rel="apple-touch-icon" href="./icons/icon-v9.4-192.png" />
+  <link rel="manifest" href="./manifest-v10.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-v10-192.png" />
   <style>
 :root {
   color-scheme: dark;
@@ -674,8 +674,14 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   .jar-card-copy, .jar-card-copy.jar-label-button { width: 58px !important; max-width: 58px !important; }
 }
 
+
+/* v10: recurrence + duplication */
+.duplicate-note { color: #9da6b6; font-size: 11px; margin-top: 4px; }
+.quest-repeat-meta { color: #8fb8dd; font-size: 11px; margin-top: 4px; }
+.duplicate-schedule-row { padding: 10px 11px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel-2); }
+
 </style>
-  <title>Questwheel v9.4</title>
+  <title>Questwheel v10</title>
 </head>
 <body>
   <div class="app-shell">
@@ -685,7 +691,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
           <span class="relative-label">Today</span>
           <span class="relative-date">Mon 24 Aug ’26</span>
         </div>
-        <h1>Questwheel <span class="build-tag">v9.4</span></h1>
+        <h1>Questwheel <span class="build-tag">v10</span></h1>
       </div>
       <button class="ghost compact" id="todayBtn" type="button">Today</button>
     </header>
@@ -730,6 +736,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
             </div>
             <div class="card-actions">
               <button id="selectedBlockEdit" class="small-btn" type="button">Edit</button>
+              <button id="selectedBlockDuplicate" class="small-btn" type="button">Duplicate</button>
               <button id="selectedBlockFinish" class="small-btn accent" type="button">Finish</button>
               <button id="selectedBlockDelete" class="small-btn danger" type="button">Delete</button>
             </div>
@@ -813,6 +820,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         <button class="icon-btn" value="cancel" aria-label="Close">×</button>
       </div>
       <input id="questParentId" type="hidden" />
+      <input id="questDuplicateSourceId" type="hidden" />
       <label>Quest / task name<input id="questName" maxlength="100" required placeholder="e.g. Opus follow-up" /></label>
       <label>Category
         <select id="questCategory">
@@ -825,16 +833,28 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         </select>
       </label>
       <label>Colour<div id="questColorPicker" class="color-picker" role="radiogroup" aria-label="Quest colour"></div></label>
-      <div class="dialog-actions"><button class="ghost" value="cancel" type="button" id="cancelQuest">Cancel</button><button class="primary" value="default" type="submit">Create</button></div>
+      <label class="repeat-toggle"><input id="questRepeatEnabled" type="checkbox" /><span>Repeat this quest</span></label>
+      <div id="questRepeatFields" class="repeat-fields" hidden>
+        <label>First occurrence<input id="questRepeatStart" type="date" /></label>
+        <div class="two-col">
+          <label>Every<div class="input-suffix"><input id="questRepeatEvery" type="number" min="1" max="365" step="1" value="1" /><span>days</span></div></label>
+          <label>For<input id="questRepeatFor" type="number" min="1" max="3650" step="1" value="4" /></label>
+        </div>
+        <label>Duration unit<select id="questRepeatUnit"><option value="days">Days</option><option value="weeks" selected>Weeks</option><option value="months">Months</option></select></label>
+        <p class="hint">One occurrence stays active at a time. When you complete it, the next one returns on its cadence date and earlier completions stay in history.</p>
+      </div>
+      <label id="questDuplicateScheduleRow" class="repeat-toggle duplicate-schedule-row" hidden><input id="questDuplicateSchedule" type="checkbox" checked /><span>Schedule the copy after creating it</span></label>
+      <div class="dialog-actions"><button class="ghost" value="cancel" type="button" id="cancelQuest">Cancel</button><button id="questSubmit" class="primary" value="default" type="submit">Create</button></div>
     </form>
   </dialog>
 
   <dialog id="blockDialog">
     <form method="dialog" id="blockForm">
       <div class="dialog-head">
-        <div><span class="eyebrow">TIME BLOCK</span><h2>Schedule block</h2></div>
+        <div><span id="blockDialogEyebrow" class="eyebrow">TIME BLOCK</span><h2 id="blockDialogTitle">Schedule block</h2></div>
         <button class="icon-btn" value="cancel" aria-label="Close">×</button>
       </div>
+      <input id="blockDuplicateSourceId" type="hidden" />
       <label>Linked quest (optional)<select id="blockQuest"></select></label>
 
       <div id="standaloneFields" class="standalone-fields">
@@ -849,7 +869,10 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
 
       <label>Fill jar when completed (optional)<select id="blockJar"></select></label>
       <p class="hint jar-count-hint">A completed block fills its jar by the <strong>planned</strong> duration, even if you finish early.</p>
-      <label>Start<input id="blockStart" type="time" required value="09:00" /></label>
+      <div class="two-col">
+        <label>Date<input id="blockDate" type="date" required /></label>
+        <label>Start<input id="blockStart" type="time" required value="09:00" /></label>
+      </div>
       <fieldset class="duration-fieldset">
         <legend>Duration</legend>
         <div class="duration-grid">
@@ -869,7 +892,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
         <p class="hint">Example: every 2 days for 6 weeks. Each occurrence remains individually completable or deletable.</p>
       </div>
 
-      <div class="dialog-actions"><button class="ghost" value="cancel" type="button" id="cancelBlock">Cancel</button><button class="primary" value="default" type="submit">Schedule</button></div>
+      <div class="dialog-actions"><button class="ghost" value="cancel" type="button" id="cancelBlock">Cancel</button><button id="blockSubmit" class="primary" value="default" type="submit">Schedule</button></div>
     </form>
   </dialog>
 
@@ -890,9 +913,10 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
 
       <div id="editRecurrenceFields" class="edit-recurrence-fields" hidden>
         <span class="field-label">Future repetition pattern</span>
+        <p class="hint">You can change both the spacing and how long the series continues.</p>
         <div class="two-col">
-          <label>Every<div class="input-suffix"><input id="editRepeatEvery" type="number" min="1" max="365" step="1" value="1" /><span>days</span></div></label>
-          <label>For<input id="editRepeatFor" type="number" min="1" max="3650" step="1" value="7" /></label>
+          <label>Repeat every<div class="input-suffix"><input id="editRepeatEvery" type="number" min="1" max="365" step="1" value="1" /><span>days</span></div></label>
+          <label>Continue for<input id="editRepeatFor" type="number" min="1" max="3650" step="1" value="7" /></label>
         </div>
         <label>Duration unit<select id="editRepeatUnit"><option value="days">Days</option><option value="weeks">Weeks</option><option value="months">Months</option></select></label>
         <p class="hint">When saving “this and all future,” Questwheel rebuilds the remaining schedule from this occurrence using this pattern. Earlier occurrences stay untouched.</p>
@@ -1057,7 +1081,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   <script>
 (() => {
   const STORE = "questwheel-v1"; // Preserve all prior Questwheel local data.
-  const BUILD = "v9.4";
+  const BUILD = "v10";
 
   const categories = {
     business: { label: "Business", color: "#FFB000" },
@@ -1122,6 +1146,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     selectedBlockMeta: $("selectedBlockMeta"),
     selectedBlockStatus: $("selectedBlockStatus"),
     selectedBlockEdit: $("selectedBlockEdit"),
+    selectedBlockDuplicate: $("selectedBlockDuplicate"),
     selectedBlockFinish: $("selectedBlockFinish"),
     selectedBlockDelete: $("selectedBlockDelete"),
     selectedBlockClose: $("selectedBlockClose"),
@@ -1186,16 +1211,31 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     questDialogEyebrow: $("questDialogEyebrow"),
     questDialogTitle: $("questDialogTitle"),
     questParentId: $("questParentId"),
+    questDuplicateSourceId: $("questDuplicateSourceId"),
+    questDuplicateScheduleRow: $("questDuplicateScheduleRow"),
+    questDuplicateSchedule: $("questDuplicateSchedule"),
+    questSubmit: $("questSubmit"),
     questName: $("questName"),
     questCategory: $("questCategory"),
     questDuration: $("questDuration"),
     questColorPicker: $("questColorPicker"),
+    questRepeatEnabled: $("questRepeatEnabled"),
+    questRepeatFields: $("questRepeatFields"),
+    questRepeatStart: $("questRepeatStart"),
+    questRepeatEvery: $("questRepeatEvery"),
+    questRepeatFor: $("questRepeatFor"),
+    questRepeatUnit: $("questRepeatUnit"),
+    blockDialogEyebrow: $("blockDialogEyebrow"),
+    blockDialogTitle: $("blockDialogTitle"),
+    blockDuplicateSourceId: $("blockDuplicateSourceId"),
+    blockSubmit: $("blockSubmit"),
     blockQuest: $("blockQuest"),
     standaloneFields: $("standaloneFields"),
     blockName: $("blockName"),
     blockCategory: $("blockCategory"),
     blockColorPicker: $("blockColorPicker"),
     blockJar: $("blockJar"),
+    blockDate: $("blockDate"),
     blockStart: $("blockStart"),
     blockHours: $("blockHours"),
     blockMinutes: $("blockMinutes"),
@@ -1279,7 +1319,15 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       completed: Boolean(q.completed),
       completedAt: q.completed ? (Number(q.completedAt) || 0) : null,
       archived: Boolean(q.archived),
-      defaultMinutes: Math.max(2, Math.min(600, Number(q.defaultMinutes) || 30))
+      defaultMinutes: Math.max(2, Math.min(600, Number(q.defaultMinutes) || 30)),
+      questSeriesId: q.questSeriesId || null,
+      questRecurrenceEvery: q.questSeriesId ? Math.max(1, Math.min(365, Number(q.questRecurrenceEvery) || 1)) : null,
+      questRecurrenceFor: q.questSeriesId ? Math.max(1, Math.min(3650, Number(q.questRecurrenceFor) || 1)) : null,
+      questRecurrenceUnit: q.questSeriesId && ["days","weeks","months"].includes(q.questRecurrenceUnit) ? q.questRecurrenceUnit : null,
+      questRecurrenceLabel: q.questSeriesId ? (q.questRecurrenceLabel || null) : null,
+      questOccurrenceDate: /^\d{4}-\d{2}-\d{2}$/.test(q.questOccurrenceDate || "") ? q.questOccurrenceDate : null,
+      questRecurrenceEndDate: /^\d{4}-\d{2}-\d{2}$/.test(q.questRecurrenceEndDate || "") ? q.questRecurrenceEndDate : null,
+      questSeriesStopped: Boolean(q.questSeriesStopped)
     };
   }
 
@@ -1505,6 +1553,79 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     };
     visit(id);
     return out;
+  }
+
+  function copyJarQuestLinks(sourceQuestId, newQuestId) {
+    (state.jars || []).forEach(jar => {
+      if (!Array.isArray(jar.linkedQuestIds) || !jar.linkedQuestIds.includes(sourceQuestId)) return;
+      if (!jar.linkedQuestIds.includes(newQuestId)) jar.linkedQuestIds.push(newQuestId);
+    });
+  }
+
+  function cloneQuestBranch(sourceParentId, newParentId) {
+    childrenOf(sourceParentId).filter(child => !child.archived).forEach(child => {
+      const clone = {
+        ...child,
+        id: uid("q"),
+        parentId: newParentId,
+        completed: false,
+        completedAt: null,
+        archived: false,
+        createdAt: Date.now(),
+        questSeriesId: null,
+        questRecurrenceEvery: null,
+        questRecurrenceFor: null,
+        questRecurrenceUnit: null,
+        questRecurrenceLabel: null,
+        questOccurrenceDate: null,
+        questRecurrenceEndDate: null,
+        questSeriesStopped: false
+      };
+      state.quests.push(clone);
+      copyJarQuestLinks(child.id, clone.id);
+      cloneQuestBranch(child.id, clone.id);
+    });
+  }
+
+  function materializeRecurringQuests() {
+    const today = isoDate(new Date());
+    const series = new Map();
+    state.quests.forEach(q => {
+      if (!q.questSeriesId) return;
+      if (!series.has(q.questSeriesId)) series.set(q.questSeriesId, []);
+      series.get(q.questSeriesId).push(q);
+    });
+    let changed = false;
+    series.forEach(items => {
+      if (items.some(q => q.questSeriesStopped)) return;
+      const ordered = [...items].sort((a,b) => String(a.questOccurrenceDate || "").localeCompare(String(b.questOccurrenceDate || "")) || (a.createdAt || 0) - (b.createdAt || 0));
+      const latest = ordered[ordered.length - 1];
+      if (!latest || latest.archived || !latest.completed || !latest.questOccurrenceDate) return;
+      const every = Math.max(1, Number(latest.questRecurrenceEvery) || 1);
+      const nextDate = isoDate(addDays(dateFromISO(latest.questOccurrenceDate), every));
+      if (nextDate > today) return;
+      if (latest.questRecurrenceEndDate && nextDate > latest.questRecurrenceEndDate) return;
+      if (items.some(q => q.questOccurrenceDate === nextDate)) return;
+      let parentId = latest.parentId || null;
+      const parent = questById(parentId);
+      if (parentId && (!parent || parent.archived || parent.completed)) parentId = null;
+      const next = {
+        ...latest,
+        id: uid("q"),
+        parentId,
+        completed: false,
+        completedAt: null,
+        archived: false,
+        createdAt: Date.now(),
+        questOccurrenceDate: nextDate
+      };
+      state.quests.push(next);
+      copyJarQuestLinks(latest.id, next.id);
+      cloneQuestBranch(latest.id, next.id);
+      changed = true;
+    });
+    if (changed) saveState();
+    return changed;
   }
 
   function ancestorArchived(q) {
@@ -1948,6 +2069,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   }
 
   function render() {
+    materializeRecurringQuests();
     renderDateIdentity();
     renderQuestOptions();
     renderJarOptions(el.blockJar, el.blockJar?.value || null);
@@ -2069,12 +2191,19 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     meta.textContent = parts.join(" · ");
 
     titleWrap.append(hierarchy, titleRow, meta);
+    if (q.questSeriesId && q.questRecurrenceLabel) {
+      const repeatMeta = document.createElement("div");
+      repeatMeta.className = "quest-repeat-meta";
+      repeatMeta.textContent = `↻ ${q.questRecurrenceLabel}`;
+      titleWrap.appendChild(repeatMeta);
+    }
     main.appendChild(titleWrap);
 
     const actions = document.createElement("div");
     actions.className = "card-actions";
     actions.append(
       makeSmallButton("Schedule", "accent", () => openBlockDialog(q.id)),
+      makeSmallButton("Duplicate", "", () => openQuestDialog(q.parentId || null, q.id)),
       makeSmallButton("+ Subtask", "", () => openQuestDialog(q.id)),
       makeSmallButton("Archive", "danger", () => archiveQuest(q)),
       makeSmallButton("Delete", "danger", () => deleteQuest(q))
@@ -2140,12 +2269,19 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       meta.textContent = `${completedAtLabel(q)} · ${categories[q.category]?.label || "Quest"}`;
     }
     text.append(hierarchy, title, meta);
+    if (q.questSeriesId && q.questRecurrenceLabel) {
+      const repeatMeta = document.createElement("div");
+      repeatMeta.className = "quest-repeat-meta";
+      repeatMeta.textContent = `↻ ${q.questRecurrenceLabel}`;
+      text.appendChild(repeatMeta);
+    }
     main.appendChild(text);
     card.appendChild(main);
 
     if (!contextOnly) {
       const actions = document.createElement("div");
       actions.className = "card-actions";
+      actions.appendChild(makeSmallButton("Duplicate", "", () => openQuestDialog(q.parentId || null, q.id)));
       actions.appendChild(makeSmallButton("Restore", "", () => {
         q.completed = false;
         q.completedAt = null;
@@ -2173,7 +2309,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   }
 
   function renderActiveQuests() {
-    const roots = childrenOf(null).filter(q => !q.archived && !q.completed).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    const roots = state.quests.filter(q => !q.archived && !q.completed && (!q.parentId || !isQuestActive(questById(q.parentId)))).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
     if (!roots.length) {
       el.questList.className = "quest-list empty-state";
       el.questList.textContent = "No active quests yet.";
@@ -2238,6 +2374,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   }
 
   function archiveQuest(q) {
+    if (q.questSeriesId) state.quests.forEach(item => { if (item.questSeriesId === q.questSeriesId) item.questSeriesStopped = true; });
     const ids = [q.id, ...descendantIds(q.id)];
     ids.forEach(id => {
       const item = questById(id);
@@ -2257,6 +2394,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     ].filter(Boolean).join(" and ");
     const message = `Permanently delete “${q.name}”${detail ? ` plus ${detail}` : ""}? This cannot be undone.`;
     if (!window.confirm(message)) return;
+    if (q.questSeriesId) state.quests.forEach(item => { if (item.questSeriesId === q.questSeriesId) item.questSeriesStopped = true; });
     state.quests = state.quests.filter(item => !ids.has(item.id));
     state.blocks = state.blocks.filter(b => !ids.has(b.questId));
     saveState();
@@ -2394,6 +2532,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       const actions = document.createElement("div");
       actions.className = "card-actions";
       actions.appendChild(makeSmallButton("Edit", "", () => openEditBlockDialog(b.id)));
+      actions.appendChild(makeSmallButton("Duplicate", "", () => openBlockDialog(null, b.id)));
       if (!b.completed) actions.appendChild(makeSmallButton("Finish", "accent", () => openFinishDialog(b.id)));
       actions.appendChild(makeSmallButton("Delete", "danger", () => openDeleteBlockDialog(b.id)));
 
@@ -2902,21 +3041,34 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     }
   }
 
-  function openQuestDialog(parentId = null) {
-    const parent = parentId ? questById(parentId) : null;
+  function openQuestDialog(parentId = null, duplicateSourceId = null) {
+    const source = duplicateSourceId ? questById(duplicateSourceId) : null;
+    const parent = parentId ? questById(parentId) : (source?.parentId ? questById(source.parentId) : null);
     el.questParentId.value = parent?.id || "";
-    el.questDialogEyebrow.textContent = parent ? "NEW SUBTASK" : "NEW QUEST";
-    el.questDialogTitle.textContent = parent ? `Add under ${parent.name}` : "Create quest";
-    el.questName.value = "";
-    if (parent) {
-      el.questCategory.value = parent.category || "personal";
-      el.questDuration.value = String(parent.defaultMinutes || 30);
-      setQuestColorPicker(questColor(parent));
+    el.questDuplicateSourceId.value = source?.id || "";
+    el.questDuplicateScheduleRow.hidden = !source;
+    el.questDuplicateSchedule.checked = true;
+    el.questDialogEyebrow.textContent = source ? "DUPLICATE QUEST" : (parent ? "NEW SUBTASK" : "NEW QUEST");
+    el.questDialogTitle.textContent = source ? `Copy ${source.name}` : (parent ? `Add under ${parent.name}` : "Create quest");
+    el.questSubmit.textContent = source ? "Create copy" : "Create";
+    el.questName.value = source?.name || "";
+    const base = source || parent;
+    if (base) {
+      el.questCategory.value = base.category || "personal";
+      el.questDuration.value = String(base.defaultMinutes || 30);
+      setQuestColorPicker(questColor(base));
     } else {
       el.questCategory.value = "business";
       el.questDuration.value = "30";
       setQuestColorPicker(categoryColor("business"));
     }
+    const repeating = Boolean(source?.questSeriesId);
+    el.questRepeatEnabled.checked = repeating;
+    el.questRepeatFields.hidden = !repeating;
+    el.questRepeatStart.value = state.selectedDate || isoDate(new Date());
+    el.questRepeatEvery.value = String(Math.max(1, Number(source?.questRecurrenceEvery) || 1));
+    el.questRepeatFor.value = String(Math.max(1, Number(source?.questRecurrenceFor) || 4));
+    el.questRepeatUnit.value = ["days","weeks","months"].includes(source?.questRecurrenceUnit) ? source.questRecurrenceUnit : "weeks";
     el.questDialog.showModal();
   }
 
@@ -2928,20 +3080,30 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     if (q && resetDuration) setBlockDurationInputs(q.defaultMinutes || 30);
   }
 
-  function openBlockDialog(questId = null) {
+  function openBlockDialog(questId = null, duplicateBlockId = null) {
     renderQuestOptions();
-    el.blockQuest.value = questId && questById(questId) ? questId : "__free__";
-    el.blockStart.value = "09:00";
-    setBlockDurationInputs(questId && questById(questId) ? (questById(questId).defaultMinutes || 30) : 30);
-    el.blockName.value = "";
-    el.blockCategory.value = "personal";
-    setBlockColorPicker(categoryColor("personal"));
-    el.repeatEnabled.checked = false;
-    el.repeatFields.hidden = true;
-    el.repeatEvery.value = "1";
-    el.repeatFor.value = "7";
-    el.repeatUnit.value = "weeks";
-    renderJarOptions(el.blockJar, null);
+    const source = duplicateBlockId ? state.blocks.find(item => item.id === duplicateBlockId) : null;
+    el.blockDuplicateSourceId.value = source?.id || "";
+    el.blockDialogEyebrow.textContent = source ? "DUPLICATE BLOCK" : "TIME BLOCK";
+    el.blockDialogTitle.textContent = source ? `Copy ${blockTitle(source)}` : "Schedule block";
+    el.blockSubmit.textContent = source ? "Create copy" : "Schedule";
+    const sourceQuest = source?.questId ? questById(source.questId) : null;
+    const initialQuestId = sourceQuest?.id || (questId && questById(questId) ? questId : null);
+    el.blockQuest.value = initialQuestId || "__free__";
+    el.blockDate.value = source?.date || state.selectedDate;
+    el.blockStart.value = source ? timeFromMinutes(source.start) : "09:00";
+    setBlockDurationInputs(source?.minutes || (initialQuestId ? (questById(initialQuestId)?.defaultMinutes || 30) : 30));
+    el.blockName.value = source && !source.questId ? (source.name || "") : "";
+    el.blockCategory.value = source && !source.questId ? (source.category || "personal") : "personal";
+    setBlockColorPicker(source && !source.questId ? blockColor(source) : categoryColor("personal"));
+    const repeating = Boolean(source?.seriesId);
+    el.repeatEnabled.checked = repeating;
+    el.repeatFields.hidden = !repeating;
+    el.repeatEvery.value = String(Math.max(1, Number(source?.recurrenceEvery) || 1));
+    el.repeatFor.value = String(Math.max(1, Number(source?.recurrenceFor) || 7));
+    el.repeatUnit.value = ["days","weeks","months"].includes(source?.recurrenceUnit) ? source.recurrenceUnit : "weeks";
+    renderJarOptions(el.blockJar, source?.jarId || null);
+    el.blockJar.value = source?.jarId || "";
     toggleBlockMode({ resetDuration: false });
     el.blockDialog.showModal();
   }
@@ -3033,8 +3195,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     toggleEditBlockMode();
 
     const seriesBlocks = block.seriesId ? state.blocks.filter(item => item.seriesId === block.seriesId) : [];
-    const hasFuture = seriesBlocks.some(item => item.id !== block.id && item.date >= block.date);
-    el.editSeriesScope.hidden = !(block.seriesId && hasFuture);
+    el.editSeriesScope.hidden = !block.seriesId;
     el.editScopeOne.checked = true;
     el.editScopeFuture.checked = false;
     el.editRepeatEvery.value = String(Math.max(1, Number(block.recurrenceEvery) || 1));
@@ -3252,11 +3413,18 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
     if (!el.questParentId.value) setQuestColorPicker(categoryColor(el.questCategory.value));
   });
   $("cancelQuest").addEventListener("click", () => el.questDialog.close());
+  el.questRepeatEnabled.addEventListener("change", () => { el.questRepeatFields.hidden = !el.questRepeatEnabled.checked; });
   el.questForm.addEventListener("submit", event => {
     event.preventDefault();
     const name = el.questName.value.trim();
     if (!name) return;
-    state.quests.push({
+    const duplicateSource = questById(el.questDuplicateSourceId.value);
+    const repeating = el.questRepeatEnabled.checked;
+    const repeatStart = /^\d{4}-\d{2}-\d{2}$/.test(el.questRepeatStart.value) ? el.questRepeatStart.value : isoDate(new Date());
+    const repeatEvery = repeating ? Math.max(1, Math.min(365, Number(el.questRepeatEvery.value) || 1)) : null;
+    const repeatFor = repeating ? Math.max(1, Math.min(3650, Number(el.questRepeatFor.value) || 1)) : null;
+    const repeatUnit = repeating && ["days","weeks","months"].includes(el.questRepeatUnit.value) ? el.questRepeatUnit.value : null;
+    const quest = {
       id: uid("q"),
       parentId: el.questParentId.value || null,
       name,
@@ -3265,11 +3433,25 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       color: selectedQuestColor,
       completed: false,
       archived: false,
-      createdAt: Date.now()
-    });
+      createdAt: Date.now(),
+      questSeriesId: repeating ? uid("qseries") : null,
+      questRecurrenceEvery: repeatEvery,
+      questRecurrenceFor: repeatFor,
+      questRecurrenceUnit: repeatUnit,
+      questRecurrenceLabel: repeating ? recurrenceLabel(repeatEvery, repeatFor, repeatUnit) : null,
+      questOccurrenceDate: repeating ? repeatStart : null,
+      questRecurrenceEndDate: repeating ? isoDate(addDuration(dateFromISO(repeatStart), repeatFor, repeatUnit)) : null,
+      questSeriesStopped: false
+    };
+    state.quests.push(quest);
+    if (duplicateSource) {
+      copyJarQuestLinks(duplicateSource.id, quest.id);
+      cloneQuestBranch(duplicateSource.id, quest.id);
+    }
     saveState();
     el.questDialog.close();
     render();
+    if (duplicateSource && el.questDuplicateSchedule.checked) openBlockDialog(quest.id);
   });
 
   $("addBlockBtn").addEventListener("click", () => openBlockDialog());
@@ -3295,7 +3477,8 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       (minutes < 2 ? el.blockMinutes : el.blockHours).focus();
       return;
     }
-    let dates = [state.selectedDate];
+    const baseDate = /^\d{4}-\d{2}-\d{2}$/.test(el.blockDate.value) ? el.blockDate.value : state.selectedDate;
+    let dates = [baseDate];
     let recurrenceText = null;
     let seriesId = null;
 
@@ -3303,7 +3486,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
       const every = Math.max(1, Math.min(365, Number(el.repeatEvery.value) || 1));
       const duration = Math.max(1, Math.min(3650, Number(el.repeatFor.value) || 1));
       const unit = ["days", "weeks", "months"].includes(el.repeatUnit.value) ? el.repeatUnit.value : "days";
-      const generated = recurrenceDates(state.selectedDate, every, duration, unit);
+      const generated = recurrenceDates(baseDate, every, duration, unit);
       dates = generated.dates;
       recurrenceText = recurrenceLabel(every, duration, unit);
       seriesId = uid("series");
@@ -3479,6 +3662,9 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   el.selectedBlockEdit.addEventListener("click", () => {
     if (selectedBlockId) openEditBlockDialog(selectedBlockId);
   });
+  el.selectedBlockDuplicate.addEventListener("click", () => {
+    if (selectedBlockId) openBlockDialog(null, selectedBlockId);
+  });
   el.selectedBlockFinish.addEventListener("click", () => {
     if (selectedBlockId) openFinishDialog(selectedBlockId);
   });
@@ -3582,7 +3768,7 @@ dialog form { display: grid; gap: 15px; padding: 16px; }
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./sw-v9.4.js", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw-v10.js", { updateViaCache: "none" });
         if (reg.update) reg.update().catch(() => {});
       } catch {}
     });
