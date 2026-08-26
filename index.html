@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Questwheel" />
-  <link rel="manifest" href="./manifest-v13.4.webmanifest" />
-  <link rel="apple-touch-icon" href="./icons/icon-v13.4-192.png" />
+  <link rel="manifest" href="./manifest-v13.4.1.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-v13.4.1-192.png" />
   <style>
 :root {
   color-scheme: dark;
@@ -947,7 +947,7 @@ html[data-theme-id="tanglang-red-velvet"] .legend,
 html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
 
 </style>
-  <title>Questwheel v13.4</title>
+  <title>Questwheel v13.4.1</title>
 </head>
 <body>
   <div class="app-shell">
@@ -957,7 +957,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
           <span class="relative-label">Today</span>
           <span class="relative-date">Mon 24 Aug ’26</span>
         </div>
-        <h1>Questwheel <span class="build-tag">v13.4</span></h1>
+        <h1>Questwheel <span class="build-tag">v13.4.1</span></h1>
       </div>
       <div class="topbar-actions">
         <button class="ghost compact theme-trigger" id="themeBtn" type="button" aria-label="Themes"><span aria-hidden="true">◈</span><span class="theme-trigger-label">Theme</span></button>
@@ -1457,7 +1457,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   <script>
 (() => {
   const STORE = "questwheel-v1"; // Preserve all prior Questwheel local data.
-  const BUILD = "v13.4";
+  const BUILD = "v13.4.1";
 
   const categories = {
     business: { label: "Business", color: "#FFB000" },
@@ -4198,6 +4198,14 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     el.questDialog.showModal();
   }
 
+  function toggleBlockMode({ resetDuration = true } = {}) {
+    const q = questById(el.blockQuest.value);
+    const standalone = !q;
+    el.standaloneFields.hidden = !standalone;
+    el.blockName.required = standalone;
+    if (q && resetDuration) setBlockDurationInputs(q.defaultMinutes || 30);
+  }
+
   function applyQuestRecurrenceToBlockForm(q, { setDate = false } = {}) {
     const config = questRecurrenceConfig(q);
     if (!config) return false;
@@ -5034,7 +5042,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./sw-v13.4.js", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw-v13.4.1.js", { updateViaCache: "none" });
         if (reg.update) reg.update().catch(() => {});
       } catch {}
     });
