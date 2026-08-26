@@ -1,4 +1,4 @@
-# Questwheel v13.1
+# Questwheel v13.2
 
 ## Free-time bank simplification
 Questwheel now uses one cumulative Banked Free Time value on the Day screen.
@@ -21,5 +21,8 @@ The Day screen no longer shows a separate Today net card. A smaller "Earned toda
 All v13 data, themes, quests, jars and schedules remain compatible.
 
 ## Update
-Upload v13.1 over the same GitHub Pages repository, replace index.html, then open once with ?v=13.1.
+Upload v13.2 over the same GitHub Pages repository, replace index.html, then open once with ?v=13.1.
 Do not clear Safari website data.
+
+
+Refinement notes in v13.2: centered Tanglang1 mantis emblem, daylight ring shifted outward, DAY MAP label removed, refined borders/buttons, closer background texture feel, and added subtle cloud background motifs.
