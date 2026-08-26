@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Questwheel" />
-  <link rel="manifest" href="./manifest-v13.5.1.webmanifest" />
+  <link rel="manifest" href="./manifest-v13.5.2.webmanifest" />
   <link rel="apple-touch-icon" href="./icons/icon-v13.5-192.png" />
   <style>
 :root {
@@ -891,7 +891,7 @@ html[data-theme-id="tanglang-red-velvet"] .wheel-panel {
 }
 html[data-theme-id="tanglang-red-velvet"] .wheel-panel::before {
   content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 1500' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23d7a53d' stroke-width='1.95' stroke-linecap='square' opacity='.9'%3E%3Crect x='8' y='8' width='984' height='1484' rx='28'/%3E%3Crect x='15' y='15' width='970' height='1470' rx='24' opacity='.68'/%3E%3Cpath d='M16 128V22h128M16 92h84V22M16 60h48V22'/%3E%3Cpath d='M984 128V22h-128M984 92h-84V22M984 60h-48V22'/%3E%3Cpath d='M16 1372v106h128M16 1410h84v68M16 1442h48v36'/%3E%3Cpath d='M984 1372v106h-128M984 1410h-84v68M984 1442h-48v36'/%3E%3C/g%3E%3C/svg%3E");
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 1500' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23d7a53d' stroke-linecap='square'%3E%3Crect x='8' y='8' width='984' height='1484' rx='26' stroke-width='2.1' opacity='.92'/%3E%3Crect x='17' y='17' width='966' height='1466' rx='20' stroke-width='1.25' opacity='.58'/%3E%3Cg stroke-width='2.1' opacity='.88'%3E%3Cpath d='M18 74V18H74M18 48H48V18M31 74V31H74M31 56H56V31'/%3E%3Cpath d='M982 74V18H926M982 48H952V18M969 74V31H926M969 56H944V31'/%3E%3Cpath d='M18 1426v56h56M18 1452h30v30M31 1426v43h43M31 1444h25v25'/%3E%3Cpath d='M982 1426v56h-56M982 1452h-30v30M969 1426v43h-43M969 1444h-25v25'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   background-size:100% 100%; background-repeat:no-repeat;
 }
 html[data-theme-id="tanglang-red-velvet"] .wheel-panel::after {
@@ -900,18 +900,18 @@ html[data-theme-id="tanglang-red-velvet"] .wheel-panel::after {
 }
 html[data-theme-id="tanglang-red-velvet"] .theme-corner-art { display:none !important; }
 html[data-theme-id="tanglang-red-velvet"] .theme-top-right-art {
-  top:74px; right:20px; width:128px; max-height:88px; object-fit:contain; opacity:.98; z-index:3;
+  top:58px; right:-12px; width:126px; max-height:86px; object-fit:contain; opacity:.98; z-index:3;
 }
 html[data-theme-id="tanglang-red-velvet"] .wheel-viewport { max-width:370px; overflow:hidden; }
 html[data-theme-id="tanglang-red-velvet"] .theme-wheel-emblem {
-  top:50%; left:50%; width:41.5%; height:41.5%; object-fit:contain; object-position:center; opacity:.97; z-index:1;
+  top:50%; left:50%; width:38.5%; height:38.5%; object-fit:contain; object-position:center; opacity:.97; z-index:1;
 }
 html[data-theme-id="tanglang-red-velvet"] #dayWheel { position:relative; z-index:2; }
 html[data-theme-id="tanglang-red-velvet"] .wheel-center { top:61.8%; z-index:3; text-shadow:0 2px 3px #2a0302,0 0 8px rgba(42,3,2,.75); }
 html[data-theme-id="tanglang-red-velvet"] .wheel-center span { font-size:30px; font-weight:800; letter-spacing:.01em; color:#f3d27a; }
 html[data-theme-id="tanglang-red-velvet"] .wheel-center small { font-size:11px; color:#e0bb62; }
 html[data-theme-id="tanglang-red-velvet"] .theme-cloud-art {
-  display:block !important; inset:0; left:0; right:auto; top:0; width:100%; height:100%; opacity:.28; object-fit:cover; z-index:1;
+  display:block !important; inset:0; left:0; right:auto; top:0; width:100%; height:100%; opacity:.30; object-fit:fill; z-index:1;
 }
 
 html[data-theme-id="tanglang-red-velvet"] .bank-time-badge,
@@ -977,7 +977,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
 @media (max-width:520px){ .jar-date-nav{grid-template-columns:40px 1fr 40px;} }
 
 </style>
-  <title>Questwheel v13.5.1</title>
+  <title>Questwheel v13.5.2</title>
 </head>
 <body>
   <div class="app-shell">
@@ -987,7 +987,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
           <span class="relative-label">Today</span>
           <span class="relative-date">Mon 24 Aug ’26</span>
         </div>
-        <h1>Questwheel <span class="build-tag">v13.5.1</span></h1>
+        <h1>Questwheel <span class="build-tag">v13.5.2</span></h1>
       </div>
       <div class="topbar-actions">
         <button class="ghost compact theme-trigger" id="themeBtn" type="button" aria-label="Themes"><span aria-hidden="true">◈</span><span class="theme-trigger-label">Theme</span></button>
@@ -1553,7 +1553,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   <script>
 (() => {
   const STORE = "questwheel-v1"; // Preserve all prior Questwheel local data.
-  const BUILD = "v13.5.1";
+  const BUILD = "v13.5.2";
 
   const categories = {
     business: { label: "Business", color: "#FFB000" },
@@ -1608,7 +1608,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     };
   }
     tanglangBuiltin.assets.topRightOverlay = "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20160%2096%27%3E%0A%3Cg%20fill%3D%27%23e1b34b%27%20opacity%3D%270.98%27%3E%0A%20%20%3Cpath%20d%3D%27M0%2C-7%20L1.9%2C-2.2%207%2C0%201.9%2C2.2%200%2C7%20-1.9%2C2.2%20-7%2C0%20-1.9%2C-2.2%20Z%27%20transform%3D%27translate%2814%2012%29%20scale%281.02%29%27/%3E%0A%20%20%3Cpath%20d%3D%27M0%2C-7%20L1.9%2C-2.2%207%2C0%201.9%2C2.2%200%2C7%20-1.9%2C2.2%20-7%2C0%20-1.9%2C-2.2%20Z%27%20transform%3D%27translate%2838%2026%29%20scale%28.93%29%27/%3E%0A%20%20%3Cpath%20d%3D%27M0%2C-7%20L1.9%2C-2.2%207%2C0%201.9%2C2.2%200%2C7%20-1.9%2C2.2%20-7%2C0%20-1.9%2C-2.2%20Z%27%20transform%3D%27translate%2860%2039%29%20scale%281.02%29%27/%3E%0A%20%20%3Cpath%20d%3D%27M0%2C-7%20L1.9%2C-2.2%207%2C0%201.9%2C2.2%200%2C7%20-1.9%2C2.2%20-7%2C0%20-1.9%2C-2.2%20Z%27%20transform%3D%27translate%2879%2056%29%20scale%28.94%29%27/%3E%0A%20%20%3Cpath%20d%3D%27M0%2C-7%20L1.9%2C-2.2%207%2C0%201.9%2C2.2%200%2C7%20-1.9%2C2.2%20-7%2C0%20-1.9%2C-2.2%20Z%27%20transform%3D%27translate%28109%2049%29%20scale%281.02%29%27/%3E%0A%20%20%3Cpath%20d%3D%27M0%2C-7%20L1.9%2C-2.2%207%2C0%201.9%2C2.2%200%2C7%20-1.9%2C2.2%20-7%2C0%20-1.9%2C-2.2%20Z%27%20transform%3D%27translate%28116%2077%29%20scale%28.96%29%27/%3E%0A%20%20%3Cpath%20d%3D%27M0%2C-7%20L1.9%2C-2.2%207%2C0%201.9%2C2.2%200%2C7%20-1.9%2C2.2%20-7%2C0%20-1.9%2C-2.2%20Z%27%20transform%3D%27translate%2885%2069%29%20scale%28.90%29%27/%3E%0A%3C/g%3E%3C/svg%3E";
-    tanglangBuiltin.assets.cloudOverlay = "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20720%20980%27%3E%0A%3Cg%20fill%3D%27none%27%20stroke%3D%27%23d6a63c%27%20stroke-width%3D%274.2%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20opacity%3D%270.88%27%3E%0A%20%20%3Cpath%20d%3D%27M536%20248h44c4-18%2019-31%2039-31%2014%200%2026%206%2033%2017%208-8%2019-13%2031-13%2024%200%2042%2016%2045%2037h48%27/%3E%0A%20%20%3Cpath%20d%3D%27M631%20210c8-14%2020-22%2034-22%2012%200%2022%205%2029%2014%27/%3E%0A%20%20%3Cpath%20d%3D%27M20%20612h40c4-18%2018-31%2036-31%2013%200%2024%206%2031%2015%209-10%2021-16%2035-16%2024%200%2042%2016%2045%2037h46%27/%3E%0A%20%20%3Cpath%20d%3D%27M49%20575c7-13%2018-20%2031-20%2011%200%2020%204%2027%2012%27/%3E%0A%20%20%3Cpath%20d%3D%27M276%20714h36c4-14%2016-24%2031-24%2011%200%2020%205%2026%2012%208-6%2018-10%2029-10%2021%200%2037%2013%2041%2032h36%27/%3E%0A%20%20%3Cpath%20d%3D%27M563%20786h32c4-14%2015-24%2030-24%2010%200%2018%204%2024%2011%207-6%2016-9%2027-9%2020%200%2035%2013%2038%2031h30%27/%3E%0A%3C/g%3E%3C/svg%3E";
+    tanglangBuiltin.assets.cloudOverlay = "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%201000%201500%27%20preserveAspectRatio%3D%27none%27%3E%0A%3Cg%20fill%3D%27none%27%20stroke%3D%27%23d6a63c%27%20stroke-width%3D%272.6%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20opacity%3D%27.86%27%3E%0A%20%20%3Cg%20transform%3D%27translate%28858%20300%29%20scale%28.72%29%27%3E%0A%20%20%20%20%3Cpath%20d%3D%27M0%2055h32c3-14%2015-24%2030-24%2011%200%2020%205%2026%2013%207-7%2016-11%2027-11%2020%200%2035%2013%2038%2031h35%27/%3E%0A%20%20%20%20%3Cpath%20d%3D%27M91%2026c7-12%2017-19%2029-19%2010%200%2019%204%2025%2012%27/%3E%0A%20%20%20%20%3Cpath%20d%3D%27M127%2042c8-5%2017-7%2027-5%2010%202%2018%208%2022%2017%27/%3E%0A%20%20%3C/g%3E%0A%20%20%3Cg%20transform%3D%27translate%28-18%20850%29%20scale%28.74%29%27%3E%0A%20%20%20%20%3Cpath%20d%3D%27M0%2068h38c4-16%2017-28%2034-28%2012%200%2022%205%2029%2014%208-8%2018-13%2030-13%2022%200%2038%2015%2041%2034h39%27/%3E%0A%20%20%20%20%3Cpath%20d%3D%27M34%2035c6-12%2017-19%2029-19%2010%200%2019%204%2025%2011%27/%3E%0A%20%20%20%20%3Cpath%20d%3D%27M113%2033c6-9%2015-14%2025-14%209%200%2016%203%2022%209%27/%3E%0A%20%20%3C/g%3E%0A%20%20%3Cg%20transform%3D%27translate%28398%20930%29%20scale%28.45%29%27%20opacity%3D%27.46%27%3E%0A%20%20%20%20%3Cpath%20d%3D%27M0%2058h35c4-14%2015-24%2030-24%2010%200%2019%204%2025%2012%207-7%2016-11%2027-11%2020%200%2035%2013%2038%2031h36%27/%3E%0A%20%20%3C/g%3E%0A%3C/g%3E%3C/svg%3E";
 
 
   const THEME_SURFACES = new Set(["flat","velvet","lacquer","parchment","ink"]);
@@ -5720,7 +5720,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./sw-v13.5.1.js", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw-v13.5.2.js", { updateViaCache: "none" });
         if (reg.update) reg.update().catch(() => {});
       } catch {}
     });
