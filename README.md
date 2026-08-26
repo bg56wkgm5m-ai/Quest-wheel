@@ -1,4 +1,4 @@
-# Questwheel v13.2
+# Questwheel v13.3
 
 ## Free-time bank simplification
 Questwheel now uses one cumulative Banked Free Time value on the Day screen.
@@ -21,8 +21,14 @@ The Day screen no longer shows a separate Today net card. A smaller "Earned toda
 All v13 data, themes, quests, jars and schedules remain compatible.
 
 ## Update
-Upload v13.2 over the same GitHub Pages repository, replace index.html, then open once with ?v=13.1.
+Upload v13.3 over the same GitHub Pages repository, replace index.html, then open once with ?v=13.1.
 Do not clear Safari website data.
 
 
-Refinement notes in v13.2: centered Tanglang1 mantis emblem, daylight ring shifted outward, DAY MAP label removed, refined borders/buttons, closer background texture feel, and added subtle cloud background motifs.
+Refinement notes in v13.3: centered Tanglang1 mantis emblem, daylight ring shifted outward, DAY MAP label removed, refined borders/buttons, closer background texture feel, and added subtle cloud background motifs.
+
+
+Additional v13.3 notes: Tanglang1 wheel narrowed to better match the concept image; new center emblem crop; solar/daylight ring shifted outward; gold reference-style current-time marker; cleaner Big Dipper stars without connector lines; and refined Tanglang1 button/card styling.
+
+
+v13.3 replacement patch: corrected center-art/daylight layering. Tanglang1 center artwork now uses a complete uncropped medallion canvas beneath the daylight ring; the daylight ring is no longer displaced to make room for it.
