@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Questwheel" />
-  <link rel="manifest" href="./manifest-v13.4.3.webmanifest" />
-  <link rel="apple-touch-icon" href="./icons/icon-v13.4.3-192.png" />
+  <link rel="manifest" href="./manifest-v13.5.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-v13.5-192.png" />
   <style>
 :root {
   color-scheme: dark;
@@ -946,8 +946,36 @@ html[data-theme-id="tanglang-red-velvet"] .sun-settings-btn {
 html[data-theme-id="tanglang-red-velvet"] .legend,
 html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
 
+/* v13.5 functionality */
+.inline-actions { display:flex; flex-wrap:wrap; gap:7px; align-items:center; }
+.quest-link-box.compact-link-box { max-height:160px; overflow:auto; }
+.quest-create-jar-fields { border:1px solid var(--border); border-radius:12px; padding:10px; display:grid; gap:9px; background:var(--panel-2); }
+.jar-date-nav { display:grid; grid-template-columns:44px 1fr 44px; gap:7px; align-items:center; margin:0 0 10px; }
+.jar-date-nav .ghost { min-height:40px; }
+.free-bank-actions { display:flex; gap:7px; flex-wrap:wrap; margin-top:10px; }
+.history-list { display:grid; gap:8px; max-height:58vh; overflow:auto; }
+.history-row { border:1px solid var(--border); border-radius:11px; padding:9px 10px; background:var(--panel-2); display:grid; gap:5px; }
+.history-row-main { display:flex; gap:8px; justify-content:space-between; align-items:flex-start; }
+.history-row strong { overflow-wrap:anywhere; }
+.history-row-meta { color:var(--muted); font-size:11px; line-height:1.35; }
+.history-row-actions { display:flex; gap:6px; flex-wrap:wrap; }
+
+.quest-repeat-relationship { display:grid; gap:7px; padding:10px; border:1px solid var(--border); border-radius:12px; background:var(--panel-2); }
+.quest-repeat-relationship[hidden] { display:none; }
+.quest-repeat-expiry { color:var(--muted); font-size:11px; line-height:1.35; }
+.bank-activity { margin:10px 0 14px; display:grid; gap:7px; }
+.bank-activity-head { display:flex; align-items:center; justify-content:space-between; gap:8px; color:var(--muted); font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+.bank-activity-list { display:grid; gap:6px; }
+.bank-activity-row { display:flex; gap:8px; align-items:flex-start; justify-content:space-between; border:1px solid var(--border); background:var(--panel-2); border-radius:10px; padding:8px 9px; }
+.bank-activity-row .bank-copy { display:grid; gap:2px; min-width:0; }
+.bank-activity-row .bank-note { font-size:12px; font-weight:700; overflow-wrap:anywhere; }
+.bank-activity-row .bank-meta { color:var(--muted); font-size:10px; }
+.bank-activity-row .bank-amount { flex:0 0 auto; font-weight:800; }
+.bank-rule-note { margin-top:-4px; }
+@media (max-width:520px){ .jar-date-nav{grid-template-columns:40px 1fr 40px;} }
+
 </style>
-  <title>Questwheel v13.4.3</title>
+  <title>Questwheel v13.5</title>
 </head>
 <body>
   <div class="app-shell">
@@ -957,7 +985,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
           <span class="relative-label">Today</span>
           <span class="relative-date">Mon 24 Aug ’26</span>
         </div>
-        <h1>Questwheel <span class="build-tag">v13.4.3</span></h1>
+        <h1>Questwheel <span class="build-tag">v13.5</span></h1>
       </div>
       <div class="topbar-actions">
         <button class="ghost compact theme-trigger" id="themeBtn" type="button" aria-label="Themes"><span aria-hidden="true">◈</span><span class="theme-trigger-label">Theme</span></button>
@@ -1050,13 +1078,18 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
         <section class="panel jars-panel">
           <div class="panel-heading">
             <div><span class="eyebrow">TIME RESERVOIRS</span><h2>Jars</h2></div>
-            <button class="primary compact" id="addJarBtn" type="button">+ Jar</button>
+            <div class="inline-actions"><button class="ghost compact" id="jarHistoryBtn" type="button">History</button><button class="primary compact" id="addJarBtn" type="button">+ Jar</button></div>
           </div>
           <div class="jar-subtabs" role="tablist" aria-label="Jar period">
             <button id="dailyJarsSubtab" class="quest-subtab active" type="button" role="tab" aria-selected="true">Daily</button>
             <button id="weeklyJarsSubtab" class="quest-subtab" type="button" role="tab" aria-selected="false">Weekly</button>
           </div>
           <div id="jarPeriodLabel" class="jar-period-label"></div>
+          <div class="jar-date-nav" aria-label="Jar history date navigation">
+            <button id="prevJarPeriod" class="icon-btn" type="button" aria-label="Previous jar period">‹</button>
+            <button id="todayJarPeriod" class="ghost" type="button">Today</button>
+            <button id="nextJarPeriod" class="icon-btn" type="button" aria-label="Next jar period">›</button>
+          </div>
 
           <section class="free-bank-card" aria-labelledby="freeBankHeading">
             <div class="free-bank-copy">
@@ -1064,13 +1097,19 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
               <h3 id="freeBankHeading">Free Time</h3>
               <strong id="freeBankBalance" class="free-bank-balance">0m</strong>
               <span id="freeBankPeriodNet" class="free-bank-net">Today ±0m</span>
-              <p>Finish early and time pours in. Run over and it is drawn back out.</p>
+              <div class="free-bank-actions"><button id="spendBankBtn" class="small-btn accent" type="button">Spend time</button></div>
+              <p>Blocks with banking enabled add their planned/actual difference. Spend time only when you deliberately cash it in.</p>
             </div>
             <div class="jar-vessel jar-vessel-large" aria-hidden="true">
               <div id="freeBankLiquid" class="jar-liquid free-liquid"></div>
               <div id="freeBankDeficit" class="jar-deficit" hidden></div>
               <div class="jar-shine"></div>
             </div>
+          </section>
+
+          <section class="bank-activity" aria-label="Banked free time activity">
+            <div class="bank-activity-head"><span>Bank activity</span><span id="bankActivityPeriod"></span></div>
+            <div id="bankActivityList" class="bank-activity-list"></div>
           </section>
 
           <div id="jarGrid" class="jar-grid empty-state">No category jars yet.</div>
@@ -1118,11 +1157,37 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
       </label>
       <label>Default duration
         <select id="questDuration">
-          <option value="2">2 minutes</option><option value="5">5 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option><option value="20">20 minutes</option><option value="30" selected>30 minutes</option><option value="45">45 minutes</option><option value="60">1 hour</option><option value="90">1½ hours</option><option value="120">2 hours</option><option value="180">3 hours</option><option value="240">4 hours</option><option value="360">6 hours</option><option value="480">8 hours</option><option value="600">10 hours</option>
+          <option value="">No default time</option><option value="2">2 minutes</option><option value="5">5 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option><option value="20">20 minutes</option><option value="30" selected>30 minutes</option><option value="45">45 minutes</option><option value="60">1 hour</option><option value="90">1½ hours</option><option value="120">2 hours</option><option value="180">3 hours</option><option value="240">4 hours</option><option value="360">6 hours</option><option value="480">8 hours</option><option value="600">10 hours</option>
         </select>
       </label>
+      <p class="hint">Use “No default time” for an abstract/container quest. Blocks linked to it can still be given their own duration.</p>
       <label>Colour<div id="questColorPicker" class="color-picker" role="radiogroup" aria-label="Quest colour"></div></label>
+      <label>Linked jars
+        <div id="questJarLinks" class="quest-link-box compact-link-box"></div>
+      </label>
+      <label class="repeat-toggle"><input id="questCreateJarEnabled" type="checkbox" /><span>Create a new jar linked to this quest</span></label>
+      <div id="questCreateJarFields" class="quest-create-jar-fields" hidden>
+        <label>Jar name<input id="questCreateJarName" maxlength="60" placeholder="Defaults to quest name" /></label>
+        <div class="two-col">
+          <label>Jar period<select id="questCreateJarPeriod"><option value="daily">Daily</option><option value="weekly">Weekly</option></select></label>
+          <label>Target
+            <div class="jar-duration-grid">
+              <span><input id="questCreateJarHours" type="number" min="0" max="168" step="1" value="0" inputmode="numeric" /><small>hours</small></span>
+              <span><input id="questCreateJarMinutes" type="number" min="0" max="59" step="1" value="30" inputmode="numeric" /><small>minutes</small></span>
+            </div>
+          </label>
+        </div>
+      </div>
       <label class="repeat-toggle"><input id="questRepeatEnabled" type="checkbox" /><span>Repeat this quest</span></label>
+      <div id="questRepeatRelationshipRow" class="quest-repeat-relationship" hidden>
+        <label>Subtask repeat relationship
+          <select id="questRepeatRelationship">
+            <option value="tethered">Tether to parent — renew with the parent</option>
+            <option value="independent">Independent — own repeat pattern</option>
+          </select>
+        </label>
+        <p id="questParentRepeatLimit" class="hint"></p>
+      </div>
       <div id="questRepeatFields" class="repeat-fields" hidden>
         <label>First occurrence<input id="questRepeatStart" type="date" /></label>
         <div class="two-col">
@@ -1131,6 +1196,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
         </div>
         <label>Duration unit<select id="questRepeatUnit"><option value="days" selected>Days</option><option value="weeks">Weeks</option><option value="months">Months</option></select></label>
         <p id="questRepeatHint" class="hint">One occurrence stays active at a time. Future scheduled blocks are populated immediately so you can plan ahead.</p>
+        <p id="questRepeatExpiryHint" class="quest-repeat-expiry"></p>
       </div>
       <label id="questScheduleRow" class="repeat-toggle duplicate-schedule-row"><input id="questScheduleEnabled" type="checkbox" /><span>Create a scheduled block when I save this quest</span></label>
       <div id="questScheduleFields" class="quest-schedule-fields" hidden>
@@ -1165,6 +1231,9 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
 
       <label>Fill jar when completed (optional)<select id="blockJar"></select></label>
       <p class="hint jar-count-hint">A completed block fills its jar by the <strong>planned</strong> duration, even if you finish early.</p>
+      <label>Banked free-time rule
+        <select id="blockBankRule"><option value="variance">Bank the difference from planned time</option><option value="none">Do not change banked free time</option></select>
+      </label>
       <div class="two-col date-time-pair">
         <label>Date<input id="blockDate" type="date" required /></label>
         <label>Start<input id="blockStart" type="time" required value="09:00" /></label>
@@ -1231,6 +1300,9 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
 
       <label>Fill jar when completed (optional)<select id="editBlockJar"></select></label>
       <p class="hint jar-count-hint">Jar credit uses the planned block length, not the actual completion time.</p>
+      <label>Banked free-time rule
+        <select id="editBlockBankRule"><option value="variance">Bank the difference from planned time</option><option value="none">Do not change banked free time</option></select>
+      </label>
       <div class="two-col date-time-pair">
         <label>Date<input id="editBlockDate" type="date" required /></label>
         <label>Start<input id="editBlockStart" type="time" required /></label>
@@ -1313,6 +1385,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
         <button class="icon-btn" value="cancel" aria-label="Close">×</button>
       </div>
       <input id="manualJarId" type="hidden" />
+      <input id="manualJarEditId" type="hidden" />
       <label>What did you do?<input id="manualJarWhat" maxlength="120" required placeholder="e.g. Took a shower" /></label>
       <div class="two-col date-time-pair">
         <label>Date<input id="manualJarDate" type="date" required /></label>
@@ -1327,6 +1400,27 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
       <input id="manualJarMinutes" type="hidden" value="5" />
       <p class="hint">Manual sand always records what you did and when you did it.</p>
       <div class="dialog-actions"><button class="ghost" value="cancel" type="button" id="cancelManualJar">Cancel</button><button class="primary" value="default" type="submit">Add time</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="spendBankDialog">
+    <form method="dialog" id="spendBankForm">
+      <div class="dialog-head"><div><span class="eyebrow">BANKED FREE TIME</span><h2>Spend banked time</h2></div><button class="icon-btn" value="cancel" aria-label="Close">×</button></div>
+      <label>What are you spending it on?<input id="spendBankWhat" maxlength="120" required placeholder="e.g. Reading, gaming, doing nothing" /></label>
+      <div class="two-col date-time-pair"><label>Date<input id="spendBankDate" type="date" required /></label><label>Start<input id="spendBankTime" type="time" required /></label></div>
+      <label>Amount<div class="jar-duration-grid"><span><input id="spendBankHours" type="number" min="0" max="24" step="1" value="0" inputmode="numeric" /><small>hours</small></span><span><input id="spendBankMinutes" type="number" min="0" max="59" step="1" value="30" inputmode="numeric" /><small>minutes</small></span></div></label>
+      <label class="repeat-toggle"><input id="spendBankShowBlock" type="checkbox" checked /><span>Show this free time as a completed block on the wheel</span></label>
+      <p id="spendBankBalanceHint" class="hint"></p>
+      <div class="dialog-actions"><button class="ghost" type="button" id="cancelSpendBank">Cancel</button><button class="primary" type="submit">Spend</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="jarHistoryDialog">
+    <form method="dialog" id="jarHistoryForm">
+      <div class="dialog-head"><div><span class="eyebrow">JAR HISTORY</span><h2 id="jarHistoryTitle">Jar history</h2></div><button class="icon-btn" value="cancel" aria-label="Close">×</button></div>
+      <label>Jar<select id="jarHistoryJar"></select></label>
+      <div id="jarHistoryList" class="history-list"></div>
+      <div class="dialog-actions"><button class="primary" type="button" id="closeJarHistory">Done</button></div>
     </form>
   </dialog>
 
@@ -1449,7 +1543,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
         <label>Actual hours<input id="actualHours" type="number" min="0" max="23" step="1" inputmode="numeric" value="0" /></label>
         <label>Actual minutes<input id="actualMinutes" type="number" min="0" max="59" step="1" inputmode="numeric" value="30" /></label>
       </div>
-      <p class="hint">Early time is added to your bank. Time over budget is deducted from it.</p>
+      <p id="finishBankHint" class="hint">The difference between planned and actual time is added to your bank.</p>
       <div class="dialog-actions"><button class="ghost" value="cancel" type="button" id="cancelFinish">Cancel</button><button class="primary" value="default" type="submit">Complete</button></div>
     </form>
   </dialog>
@@ -1457,7 +1551,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   <script>
 (() => {
   const STORE = "questwheel-v1"; // Preserve all prior Questwheel local data.
-  const BUILD = "v13.4.3";
+  const BUILD = "v13.5";
 
   const categories = {
     business: { label: "Business", color: "#FFB000" },
@@ -1592,6 +1686,26 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     freeBankPeriodNet: $("freeBankPeriodNet"),
     freeBankLiquid: $("freeBankLiquid"),
     freeBankDeficit: $("freeBankDeficit"),
+    bankActivityPeriod: $("bankActivityPeriod"),
+    bankActivityList: $("bankActivityList"),
+    jarHistoryBtn: $("jarHistoryBtn"),
+    prevJarPeriod: $("prevJarPeriod"),
+    todayJarPeriod: $("todayJarPeriod"),
+    nextJarPeriod: $("nextJarPeriod"),
+    spendBankBtn: $("spendBankBtn"),
+    spendBankDialog: $("spendBankDialog"),
+    spendBankForm: $("spendBankForm"),
+    spendBankWhat: $("spendBankWhat"),
+    spendBankDate: $("spendBankDate"),
+    spendBankTime: $("spendBankTime"),
+    spendBankHours: $("spendBankHours"),
+    spendBankMinutes: $("spendBankMinutes"),
+    spendBankShowBlock: $("spendBankShowBlock"),
+    spendBankBalanceHint: $("spendBankBalanceHint"),
+    jarHistoryDialog: $("jarHistoryDialog"),
+    jarHistoryTitle: $("jarHistoryTitle"),
+    jarHistoryJar: $("jarHistoryJar"),
+    jarHistoryList: $("jarHistoryList"),
     jarDialog: $("jarDialog"),
     jarForm: $("jarForm"),
     jarDialogEyebrow: $("jarDialogEyebrow"),
@@ -1614,6 +1728,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     manualJarForm: $("manualJarForm"),
     manualJarTitle: $("manualJarTitle"),
     manualJarId: $("manualJarId"),
+    manualJarEditId: $("manualJarEditId"),
     manualJarWhat: $("manualJarWhat"),
     manualJarDate: $("manualJarDate"),
     manualJarTime: $("manualJarTime"),
@@ -1683,13 +1798,24 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     questCategory: $("questCategory"),
     questDuration: $("questDuration"),
     questColorPicker: $("questColorPicker"),
+    questJarLinks: $("questJarLinks"),
+    questCreateJarEnabled: $("questCreateJarEnabled"),
+    questCreateJarFields: $("questCreateJarFields"),
+    questCreateJarName: $("questCreateJarName"),
+    questCreateJarPeriod: $("questCreateJarPeriod"),
+    questCreateJarHours: $("questCreateJarHours"),
+    questCreateJarMinutes: $("questCreateJarMinutes"),
     questRepeatEnabled: $("questRepeatEnabled"),
+    questRepeatRelationshipRow: $("questRepeatRelationshipRow"),
+    questRepeatRelationship: $("questRepeatRelationship"),
+    questParentRepeatLimit: $("questParentRepeatLimit"),
     questRepeatFields: $("questRepeatFields"),
     questRepeatStart: $("questRepeatStart"),
     questRepeatEvery: $("questRepeatEvery"),
     questRepeatFor: $("questRepeatFor"),
     questRepeatUnit: $("questRepeatUnit"),
     questRepeatHint: $("questRepeatHint"),
+    questRepeatExpiryHint: $("questRepeatExpiryHint"),
     blockDialogEyebrow: $("blockDialogEyebrow"),
     blockDialogTitle: $("blockDialogTitle"),
     blockDuplicateSourceId: $("blockDuplicateSourceId"),
@@ -1700,6 +1826,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     blockCategory: $("blockCategory"),
     blockColorPicker: $("blockColorPicker"),
     blockJar: $("blockJar"),
+    blockBankRule: $("blockBankRule"),
     blockDate: $("blockDate"),
     blockStart: $("blockStart"),
     blockHours: $("blockHours"),
@@ -1725,6 +1852,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     editBlockCategory: $("editBlockCategory"),
     editBlockColorPicker: $("editBlockColorPicker"),
     editBlockJar: $("editBlockJar"),
+    editBlockBankRule: $("editBlockBankRule"),
     editBlockDate: $("editBlockDate"),
     editBlockStart: $("editBlockStart"),
     editBlockHours: $("editBlockHours"),
@@ -1744,7 +1872,8 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     gaugeDeltaLabel: $("gaugeDeltaLabel"),
     actualDurationLabel: $("actualDurationLabel"),
     actualHours: $("actualHours"),
-    actualMinutes: $("actualMinutes")
+    actualMinutes: $("actualMinutes"),
+    finishBankHint: $("finishBankHint")
   };
 
   function isoDate(d) {
@@ -1785,12 +1914,14 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
       completed: Boolean(q.completed),
       completedAt: q.completed ? (Number(q.completedAt) || 0) : null,
       archived: Boolean(q.archived),
-      defaultMinutes: Math.max(2, Math.min(600, Number(q.defaultMinutes) || 30)),
+      defaultMinutes: (q.defaultMinutes == null || q.defaultMinutes === "") ? null : Math.max(2, Math.min(600, Number(q.defaultMinutes) || 30)),
       questTemplateId: q.questTemplateId || q.id || uid("qtpl"),
       questSeriesId: q.questSeriesId || null,
       questRecurrenceInherited: Boolean(q.questRecurrenceInherited),
+      questRecurrenceMode: q.questRecurrenceMode === "tethered" ? "tethered" : q.questRecurrenceMode === "independent" ? "independent" : (q.questRecurrenceInherited ? "tethered" : (q.questSeriesId ? "independent" : null)),
       questRecurrenceSourceSeriesId: q.questRecurrenceSourceSeriesId || null,
       questParentSeriesId: q.questParentSeriesId || null,
+      questParentTemplateId: q.questParentTemplateId || null,
       questRecurrenceEvery: hasRecurrence ? Math.max(1, Math.min(365, Number(q.questRecurrenceEvery) || 1)) : null,
       questRecurrenceFor: hasRecurrence ? Math.max(1, Math.min(3650, Number(q.questRecurrenceFor) || 1)) : null,
       questRecurrenceUnit: hasRecurrence && ["days","weeks","months"].includes(q.questRecurrenceUnit) ? q.questRecurrenceUnit : null,
@@ -1813,6 +1944,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
       category: b.category || "personal",
       color: b.color || null,
       jarId: b.jarId || null,
+      bankRule: b.bankRule === "none" ? "none" : "variance",
       completed: Boolean(b.completed),
       bankDelta: b.bankDelta != null ? Math.abs(Number(b.bankDelta) || 0) : Math.max(0, Number(b.reclaimed) || 0),
       reclaimed: Math.abs(b.bankDelta != null ? Number(b.bankDelta) || 0 : Number(b.reclaimed) || 0),
@@ -1820,6 +1952,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
       minutes: Math.max(2, Math.min(600, Number(b.minutes) || 30)),
       start: Math.max(0, Math.min(1439, Number(b.start) || 0)),
       questManagedRecurrence: Boolean(b.questManagedRecurrence),
+      questCompletionOneOff: Boolean(b.questCompletionOneOff || (b.completedByQuest && !b.seriesId && !b.questManagedRecurrence)),
       questTemplateId: b.questTemplateId || null,
       questOccurrenceAnchorDate: /^\d{4}-\d{2}-\d{2}$/.test(b.questOccurrenceAnchorDate || "") ? b.questOccurrenceAnchorDate : null
     };
@@ -1982,13 +2115,16 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
         ? parsed.bankLedger.map(entry => ({
             id: entry.id || uid("bank"),
             blockId: entry.blockId || null,
-            delta: Math.abs(Number(entry.delta) || 0),
+            delta: entry.kind === "spend" ? -Math.abs(Number(entry.delta) || 0) : Math.abs(Number(entry.delta) || 0),
+            kind: entry.kind === "spend" ? "spend" : "earn",
+            date: /^\d{4}-\d{2}-\d{2}$/.test(entry.date || "") ? entry.date : null,
+            time: /^\d{2}:\d{2}$/.test(entry.time || "") ? entry.time : null,
             createdAt: Number(entry.createdAt) || 0,
             note: entry.note || null
           }))
         : blocks
             .filter(b => b.completed && (b.bankDelta || 0) !== 0)
-            .map(b => ({ id: uid("bank-migrate"), blockId: b.id, delta: Math.abs(Number(b.bankDelta) || 0), createdAt: 0, note: "Migrated from earlier Questwheel version" }));
+            .map(b => ({ id: uid("bank-migrate"), blockId: b.id, delta: Math.abs(Number(b.bankDelta) || 0), kind: "earn", date: null, time: null, createdAt: 0, note: "Migrated from earlier Questwheel version" }));
       return {
         quests: Array.isArray(parsed.quests) ? parsed.quests.map(normalizeQuest) : [],
         blocks,
@@ -2052,7 +2188,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   }
 
   function bankBalance() {
-    return (state.bankLedger || []).reduce((sum, entry) => sum + Math.abs(Number(entry.delta) || 0), 0);
+    return (state.bankLedger || []).reduce((sum, entry) => sum + (Number(entry.delta) || 0), 0);
   }
 
   function jarById(id) {
@@ -2075,6 +2211,56 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
         select.appendChild(opt);
       });
     if (selectedId && jarById(selectedId)) select.value = selectedId;
+  }
+
+  function linkedJarIdsForQuest(questId) {
+    if (!questId) return [];
+    return (state.jars || []).filter(jar => Array.isArray(jar.linkedQuestIds) && jar.linkedQuestIds.includes(questId)).map(jar => jar.id);
+  }
+
+  function renderQuestJarLinks(selectedIds = []) {
+    if (!el.questJarLinks) return;
+    const selected = new Set(selectedIds || []);
+    el.questJarLinks.innerHTML = "";
+    const jars = [...(state.jars || [])].sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
+    if (!jars.length) {
+      const empty = document.createElement("span"); empty.className = "hint"; empty.textContent = "No jars yet. You can create one below."; el.questJarLinks.appendChild(empty); return;
+    }
+    jars.forEach(jar => {
+      const label = document.createElement("label"); label.className = "quest-link-row";
+      const check = document.createElement("input"); check.type = "checkbox"; check.value = jar.id; check.checked = selected.has(jar.id);
+      const text = document.createElement("span"); text.textContent = `${jar.name} · ${jar.period === "weekly" ? "weekly" : "daily"}`;
+      label.append(check, text); el.questJarLinks.appendChild(label);
+    });
+  }
+
+  function selectedQuestJarIds() {
+    return el.questJarLinks ? [...el.questJarLinks.querySelectorAll('input[type="checkbox"]:checked')].map(input => input.value) : [];
+  }
+
+  function applyQuestJarLinks(questId, selectedIds = []) {
+    const selected = new Set(selectedIds || []);
+    (state.jars || []).forEach(jar => {
+      jar.linkedQuestIds = Array.isArray(jar.linkedQuestIds) ? [...new Set(jar.linkedQuestIds.filter(Boolean))] : [];
+      jar.linkedQuestIds = jar.linkedQuestIds.filter(id => id !== questId);
+      if (selected.has(jar.id)) jar.linkedQuestIds.push(questId);
+    });
+  }
+
+  function createQuestLinkedJar(quest) {
+    if (!quest || !el.questCreateJarEnabled?.checked) return null;
+    const period = el.questCreateJarPeriod.value === "weekly" ? "weekly" : "daily";
+    const hours = Math.max(0, Number(el.questCreateJarHours.value) || 0);
+    const minutePart = Math.max(0, Math.min(59, Number(el.questCreateJarMinutes.value) || 0));
+    const limit = period === "weekly" ? 10080 : 1440;
+    const fallback = quest.defaultMinutes || 30;
+    const target = Math.max(1, Math.min(limit, Math.round(hours * 60 + minutePart) || fallback));
+    const jar = {
+      id: uid("jar"), name: el.questCreateJarName.value.trim() || quest.name, period, linkedDailyJarId: null,
+      linkedQuestIds: [quest.id], minMinutes: target, maxMinutes: target, color: quest.color || categoryColor(quest.category), createdAt: Date.now()
+    };
+    state.jars = Array.isArray(state.jars) ? state.jars : []; state.jars.push(jar);
+    return jar;
   }
 
   function weekDatesFor(dateISO) {
@@ -2123,7 +2309,8 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   function bankNetForDate(dateISO) {
     return (state.bankLedger || []).reduce((sum, entry) => {
       const block = entry.blockId ? state.blocks.find(b => b.id === entry.blockId) : null;
-      return sum + (block?.date === dateISO ? Math.abs(Number(entry.delta) || 0) : 0);
+      const entryDate = entry.date || block?.date || null;
+      return sum + (entryDate === dateISO ? (Number(entry.delta) || 0) : 0);
     }, 0);
   }
 
@@ -2134,7 +2321,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
 
 
   function blockBankDelta(b) {
-    if (!b?.completed) return 0;
+    if (!b?.completed || b.bankRule === "none") return 0;
     if (b.actualMinutes != null) return Math.abs((Number(b.minutes) || 0) - (Number(b.actualMinutes) || 0));
     if (b.bankDelta != null) return Math.abs(Number(b.bankDelta) || 0);
     return Math.max(0, Number(b.reclaimed) || 0);
@@ -2418,11 +2605,13 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   function applyInheritedRecurrence(child, parent) {
     const config = questRecurrenceConfig(parent);
     if (!child || !config) return false;
-    const before = JSON.stringify([child.questSeriesId, child.questRecurrenceInherited, child.questRecurrenceSourceSeriesId, child.questRecurrenceEvery, child.questRecurrenceFor, child.questRecurrenceUnit, child.questOccurrenceDate, child.questRecurrenceEndDate]);
+    const before = JSON.stringify([child.questSeriesId, child.questRecurrenceInherited, child.questRecurrenceMode, child.questRecurrenceSourceSeriesId, child.questParentSeriesId, child.questParentTemplateId, child.questRecurrenceEvery, child.questRecurrenceFor, child.questRecurrenceUnit, child.questOccurrenceDate, child.questRecurrenceEndDate]);
     child.questSeriesId = null;
     child.questRecurrenceInherited = true;
+    child.questRecurrenceMode = "tethered";
     child.questRecurrenceSourceSeriesId = config.sourceSeriesId;
     child.questParentSeriesId = config.sourceSeriesId;
+    child.questParentTemplateId = parent.questTemplateId || parent.id;
     child.questRecurrenceEvery = config.every;
     child.questRecurrenceFor = config.duration;
     child.questRecurrenceUnit = config.unit;
@@ -2430,26 +2619,66 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     child.questOccurrenceDate = parent.questOccurrenceDate;
     child.questRecurrenceEndDate = config.end;
     child.questSeriesStopped = false;
-    const after = JSON.stringify([child.questSeriesId, child.questRecurrenceInherited, child.questRecurrenceSourceSeriesId, child.questRecurrenceEvery, child.questRecurrenceFor, child.questRecurrenceUnit, child.questOccurrenceDate, child.questRecurrenceEndDate]);
+    const after = JSON.stringify([child.questSeriesId, child.questRecurrenceInherited, child.questRecurrenceMode, child.questRecurrenceSourceSeriesId, child.questParentSeriesId, child.questParentTemplateId, child.questRecurrenceEvery, child.questRecurrenceFor, child.questRecurrenceUnit, child.questOccurrenceDate, child.questRecurrenceEndDate]);
     return before !== after;
+  }
+
+  function earliestAncestorRecurrenceEnd(parent) {
+    let current = parent, end = null, guard = 0;
+    while (current && guard < 40) {
+      const config = questRecurrenceConfig(current);
+      if (config?.end && (!end || config.end < end)) end = config.end;
+      current = current.parentId ? questById(current.parentId) : null;
+      guard += 1;
+    }
+    return end;
+  }
+
+  function maxRepeatAmountWithinEnd(startISO, endISO, unit) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(startISO || "") || !/^\d{4}-\d{2}-\d{2}$/.test(endISO || "")) return 3650;
+    const start = dateFromISO(startISO), end = dateFromISO(endISO);
+    if (start > end) return 0;
+    let lo = 0, hi = 3650;
+    while (lo < hi) {
+      const mid = Math.ceil((lo + hi) / 2);
+      if (addDuration(start, mid, unit) <= end) lo = mid;
+      else hi = mid - 1;
+    }
+    return lo;
+  }
+
+  function boundQuestRecurrenceToAncestors(q) {
+    if (!q || q.questRecurrenceInherited || !q.questSeriesId || !q.parentId || !q.questOccurrenceDate) return false;
+    const parent = questById(q.parentId);
+    const bound = earliestAncestorRecurrenceEnd(parent);
+    if (!bound) return false;
+    const currentEnd = q.questRecurrenceEndDate || isoDate(addDuration(dateFromISO(q.questOccurrenceDate), Math.max(1, Number(q.questRecurrenceFor) || 1), q.questRecurrenceUnit || "days"));
+    if (currentEnd <= bound) return false;
+    const unit = ["days","weeks","months"].includes(q.questRecurrenceUnit) ? q.questRecurrenceUnit : "days";
+    const maxAmount = Math.max(1, maxRepeatAmountWithinEnd(q.questOccurrenceDate, bound, unit));
+    q.questRecurrenceFor = maxAmount;
+    q.questRecurrenceEndDate = isoDate(addDuration(dateFromISO(q.questOccurrenceDate), maxAmount, unit));
+    if (q.questRecurrenceEndDate > bound) q.questRecurrenceEndDate = bound;
+    q.questRecurrenceLabel = recurrenceLabel(Math.max(1, Number(q.questRecurrenceEvery) || 1), maxAmount, unit);
+    q.questParentTemplateId = parent?.questTemplateId || parent?.id || q.questParentTemplateId || null;
+    return true;
   }
 
   function inheritRecurrenceDefaults() {
     let changed = false;
     const walk = parent => {
       orderedChildren(parent.id).filter(child => !child.archived).forEach(child => {
-        if (questHasRecurrence(parent)) {
-          if (!questHasRecurrence(child)) {
-            changed = applyInheritedRecurrence(child, parent) || changed;
-          } else if (child.questSeriesId && recurrenceEquivalent(child, parent)) {
-            const sameSeriesItems = state.quests.filter(item => item.questSeriesId === child.questSeriesId);
-            if (sameSeriesItems.length <= 1) changed = applyInheritedRecurrence(child, parent) || changed;
-          } else if (child.questSeriesId && !child.questParentSeriesId) {
-            child.questParentSeriesId = questRecurrenceSourceId(parent);
+        if (child.questRecurrenceInherited) {
+          if (questHasRecurrence(parent)) changed = applyInheritedRecurrence(child, parent) || changed;
+          else {
+            child.questRecurrenceInherited = false;
+            child.questRecurrenceMode = child.questSeriesId ? "independent" : null;
             changed = true;
-          } else if (child.questRecurrenceInherited) {
-            changed = applyInheritedRecurrence(child, parent) || changed;
           }
+        } else if (child.questSeriesId) {
+          if (!child.questRecurrenceMode) { child.questRecurrenceMode = "independent"; changed = true; }
+          if (!child.questParentTemplateId) { child.questParentTemplateId = parent.questTemplateId || parent.id; changed = true; }
+          changed = boundQuestRecurrenceToAncestors(child) || changed;
         }
         walk(child);
       });
@@ -2472,7 +2701,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
 
   function prepopulateBlockForQuest(block, q) {
     const config = questRecurrenceConfig(q);
-    if (!block || !config || block.seriesId || block.questManagedRecurrence) return false;
+    if (!block || !config || block.seriesId || block.questManagedRecurrence || block.questCompletionOneOff) return false;
     const seriesId = uid("qbs");
     block.seriesId = seriesId;
     block.recurrenceEvery = config.every;
@@ -2536,7 +2765,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
       const linked = state.blocks.filter(block => block.questId === q.id);
       let touched = false;
       linked.forEach(block => {
-        if (!block.seriesId && !block.questManagedRecurrence) touched = prepopulateBlockForQuest(block, q) || touched;
+        if (!block.seriesId && !block.questManagedRecurrence && !block.questCompletionOneOff) touched = prepopulateBlockForQuest(block, q) || touched;
       });
       if (touched || linked.some(block => block.seriesId || block.questManagedRecurrence)) {
         if (!q.questBlocksPrepopulated) { q.questBlocksPrepopulated = true; changed = true; }
@@ -2549,7 +2778,8 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   function cloneQuestBranch(sourceParentId, newParentId, options = {}) {
     const newParent = questById(newParentId);
     childrenOf(sourceParentId).filter(child => !child.archived).forEach(child => {
-      if (options.mode === "recurrence" && child.questSeriesId && !child.questRecurrenceInherited) return;
+      // Parent renewal carries only explicitly tethered descendants.
+      if (options.mode === "recurrence" && !child.questRecurrenceInherited) return;
       const clone = {
         ...child,
         id: uid("q"),
@@ -2564,36 +2794,58 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
         questAutoScheduleStart: null,
         questBlocksPrepopulated: true
       };
-      if (options.mode === "recurrence" && newParent && questHasRecurrence(newParent)) {
+      if (options.mode === "recurrence") {
+        if (!newParent || !questHasRecurrence(newParent)) return;
+        const config = questRecurrenceConfig(newParent);
         clone.questSeriesId = null;
         clone.questRecurrenceInherited = true;
-        clone.questRecurrenceSourceSeriesId = questRecurrenceSourceId(newParent);
-        clone.questParentSeriesId = questRecurrenceSourceId(newParent);
-        clone.questRecurrenceEvery = newParent.questRecurrenceEvery;
-        clone.questRecurrenceFor = newParent.questRecurrenceFor;
-        clone.questRecurrenceUnit = newParent.questRecurrenceUnit;
-        clone.questRecurrenceLabel = newParent.questRecurrenceLabel;
+        clone.questRecurrenceMode = "tethered";
+        clone.questRecurrenceSourceSeriesId = config.sourceSeriesId;
+        clone.questParentSeriesId = config.sourceSeriesId;
+        clone.questParentTemplateId = newParent.questTemplateId || newParent.id;
+        clone.questRecurrenceEvery = config.every;
+        clone.questRecurrenceFor = config.duration;
+        clone.questRecurrenceUnit = config.unit;
+        clone.questRecurrenceLabel = config.label;
         clone.questOccurrenceDate = options.occurrenceDate || newParent.questOccurrenceDate;
-        clone.questRecurrenceEndDate = newParent.questRecurrenceEndDate;
+        clone.questRecurrenceEndDate = config.end;
         clone.questSeriesStopped = false;
       } else if (options.mode === "duplicate") {
-        if (newParent && questHasRecurrence(newParent)) {
+        if (child.questRecurrenceInherited && newParent && questHasRecurrence(newParent)) {
+          const config = questRecurrenceConfig(newParent);
           clone.questSeriesId = null;
           clone.questRecurrenceInherited = true;
-          clone.questRecurrenceSourceSeriesId = questRecurrenceSourceId(newParent);
-          clone.questParentSeriesId = questRecurrenceSourceId(newParent);
-          clone.questRecurrenceEvery = newParent.questRecurrenceEvery;
-          clone.questRecurrenceFor = newParent.questRecurrenceFor;
-          clone.questRecurrenceUnit = newParent.questRecurrenceUnit;
-          clone.questRecurrenceLabel = newParent.questRecurrenceLabel;
+          clone.questRecurrenceMode = "tethered";
+          clone.questRecurrenceSourceSeriesId = config.sourceSeriesId;
+          clone.questParentSeriesId = config.sourceSeriesId;
+          clone.questParentTemplateId = newParent.questTemplateId || newParent.id;
+          clone.questRecurrenceEvery = config.every;
+          clone.questRecurrenceFor = config.duration;
+          clone.questRecurrenceUnit = config.unit;
+          clone.questRecurrenceLabel = config.label;
           clone.questOccurrenceDate = newParent.questOccurrenceDate;
-          clone.questRecurrenceEndDate = newParent.questRecurrenceEndDate;
+          clone.questRecurrenceEndDate = config.end;
           clone.questSeriesStopped = false;
+        } else if (child.questSeriesId) {
+          const newSeriesId = uid("qseries");
+          clone.questSeriesId = newSeriesId;
+          clone.questRecurrenceInherited = false;
+          clone.questRecurrenceMode = "independent";
+          clone.questRecurrenceSourceSeriesId = newSeriesId;
+          clone.questParentSeriesId = newParent && questHasRecurrence(newParent) ? questRecurrenceSourceId(newParent) : null;
+          clone.questParentTemplateId = newParent ? (newParent.questTemplateId || newParent.id) : null;
+          clone.questSeriesStopped = false;
+          if (newParent) {
+            const bound = earliestAncestorRecurrenceEnd(newParent);
+            if (bound && clone.questRecurrenceEndDate && clone.questRecurrenceEndDate > bound) clone.questRecurrenceEndDate = bound;
+          }
         } else {
           clone.questSeriesId = null;
           clone.questRecurrenceInherited = false;
+          clone.questRecurrenceMode = null;
           clone.questRecurrenceSourceSeriesId = null;
           clone.questParentSeriesId = null;
+          clone.questParentTemplateId = newParent ? (newParent.questTemplateId || newParent.id) : null;
           clone.questRecurrenceEvery = null;
           clone.questRecurrenceFor = null;
           clone.questRecurrenceUnit = null;
@@ -2633,15 +2885,21 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
         if (latest.questRecurrenceEndDate && nextDate > latest.questRecurrenceEndDate) continue;
         if (items.some(q => q.questOccurrenceDate === nextDate)) continue;
         let parentId = null;
-        if (latest.questParentSeriesId) {
+        if (latest.questParentTemplateId || latest.questParentSeriesId) {
           const parentOccurrence = state.quests
-            .filter(parent => parent.questSeriesId === latest.questParentSeriesId && parent.questOccurrenceDate && parent.questOccurrenceDate <= nextDate && !parent.archived)
-            .sort((a,b) => String(b.questOccurrenceDate).localeCompare(String(a.questOccurrenceDate)))[0];
+            .filter(parent => {
+              if (parent.archived || !parent.questOccurrenceDate || parent.questOccurrenceDate > nextDate) return false;
+              if (latest.questParentTemplateId) return (parent.questTemplateId || parent.id) === latest.questParentTemplateId;
+              return parent.questSeriesId === latest.questParentSeriesId || parent.questRecurrenceSourceSeriesId === latest.questParentSeriesId;
+            })
+            .sort((a,b) => String(b.questOccurrenceDate).localeCompare(String(a.questOccurrenceDate)) || (b.createdAt||0)-(a.createdAt||0))[0];
           if (!parentOccurrence) continue;
+          const parentBound = earliestAncestorRecurrenceEnd(parentOccurrence);
+          if (parentBound && nextDate > parentBound) continue;
           parentId = parentOccurrence.id;
         } else if (latest.parentId) {
           const oldParent = questById(latest.parentId);
-          if (oldParent && !oldParent.archived && !oldParent.completed) parentId = oldParent.id;
+          if (oldParent && !oldParent.archived) parentId = oldParent.id;
         }
         const next = {
           ...latest,
@@ -3019,6 +3277,26 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   }
 
 
+  function openSpendBankDialog() {
+    const balance = Math.max(0, bankBalance());
+    if (balance <= 0) { window.alert("There is no Banked Free Time available to spend yet."); return; }
+    el.spendBankWhat.value = "";
+    el.spendBankDate.value = state.selectedDate || isoDate(new Date());
+    const now = new Date();
+    el.spendBankTime.value = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+    const suggested = Math.min(30, Math.max(1, Math.floor(balance)));
+    el.spendBankHours.value = "0"; el.spendBankMinutes.value = String(suggested);
+    el.spendBankShowBlock.checked = true;
+    el.spendBankBalanceHint.textContent = `Available: ${fmtMinutes(balance)}. Spending subtracts from the bank; ordinary leisure does not.`;
+    el.spendBankDialog.showModal();
+  }
+
+  function spendAmountFromInputs() {
+    const hours = Math.max(0, Math.min(24, Number(el.spendBankHours.value) || 0));
+    const minutes = Math.max(0, Math.min(59, Number(el.spendBankMinutes.value) || 0));
+    return Math.round(hours * 60 + minutes);
+  }
+
   function setJarLiquid(liquid, percent, color) {
     liquid.style.height = `${Math.max(0, Math.min(100, percent))}%`;
     liquid.style.setProperty("--jar-color", color);
@@ -3096,8 +3374,8 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   function renderJarManualHistory(jarId) {
     const entries = (state.jarEntries || [])
       .filter(entry => entry.jarId === jarId)
-      .sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0))
-      .slice(0, 5);
+      .sort((a,b) => String(b.date).localeCompare(String(a.date)) || String(b.time || "").localeCompare(String(a.time || "")))
+      .slice(0, 8);
     el.jarManualHistory.innerHTML = "";
     el.jarManualHistory.hidden = !entries.length;
     entries.forEach(entry => {
@@ -3108,7 +3386,8 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
       const meta = document.createElement("span");
       const d = dateFromISO(entry.date);
       meta.textContent = `${d.toLocaleDateString(undefined,{month:"short",day:"numeric"})}${entry.time ? ` · ${entry.time}` : ""}`;
-      row.append(strong, meta);
+      const edit = makeSmallButton("Edit", "", () => { el.jarDialog.close(); openManualJarDialog(jarId, entry.id); });
+      row.append(strong, meta, edit);
       el.jarManualHistory.appendChild(row);
     });
   }
@@ -3146,19 +3425,97 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     render();
   }
 
-  function openManualJarDialog(jarId) {
+  function openManualJarDialog(jarId, entryId = null) {
     const jar = jarById(jarId);
     if (!jar) return;
+    const entry = entryId ? (state.jarEntries || []).find(item => item.id === entryId && item.jarId === jar.id) : null;
     el.manualJarId.value = jar.id;
-    el.manualJarTitle.textContent = `Add time to ${jar.name}`;
-    el.manualJarWhat.value = "";
-    el.manualJarDate.value = state.selectedDate;
+    el.manualJarEditId.value = entry?.id || "";
+    el.manualJarTitle.textContent = entry ? `Edit ${jar.name} entry` : `Add time to ${jar.name}`;
+    el.manualJarWhat.value = entry?.what || "";
+    el.manualJarDate.value = entry?.date || state.selectedDate;
     const now = new Date();
-    el.manualJarTime.value = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
-    el.manualJarMinutes.value = "5";
-    el.manualJarHours.value = "0";
-    el.manualJarMinutesPart.value = "5";
+    el.manualJarTime.value = entry?.time || `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+    const total = Math.max(1, Number(entry?.minutes) || 5);
+    el.manualJarMinutes.value = String(total);
+    el.manualJarHours.value = String(Math.floor(total / 60));
+    el.manualJarMinutesPart.value = String(total % 60);
     el.manualJarDialog.showModal();
+  }
+
+  function jarHistoryPeriodDates() {
+    return activeJarPeriod === "weekly" ? weekDatesFor(state.selectedDate) : [state.selectedDate];
+  }
+
+  function renderJarHistory() {
+    if (!el.jarHistoryList || !el.jarHistoryJar) return;
+    const jar = jarById(el.jarHistoryJar.value);
+    el.jarHistoryList.innerHTML = "";
+    if (!jar) { el.jarHistoryList.textContent = "No jar selected."; return; }
+    const dates = new Set(jarHistoryPeriodDates());
+    const rows = [];
+    state.blocks.filter(block => dates.has(block.date) && blockCreditsJar(block, jar)).forEach(block => {
+      rows.push({ kind:"block", date:block.date, time:timeFromMinutes(block.start), minutes:Number(block.minutes)||0, title:blockTitle(block), block });
+    });
+    (state.jarEntries || []).filter(entry => jarSourceIds(jar).includes(entry.jarId) && dates.has(entry.date)).forEach(entry => {
+      rows.push({ kind:"manual", date:entry.date, time:entry.time || "00:00", minutes:Number(entry.minutes)||0, title:entry.what || "Manual entry", entry });
+    });
+    rows.sort((a,b) => String(b.date).localeCompare(String(a.date)) || String(b.time).localeCompare(String(a.time)));
+    const total = rows.reduce((sum,row)=>sum+row.minutes,0);
+    const summary = document.createElement("div"); summary.className = "history-row";
+    summary.innerHTML = `<div class="history-row-main"><strong>${jar.name}</strong><strong>${fmtMinutes(total)}</strong></div><div class="history-row-meta">${activeJarPeriod === "weekly" ? "Selected week" : compactDate(dateFromISO(state.selectedDate))} · ${rows.length} contribution${rows.length===1?"":"s"}</div>`;
+    el.jarHistoryList.appendChild(summary);
+    if (!rows.length) { const empty=document.createElement("div"); empty.className="empty-state"; empty.textContent="No jar activity in this period."; el.jarHistoryList.appendChild(empty); return; }
+    rows.forEach(item => {
+      const row=document.createElement("div"); row.className="history-row";
+      const main=document.createElement("div"); main.className="history-row-main";
+      const title=document.createElement("strong"); title.textContent=item.title;
+      const amount=document.createElement("strong"); amount.textContent=fmtMinutes(item.minutes); main.append(title,amount);
+      const meta=document.createElement("div"); meta.className="history-row-meta"; meta.textContent=`${compactDate(dateFromISO(item.date))} · ${item.time} · ${item.kind === "manual" ? "manual entry" : "completed block"}`;
+      const actions=document.createElement("div"); actions.className="history-row-actions";
+      if (item.kind === "manual") {
+        actions.append(makeSmallButton("Edit", "", () => { el.jarHistoryDialog.close(); openManualJarDialog(item.entry.jarId,item.entry.id); }));
+        actions.append(makeSmallButton("Delete", "danger", () => { if(!window.confirm("Delete this jar entry?")) return; state.jarEntries=(state.jarEntries||[]).filter(e=>e.id!==item.entry.id); saveState(); render(); renderJarHistory(); }));
+      } else {
+        actions.append(makeSmallButton("Open block", "", () => { state.selectedDate=item.block.date; state.wheelMode="calendar"; selectedBlockId=item.block.id; saveState(); el.jarHistoryDialog.close(); switchView("dayView"); render(); }));
+      }
+      row.append(main,meta,actions); el.jarHistoryList.appendChild(row);
+    });
+  }
+
+  function openJarHistoryDialog(preferredJarId = null) {
+    el.jarHistoryJar.innerHTML = "";
+    [...(state.jars || [])].sort((a,b)=>(a.createdAt||0)-(b.createdAt||0)).forEach(jar => { const opt=document.createElement("option"); opt.value=jar.id; opt.textContent=`${jar.name} · ${jar.period === "weekly" ? "weekly" : "daily"}`; el.jarHistoryJar.appendChild(opt); });
+    if (!el.jarHistoryJar.options.length) { window.alert("Create a jar first."); return; }
+    if (preferredJarId && jarById(preferredJarId)) el.jarHistoryJar.value=preferredJarId;
+    el.jarHistoryTitle.textContent = activeJarPeriod === "weekly" ? "Jar history · selected week" : `Jar history · ${compactDate(dateFromISO(state.selectedDate))}`;
+    renderJarHistory(); el.jarHistoryDialog.showModal();
+  }
+
+  function renderBankActivity() {
+    if (!el.bankActivityList || !el.bankActivityPeriod) return;
+    const dates = new Set(activeJarPeriod === "weekly" ? weekDatesFor(state.selectedDate) : [state.selectedDate]);
+    el.bankActivityPeriod.textContent = activeJarPeriod === "weekly" ? "selected week" : "selected day";
+    const rows = (state.bankLedger || []).map(entry => {
+      const block = entry.blockId ? state.blocks.find(b => b.id === entry.blockId) : null;
+      const date = entry.date || block?.date || null;
+      const time = entry.time || (block ? timeFromMinutes(block.start) : "");
+      return { entry, block, date, time };
+    }).filter(row => row.date && dates.has(row.date))
+      .sort((a,b) => String(b.date).localeCompare(String(a.date)) || String(b.time || "").localeCompare(String(a.time || "")) || (b.entry.createdAt||0)-(a.entry.createdAt||0));
+    el.bankActivityList.innerHTML = "";
+    if (!rows.length) {
+      const empty = document.createElement("div"); empty.className = "hint"; empty.textContent = "No bank activity in this period."; el.bankActivityList.appendChild(empty); return;
+    }
+    rows.forEach(({entry, block, date, time}) => {
+      const row = document.createElement("div"); row.className = "bank-activity-row";
+      const copy = document.createElement("div"); copy.className = "bank-copy";
+      const note = document.createElement("div"); note.className = "bank-note"; note.textContent = entry.note || (entry.kind === "spend" ? "Spent free time" : (block ? blockTitle(block) : "Earned free time"));
+      const meta = document.createElement("div"); meta.className = "bank-meta"; meta.textContent = `${entry.kind === "spend" ? "Spent" : "Earned"} · ${compactDate(dateFromISO(date))}${time ? ` · ${time}` : ""}`;
+      copy.append(note, meta);
+      const amount = document.createElement("div"); amount.className = "bank-amount"; amount.textContent = fmtSignedMinutes(Number(entry.delta)||0);
+      row.append(copy, amount); el.bankActivityList.appendChild(row);
+    });
   }
 
   function renderJars() {
@@ -3174,13 +3531,14 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
 
     const balance = bankBalance();
     const net = bankNetForPeriod();
-    el.freeBankBalance.textContent = fmtMinutes(balance);
-    el.freeBankBalance.classList.remove("negative");
-    el.freeBankPeriodNet.textContent = `Earned ${activeJarPeriod === "weekly" ? "this week" : "this day"}: ${net ? "+" + fmtMinutes(net) : "0m"}`;
+    el.freeBankBalance.textContent = balance < 0 ? `−${fmtMinutes(Math.abs(balance))}` : fmtMinutes(balance);
+    el.freeBankBalance.classList.toggle("negative", balance < 0);
+    el.freeBankPeriodNet.textContent = `Net ${activeJarPeriod === "weekly" ? "this week" : "this day"}: ${fmtSignedMinutes(net)}`;
     const visualCapacity = 480;
-    const bankPct = Math.min(100, balance / visualCapacity * 100);
+    const bankPct = Math.min(100, Math.max(0, balance) / visualCapacity * 100);
     el.freeBankLiquid.style.height = `${bankPct}%`;
-    el.freeBankDeficit.hidden = true;
+    el.freeBankDeficit.hidden = balance >= 0;
+    renderBankActivity();
 
     const jars = [...(state.jars || [])]
       .filter(jar => activeJarPeriod === "weekly" || jar.period !== "weekly")
@@ -3381,7 +3739,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
 
     const meta = document.createElement("div");
     meta.className = "card-meta";
-    const parts = [categories[q.category]?.label || "Quest", `default ${fmtMinutes(q.defaultMinutes)}`];
+    const parts = [categories[q.category]?.label || "Quest", q.defaultMinutes == null ? "no default time" : `default ${fmtMinutes(q.defaultMinutes)}`];
     if (scheduled) parts.push(`${scheduled} scheduled`);
     if (allChildren.length) parts.push(`${allChildren.length} direct subtask${allChildren.length === 1 ? "" : "s"}`);
     meta.textContent = parts.join(" · ");
@@ -3396,7 +3754,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     }
     if (questHasRecurrence(q) && q.questRecurrenceLabel) {
       const repeatMeta = document.createElement("div"); repeatMeta.className = "quest-repeat-meta";
-      repeatMeta.textContent = `↻ ${q.questRecurrenceLabel}${q.questRecurrenceInherited ? " · inherited" : ""}${q.questAutoScheduleStart ? ` · auto-block ${q.questAutoScheduleStart}` : ""}`;
+      repeatMeta.textContent = `↻ ${q.questRecurrenceLabel}${q.questRecurrenceInherited ? " · tethered" : (q.parentId && q.questSeriesId ? " · independent" : "")}${q.questRecurrenceEndDate ? ` · ends ${compactDate(dateFromISO(q.questRecurrenceEndDate))}` : ""}${q.questAutoScheduleStart ? ` · auto-block ${q.questAutoScheduleStart}` : ""}`;
       titleWrap.appendChild(repeatMeta);
     }
     main.appendChild(titleWrap);
@@ -3647,7 +4005,9 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     el.selectedBlockStatus.className = "selected-block-status";
     if (block.completed) {
       const actual = Number(block.actualMinutes) || block.minutes;
-      if (delta > 0 && actual < block.minutes) {
+      if (block.bankRule === "none") {
+        el.selectedBlockStatus.textContent = `Completed in ${fmtMinutes(actual)} · no bank change`;
+      } else if (delta > 0 && actual < block.minutes) {
         el.selectedBlockStatus.textContent = `+${fmtMinutes(delta)} banked · completed in ${fmtMinutes(actual)}`;
         el.selectedBlockStatus.classList.add("positive");
       } else if (delta > 0 && actual > block.minutes) {
@@ -3676,8 +4036,8 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     el.reclaimedTotal.textContent = `Earned today: ${earnedToday ? "+" + fmtMinutes(earnedToday) : "0m"}`;
     el.reclaimedTotal.classList.remove("negative");
     const balance = bankBalance();
-    el.bankedTimeTotal.textContent = fmtMinutes(balance);
-    el.bankedTimeTotal.classList.remove("negative");
+    el.bankedTimeTotal.textContent = balance < 0 ? `−${fmtMinutes(Math.abs(balance))}` : fmtMinutes(balance);
+    el.bankedTimeTotal.classList.toggle("negative", balance < 0);
 
     if (!blocks.length) {
       el.timeline.className = "timeline empty-state";
@@ -4292,6 +4652,64 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     el.questScheduleDate.disabled = repeating;
   }
 
+  function syncQuestRecurrenceUI() {
+    const repeating = Boolean(el.questRepeatEnabled.checked);
+    const parent = questById(el.questParentId.value);
+    const parentConfig = questRecurrenceConfig(parent);
+    const hasParentRecurrence = Boolean(parentConfig);
+    el.questRepeatFields.hidden = !repeating;
+    el.questRepeatRelationshipRow.hidden = !(repeating && hasParentRecurrence);
+    const tethered = Boolean(repeating && hasParentRecurrence && el.questRepeatRelationship.value === "tethered");
+    const controls = [el.questRepeatStart, el.questRepeatEvery, el.questRepeatFor, el.questRepeatUnit];
+    controls.forEach(control => { control.disabled = tethered; });
+    if (tethered) {
+      el.questRepeatStart.value = parent.questOccurrenceDate || parentConfig.start;
+      el.questRepeatEvery.value = String(parentConfig.every);
+      el.questRepeatFor.value = String(parentConfig.duration);
+      el.questRepeatUnit.value = parentConfig.unit;
+      el.questRepeatFor.max = "3650";
+      el.questParentRepeatLimit.textContent = `Tethered to ${parent.name}: this subtask renews only when the parent renews and expires with it.`;
+      el.questRepeatHint.textContent = "The parent controls this subtask's recurrence. Change the relationship to Independent if it needs its own rhythm.";
+      el.questRepeatHint.classList.add("quest-inherited-note");
+    } else {
+      el.questRepeatHint.classList.remove("quest-inherited-note");
+      el.questRepeatHint.textContent = hasParentRecurrence
+        ? "Independent subtasks can use their own repeat pattern, but can never extend beyond the parent quest's recurrence window."
+        : "One occurrence stays active at a time. Future scheduled blocks are populated immediately so you can plan ahead.";
+      const bound = parent ? earliestAncestorRecurrenceEnd(parent) : null;
+      if (bound) {
+        const minStart = parent.questOccurrenceDate || parentConfig?.start || "";
+        if (minStart) el.questRepeatStart.min = minStart; else el.questRepeatStart.removeAttribute("min");
+        el.questRepeatStart.max = bound;
+        if (el.questRepeatStart.value && el.questRepeatStart.value > bound) el.questRepeatStart.value = bound;
+        if (minStart && el.questRepeatStart.value && el.questRepeatStart.value < minStart) el.questRepeatStart.value = minStart;
+        const unit = ["days","weeks","months"].includes(el.questRepeatUnit.value) ? el.questRepeatUnit.value : "days";
+        const maxAmount = Math.max(1, maxRepeatAmountWithinEnd(el.questRepeatStart.value || minStart || state.selectedDate, bound, unit));
+        el.questRepeatFor.max = String(maxAmount);
+        if ((Number(el.questRepeatFor.value) || 1) > maxAmount) el.questRepeatFor.value = String(maxAmount);
+        el.questParentRepeatLimit.textContent = `Parent limit: this subtask must expire by ${compactDate(dateFromISO(bound))}.`;
+      } else {
+        el.questRepeatStart.removeAttribute("min");
+        el.questRepeatStart.removeAttribute("max");
+        el.questRepeatFor.max = "3650";
+        el.questParentRepeatLimit.textContent = "";
+      }
+    }
+    if (repeating) {
+      const unit = ["days","weeks","months"].includes(el.questRepeatUnit.value) ? el.questRepeatUnit.value : "days";
+      const amount = Math.max(1, Number(el.questRepeatFor.value) || 1);
+      const start = /^\d{4}-\d{2}-\d{2}$/.test(el.questRepeatStart.value || "") ? el.questRepeatStart.value : state.selectedDate;
+      let end = tethered ? parentConfig.end : isoDate(addDuration(dateFromISO(start), amount, unit));
+      const bound = !tethered && parent ? earliestAncestorRecurrenceEnd(parent) : null;
+      if (bound && end > bound) end = bound;
+      el.questRepeatExpiryHint.textContent = `Expiry: ${compactDate(dateFromISO(end))}. No descendant recurrence can extend past this date.`;
+    } else {
+      el.questRepeatExpiryHint.textContent = "";
+      el.questParentRepeatLimit.textContent = "";
+    }
+    syncQuestInlineScheduleDate();
+  }
+
   function openQuestDialog(parentId = null, duplicateSourceId = null, editQuestId = null) {
     const source = duplicateSourceId ? questById(duplicateSourceId) : null;
     const editing = editQuestId ? questById(editQuestId) : null;
@@ -4307,26 +4725,34 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     const base = basis || parent;
     if (base) {
       el.questCategory.value = base.category || "personal";
-      el.questDuration.value = String(base.defaultMinutes || 30);
+      el.questDuration.value = base.defaultMinutes == null ? "" : String(base.defaultMinutes);
       setQuestColorPicker(questColor(base));
     } else {
       el.questCategory.value = "business"; el.questDuration.value = "30"; setQuestColorPicker(categoryColor("business"));
     }
-    const recurrenceBasis = basis && questHasRecurrence(basis) ? basis : (!basis && parent && questHasRecurrence(parent) ? parent : null);
+    renderQuestJarLinks(basis ? linkedJarIdsForQuest(basis.id) : []);
+    el.questCreateJarEnabled.checked = false;
+    el.questCreateJarFields.hidden = true;
+    el.questCreateJarName.value = "";
+    delete el.questCreateJarName.dataset.touched;
+    el.questCreateJarPeriod.value = "daily";
+    el.questCreateJarHours.value = "0";
+    el.questCreateJarMinutes.value = String(basis?.defaultMinutes || 30);
+
+    const parentConfig = questRecurrenceConfig(parent);
+    const recurrenceBasis = basis && questHasRecurrence(basis) ? basis : (!basis && parentConfig ? parent : null);
     const repeating = Boolean(recurrenceBasis);
     el.questRepeatEnabled.checked = repeating;
-    el.questRepeatFields.hidden = !repeating;
+    el.questRepeatStart.disabled = false;
+    el.questRepeatEvery.disabled = false;
+    el.questRepeatFor.disabled = false;
+    el.questRepeatUnit.disabled = false;
     el.questRepeatStart.value = recurrenceBasis?.questOccurrenceDate || state.selectedDate || isoDate(new Date());
     el.questRepeatEvery.value = String(Math.max(1, Number(recurrenceBasis?.questRecurrenceEvery) || 1));
     el.questRepeatFor.value = String(Math.max(1, Number(recurrenceBasis?.questRecurrenceFor) || 4));
     el.questRepeatUnit.value = ["days","weeks","months"].includes(recurrenceBasis?.questRecurrenceUnit) ? recurrenceBasis.questRecurrenceUnit : "days";
-    if (parent && questHasRecurrence(parent) && !basis) {
-      el.questRepeatHint.textContent = "Inherited from the parent quest by default. Change these values or turn repetition off to override it.";
-      el.questRepeatHint.classList.add("quest-inherited-note");
-    } else {
-      el.questRepeatHint.textContent = "One occurrence stays active at a time. Future scheduled blocks are populated immediately so you can plan ahead.";
-      el.questRepeatHint.classList.remove("quest-inherited-note");
-    }
+    el.questRepeatRelationship.value = basis?.questRecurrenceInherited ? "tethered" : (basis?.questSeriesId ? "independent" : (!basis && parentConfig ? "tethered" : "independent"));
+    syncQuestRecurrenceUI();
 
     // New/duplicate quests can create their first scheduled block in the same save flow.
     el.questScheduleRow.hidden = Boolean(editing);
@@ -4337,7 +4763,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
       ? el.questRepeatStart.value
       : (sourceBlock?.date || state.selectedDate || isoDate(new Date()));
     el.questScheduleStart.value = sourceBlock ? timeFromMinutes(sourceBlock.start) : "09:00";
-    syncQuestInlineScheduleDate();
+    syncQuestRecurrenceUI();
     el.questDialog.showModal();
   }
 
@@ -4346,7 +4772,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     const standalone = !q;
     el.standaloneFields.hidden = !standalone;
     el.blockName.required = standalone;
-    if (q && resetDuration) setBlockDurationInputs(q.defaultMinutes || 30);
+    if (q && resetDuration) setBlockDurationInputs(q.defaultMinutes == null ? 30 : q.defaultMinutes);
   }
 
   function applyQuestRecurrenceToBlockForm(q, { setDate = false } = {}) {
@@ -4377,7 +4803,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     const questRepeat = !source ? questRecurrenceConfig(initialQuest) : null;
     el.blockDate.value = source?.date || initialQuest?.questOccurrenceDate || state.selectedDate;
     el.blockStart.value = source ? timeFromMinutes(source.start) : "09:00";
-    setBlockDurationInputs(source?.minutes || (initialQuestId ? (questById(initialQuestId)?.defaultMinutes || 30) : 30));
+    setBlockDurationInputs(source?.minutes || (initialQuestId ? (questById(initialQuestId)?.defaultMinutes ?? 30) : 30));
     el.blockName.value = source && !source.questId ? (source.name || "") : "";
     el.blockCategory.value = source && !source.questId ? (source.category || "personal") : "personal";
     setBlockColorPicker(source && !source.questId ? blockColor(source) : categoryColor("personal"));
@@ -4398,6 +4824,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     }
     renderJarOptions(el.blockJar, source?.jarId || null);
     el.blockJar.value = source?.jarId || "";
+    el.blockBankRule.value = source?.bankRule === "none" ? "none" : "variance";
     toggleBlockMode({ resetDuration: false });
     el.blockDialog.showModal();
   }
@@ -4431,18 +4858,19 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
 
   function refreshLedgerForBlock(block) {
     if (!block.completed || block.actualMinutes == null) return;
-    const newDelta = Math.abs(block.minutes - block.actualMinutes);
+    const newDelta = block.bankRule === "none" ? 0 : Math.abs(block.minutes - block.actualMinutes);
     block.bankDelta = newDelta;
     block.reclaimed = newDelta;
     state.bankLedger = Array.isArray(state.bankLedger) ? state.bankLedger : [];
     const entries = state.bankLedger.filter(entry => entry.blockId === block.id);
     if (entries.length) {
       entries[0].delta = newDelta;
+      entries[0].kind = "earn";
       entries[0].note = blockTitle(block);
-      state.bankLedger = state.bankLedger.filter((entry, index) => entry.blockId !== block.id || entry === entries[0]);
+      state.bankLedger = state.bankLedger.filter(entry => entry.blockId !== block.id || entry === entries[0]);
       if (newDelta === 0) state.bankLedger = state.bankLedger.filter(entry => entry.blockId !== block.id);
     } else if (newDelta !== 0) {
-      state.bankLedger.push({ id: uid("bank"), blockId: block.id, delta: newDelta, createdAt: Date.now(), note: blockTitle(block) });
+      state.bankLedger.push({ id: uid("bank"), blockId: block.id, delta: newDelta, kind: "earn", date: null, time: null, createdAt: Date.now(), note: blockTitle(block) });
     }
   }
 
@@ -4483,6 +4911,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     setEditBlockColorPicker(blockColor(block));
     renderJarOptions(el.editBlockJar, block.jarId);
     el.editBlockJar.value = block.jarId || "";
+    el.editBlockBankRule.value = block.bankRule === "none" ? "none" : "variance";
     el.editBlockDate.value = block.date;
     el.editBlockStart.value = timeFromMinutes(block.start);
     setEditBlockDurationInputs(block.minutes);
@@ -4530,6 +4959,11 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     const deviation = actual - b.minutes;
     const bankAmount = Math.abs(deviation);
     el.actualDurationLabel.textContent = `Actual: ${fmtMinutes(actual)}`;
+    if (b.bankRule === "none") {
+      el.gaugeDeltaLabel.textContent = deviation === 0 ? "On time · no bank change" : `${fmtMinutes(bankAmount)} ${deviation < 0 ? "early" : "over"} · no bank change`;
+      el.gaugeDeltaLabel.classList.remove("negative");
+      return;
+    }
     if (deviation < 0) {
       el.gaugeDeltaLabel.textContent = `${fmtMinutes(bankAmount)} early · bank +${fmtMinutes(bankAmount)}`;
       el.gaugeDeltaLabel.classList.remove("negative");
@@ -4553,6 +4987,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     el.timeDeltaGauge.min = String(-(b.minutes - 1));
     el.timeDeltaGauge.max = String(Math.min(720, 1440 - b.minutes));
     el.timeDeltaGauge.value = "0";
+    el.finishBankHint.textContent = b.bankRule === "none" ? "This block is set not to change Banked Free Time." : "The difference between planned and actual time is added to your bank.";
     setActualDurationInputs(b.minutes);
     updateFinishReadout(b, b.minutes);
     el.finishDialog.showModal();
@@ -4718,51 +5153,77 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     if (!el.questParentId.value) setQuestColorPicker(categoryColor(el.questCategory.value));
   });
   $("cancelQuest").addEventListener("click", () => el.questDialog.close());
-  el.questRepeatEnabled.addEventListener("change", () => {
-    el.questRepeatFields.hidden = !el.questRepeatEnabled.checked;
-    syncQuestInlineScheduleDate();
-  });
-  el.questRepeatStart.addEventListener("change", syncQuestInlineScheduleDate);
-  el.questRepeatStart.addEventListener("input", syncQuestInlineScheduleDate);
+  el.questRepeatEnabled.addEventListener("change", syncQuestRecurrenceUI);
+  el.questRepeatRelationship.addEventListener("change", syncQuestRecurrenceUI);
+  el.questRepeatStart.addEventListener("change", syncQuestRecurrenceUI);
+  el.questRepeatStart.addEventListener("input", syncQuestRecurrenceUI);
+  el.questRepeatEvery.addEventListener("input", syncQuestRecurrenceUI);
+  el.questRepeatFor.addEventListener("input", syncQuestRecurrenceUI);
+  el.questRepeatUnit.addEventListener("change", syncQuestRecurrenceUI);
   el.questScheduleEnabled.addEventListener("change", () => {
     el.questScheduleFields.hidden = !el.questScheduleEnabled.checked || Boolean(el.questEditId.value);
     syncQuestInlineScheduleDate();
   });
+  el.questCreateJarEnabled.addEventListener("change", () => {
+    el.questCreateJarFields.hidden = !el.questCreateJarEnabled.checked;
+    if (el.questCreateJarEnabled.checked && !el.questCreateJarName.value.trim()) el.questCreateJarName.value = el.questName.value.trim();
+  });
+  el.questName.addEventListener("input", () => {
+    if (el.questCreateJarEnabled.checked && !el.questCreateJarName.dataset.touched) el.questCreateJarName.value = el.questName.value.trim();
+  });
+  el.questCreateJarName.addEventListener("input", () => { el.questCreateJarName.dataset.touched = "1"; });
   el.questForm.addEventListener("submit", event => {
     event.preventDefault();
     const name = el.questName.value.trim();
     if (!name) return;
+    const questDefaultMinutes = el.questDuration.value === "" ? null : Math.max(2, Math.min(600, Number(el.questDuration.value) || 30));
+    const selectedLinkedJarIds = selectedQuestJarIds();
     const duplicateSource = questById(el.questDuplicateSourceId.value);
     const editing = questById(el.questEditId.value);
     const repeating = el.questRepeatEnabled.checked;
-    const repeatStart = /^\d{4}-\d{2}-\d{2}$/.test(el.questRepeatStart.value) ? el.questRepeatStart.value : (editing?.questOccurrenceDate || isoDate(new Date()));
-    const repeatEvery = repeating ? Math.max(1, Math.min(365, Number(el.questRepeatEvery.value) || 1)) : null;
-    const repeatFor = repeating ? Math.max(1, Math.min(3650, Number(el.questRepeatFor.value) || 1)) : null;
-    const repeatUnit = repeating && ["days","weeks","months"].includes(el.questRepeatUnit.value) ? el.questRepeatUnit.value : null;
     const formParent = questById(el.questParentId.value);
     const parentConfig = questRecurrenceConfig(formParent);
-    const inheritsParent = Boolean(repeating && parentConfig && repeatStart === formParent.questOccurrenceDate && repeatEvery === parentConfig.every && repeatFor === parentConfig.duration && repeatUnit === parentConfig.unit);
+    const recurrenceRelationship = repeating && parentConfig ? el.questRepeatRelationship.value : "independent";
+    const inheritsParent = Boolean(repeating && parentConfig && recurrenceRelationship === "tethered");
+    let repeatStart = repeating
+      ? (inheritsParent ? (formParent.questOccurrenceDate || parentConfig.start) : (/^\d{4}-\d{2}-\d{2}$/.test(el.questRepeatStart.value) ? el.questRepeatStart.value : (editing?.questOccurrenceDate || isoDate(new Date()))))
+      : null;
+    let repeatEvery = repeating ? (inheritsParent ? parentConfig.every : Math.max(1, Math.min(365, Number(el.questRepeatEvery.value) || 1))) : null;
+    let repeatFor = repeating ? (inheritsParent ? parentConfig.duration : Math.max(1, Math.min(3650, Number(el.questRepeatFor.value) || 1))) : null;
+    let repeatUnit = repeating ? (inheritsParent ? parentConfig.unit : (["days","weeks","months"].includes(el.questRepeatUnit.value) ? el.questRepeatUnit.value : "days")) : null;
+    let repeatEnd = repeating ? (inheritsParent ? parentConfig.end : isoDate(addDuration(dateFromISO(repeatStart), repeatFor, repeatUnit))) : null;
+    const ancestorBound = repeating && formParent ? earliestAncestorRecurrenceEnd(formParent) : null;
+    if (repeating && !inheritsParent && ancestorBound && repeatEnd > ancestorBound) {
+      const maxAmount = Math.max(1, maxRepeatAmountWithinEnd(repeatStart, ancestorBound, repeatUnit));
+      repeatFor = maxAmount;
+      repeatEnd = isoDate(addDuration(dateFromISO(repeatStart), repeatFor, repeatUnit));
+      if (repeatEnd > ancestorBound) repeatEnd = ancestorBound;
+    }
 
     if (editing) {
       const oldSeriesId = editing.questSeriesId;
-      if (!repeating && oldSeriesId) state.quests.forEach(item => { if (item.questSeriesId === oldSeriesId) item.questSeriesStopped = true; });
+      if ((!repeating || inheritsParent) && oldSeriesId) state.quests.forEach(item => { if (item.questSeriesId === oldSeriesId) item.questSeriesStopped = true; });
       editing.name = name;
       editing.category = el.questCategory.value;
-      editing.defaultMinutes = Math.max(2, Math.min(600, Number(el.questDuration.value) || 30));
+      editing.defaultMinutes = questDefaultMinutes;
       editing.color = selectedQuestColor;
       editing.questSeriesId = repeating && !inheritsParent ? (oldSeriesId || uid("qseries")) : null;
       editing.questRecurrenceInherited = inheritsParent;
+      editing.questRecurrenceMode = repeating ? (inheritsParent ? "tethered" : "independent") : null;
       editing.questRecurrenceSourceSeriesId = inheritsParent ? parentConfig.sourceSeriesId : null;
       editing.questParentSeriesId = formParent && questHasRecurrence(formParent) ? questRecurrenceSourceId(formParent) : null;
+      editing.questParentTemplateId = formParent ? (formParent.questTemplateId || formParent.id) : null;
       editing.questRecurrenceEvery = repeatEvery;
       editing.questRecurrenceFor = repeatFor;
       editing.questRecurrenceUnit = repeatUnit;
       editing.questRecurrenceLabel = repeating ? recurrenceLabel(repeatEvery, repeatFor, repeatUnit) : null;
       if (editing.questSeriesId) editing.questRecurrenceSourceSeriesId = editing.questSeriesId;
       editing.questOccurrenceDate = repeating ? repeatStart : null;
-      editing.questRecurrenceEndDate = repeating ? isoDate(addDuration(dateFromISO(repeatStart), repeatFor, repeatUnit)) : null;
+      editing.questRecurrenceEndDate = repeating ? repeatEnd : null;
       editing.questSeriesStopped = false;
       editing.questTemplateId = editing.questTemplateId || editing.id;
+      applyQuestJarLinks(editing.id, selectedLinkedJarIds);
+      createQuestLinkedJar(editing);
       inheritRecurrenceDefaults();
       prepopulateRecurringQuestBlocks();
       syncDerivedQuestCompletion();
@@ -4773,6 +5234,11 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     }
 
     const scheduleNow = el.questScheduleEnabled.checked;
+    if (scheduleNow && questDefaultMinutes == null) {
+      window.alert("Choose a default duration before creating a scheduled block, or turn off scheduled block creation.");
+      el.questDuration.focus();
+      return;
+    }
     const scheduleDate = repeating
       ? repeatStart
       : (/^\d{4}-\d{2}-\d{2}$/.test(el.questScheduleDate.value) ? el.questScheduleDate.value : state.selectedDate);
@@ -4780,17 +5246,19 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     const parentId = el.questParentId.value || null;
     const quest = {
       id: uid("q"), parentId, name, category: el.questCategory.value,
-      defaultMinutes: Math.max(2, Math.min(600, Number(el.questDuration.value) || 30)), color: selectedQuestColor,
+      defaultMinutes: questDefaultMinutes, color: selectedQuestColor,
       completed: false, archived: false, createdAt: Date.now(), sortOrder: nextQuestSortOrder(parentId),
       questTemplateId: uid("qtpl"),
       questSeriesId: repeating && !inheritsParent ? uid("qseries") : null,
       questRecurrenceInherited: inheritsParent,
+      questRecurrenceMode: repeating ? (inheritsParent ? "tethered" : "independent") : null,
       questRecurrenceSourceSeriesId: inheritsParent ? parentConfig.sourceSeriesId : null,
       questParentSeriesId: formParent && questHasRecurrence(formParent) ? questRecurrenceSourceId(formParent) : null,
+      questParentTemplateId: formParent ? (formParent.questTemplateId || formParent.id) : null,
       questRecurrenceEvery: repeatEvery, questRecurrenceFor: repeatFor, questRecurrenceUnit: repeatUnit,
       questRecurrenceLabel: repeating ? recurrenceLabel(repeatEvery, repeatFor, repeatUnit) : null,
       questOccurrenceDate: repeating ? repeatStart : null,
-      questRecurrenceEndDate: repeating ? isoDate(addDuration(dateFromISO(repeatStart), repeatFor, repeatUnit)) : null,
+      questRecurrenceEndDate: repeating ? repeatEnd : null,
       questSeriesStopped: false,
       questAutoSchedule: Boolean(repeating && scheduleNow),
       questAutoScheduleStart: repeating && scheduleNow ? scheduleStart : null
@@ -4801,11 +5269,13 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
       copyJarQuestLinks(duplicateSource.id, quest.id);
       cloneQuestBranch(duplicateSource.id, quest.id, { mode: "duplicate" });
     }
+    applyQuestJarLinks(quest.id, selectedLinkedJarIds);
+    createQuestLinkedJar(quest);
     if (scheduleNow) {
       state.blocks.push({
         id: uid("b"), questId: quest.id, name: null, category: quest.category, color: null, jarId: null,
         date: scheduleDate, start: minutesFromTime(scheduleStart), minutes: quest.defaultMinutes,
-        completed: false, actualMinutes: null, reclaimed: 0, bankDelta: 0, seriesId: null, recurrenceLabel: null,
+        completed: false, actualMinutes: null, reclaimed: 0, bankDelta: 0, bankRule: "variance", seriesId: null, recurrenceLabel: null,
         questManagedRecurrence: false, questTemplateId: quest.questTemplateId, questOccurrenceAnchorDate: quest.questOccurrenceDate || scheduleDate
       });
       if (questHasRecurrence(quest)) prepopulateRecurringQuestBlocks();
@@ -4882,6 +5352,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
         category: standalone ? el.blockCategory.value : (q?.category || "personal"),
         color: standalone ? selectedBlockColor : null,
         jarId: jarById(el.blockJar.value) ? el.blockJar.value : null,
+        bankRule: el.blockBankRule.value === "none" ? "none" : "variance",
         date,
         start,
         minutes,
@@ -4894,6 +5365,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
         recurrenceFor: el.repeatEnabled.checked ? Math.max(1, Math.min(3650, Number(el.repeatFor.value) || 1)) : null,
         recurrenceUnit: el.repeatEnabled.checked ? el.repeatUnit.value : null,
         questManagedRecurrence: questManaged,
+        questCompletionOneOff: Boolean(pendingQuestCompletionId && q?.id === pendingQuestCompletionId),
         questTemplateId: questManaged ? (q.questTemplateId || q.id) : null,
         questOccurrenceAnchorDate: questManaged ? anchorDate : null
       };
@@ -4948,6 +5420,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
       block.category = standalone ? el.editBlockCategory.value : (q?.category || "personal");
       block.color = standalone ? selectedEditBlockColor : null;
       block.jarId = jarById(el.editBlockJar.value) ? el.editBlockJar.value : null;
+      block.bankRule = el.editBlockBankRule.value === "none" ? "none" : "variance";
       refreshLedgerForBlock(block);
     };
 
@@ -4976,6 +5449,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
           category: standalone ? el.editBlockCategory.value : (q?.category || "personal"),
           color: standalone ? selectedEditBlockColor : null,
           jarId: jarById(el.editBlockJar.value) ? el.editBlockJar.value : null,
+          bankRule: el.editBlockBankRule.value === "none" ? "none" : "variance",
           date,
           start: newStart,
           minutes,
@@ -5035,7 +5509,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     const b = state.blocks.find(x => x.id === el.finishBlockId.value);
     if (!b) return;
     const actual = actualDurationFromInputs();
-    const delta = Math.abs(b.minutes - actual);
+    const delta = b.bankRule === "none" ? 0 : Math.abs(b.minutes - actual);
     b.completed = true;
     b.actualMinutes = actual;
     b.bankDelta = delta;
@@ -5043,16 +5517,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     const linkedQuest = questById(b.questId);
     if (linkedQuest && isLeafQuest(linkedQuest)) { linkedQuest.completed = true; linkedQuest.completedAt = Date.now(); }
     syncDerivedQuestCompletion();
-    state.bankLedger = Array.isArray(state.bankLedger) ? state.bankLedger : [];
-    if (delta !== 0) {
-      state.bankLedger.push({
-        id: uid("bank"),
-        blockId: b.id,
-        delta,
-        createdAt: Date.now(),
-        note: blockTitle(b)
-      });
-    }
+    refreshLedgerForBlock(b);
     saveState();
     el.finishDialog.close();
     render();
@@ -5128,6 +5593,44 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     renderWeek();
   });
 
+  el.spendBankBtn.addEventListener("click", openSpendBankDialog);
+  $("cancelSpendBank").addEventListener("click", () => el.spendBankDialog.close());
+  el.spendBankForm.addEventListener("submit", event => {
+    event.preventDefault();
+    const amount = spendAmountFromInputs();
+    const balance = Math.max(0, bankBalance());
+    if (amount < 1) { window.alert("Enter an amount of banked time to spend."); return; }
+    if (amount > balance) { window.alert(`You only have ${fmtMinutes(balance)} banked.`); return; }
+    if (el.spendBankShowBlock.checked && amount > 600) { window.alert("A wheel block can be at most 10 hours. Spend a smaller amount or turn off the wheel-block option."); return; }
+    const what = el.spendBankWhat.value.trim();
+    if (!what) { el.spendBankWhat.focus(); return; }
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(el.spendBankDate.value) ? el.spendBankDate.value : state.selectedDate;
+    const time = /^\d{2}:\d{2}$/.test(el.spendBankTime.value) ? el.spendBankTime.value : "00:00";
+    state.bankLedger = Array.isArray(state.bankLedger) ? state.bankLedger : [];
+    state.bankLedger.push({ id: uid("bank"), blockId: null, delta: -amount, kind: "spend", date, time, createdAt: Date.now(), note: what });
+    if (el.spendBankShowBlock.checked) {
+      state.blocks.push({
+        id: uid("b"), questId: null, name: what, category: "rest", color: categories.rest.color, jarId: null,
+        bankRule: "none", date, start: minutesFromTime(time), minutes: amount, completed: true, actualMinutes: amount,
+        reclaimed: 0, bankDelta: 0, seriesId: null, recurrenceLabel: null, bankSpendVisual: true
+      });
+    }
+    saveState(); el.spendBankDialog.close(); render();
+  });
+
+  el.prevJarPeriod.addEventListener("click", () => {
+    state.selectedDate = isoDate(addDays(dateFromISO(state.selectedDate), activeJarPeriod === "weekly" ? -7 : -1));
+    saveState(); renderJars();
+  });
+  el.nextJarPeriod.addEventListener("click", () => {
+    state.selectedDate = isoDate(addDays(dateFromISO(state.selectedDate), activeJarPeriod === "weekly" ? 7 : 1));
+    saveState(); renderJars();
+  });
+  el.todayJarPeriod.addEventListener("click", () => { state.selectedDate = isoDate(new Date()); saveState(); renderJars(); });
+  el.jarHistoryBtn.addEventListener("click", () => openJarHistoryDialog());
+  el.jarHistoryJar.addEventListener("change", renderJarHistory);
+  $("closeJarHistory").addEventListener("click", () => el.jarHistoryDialog.close());
+
   $("addJarBtn").addEventListener("click", () => openJarDialog());
   $("cancelJar").addEventListener("click", () => el.jarDialog.close());
   el.jarPeriod.addEventListener("change", syncJarPeriodEditor);
@@ -5179,7 +5682,16 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     const date = /^\d{4}-\d{2}-\d{2}$/.test(el.manualJarDate.value) ? el.manualJarDate.value : state.selectedDate;
     const time = /^\d{2}:\d{2}$/.test(el.manualJarTime.value) ? el.manualJarTime.value : "00:00";
     state.jarEntries = Array.isArray(state.jarEntries) ? state.jarEntries : [];
-    state.jarEntries.push({ id: uid("jar-entry"), jarId: jar.id, date, time, what, minutes, createdAt: Date.now() });
+    const existingEntry = el.manualJarEditId.value ? state.jarEntries.find(entry => entry.id === el.manualJarEditId.value && entry.jarId === jar.id) : null;
+    if (existingEntry) {
+      existingEntry.date = date;
+      existingEntry.time = time;
+      existingEntry.what = what;
+      existingEntry.minutes = minutes;
+      existingEntry.updatedAt = Date.now();
+    } else {
+      state.jarEntries.push({ id: uid("jar-entry"), jarId: jar.id, date, time, what, minutes, createdAt: Date.now() });
+    }
     saveState();
     el.manualJarDialog.close();
     render();
@@ -5205,7 +5717,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./sw-v13.4.3.js", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw-v13.5.js", { updateViaCache: "none" });
         if (reg.update) reg.update().catch(() => {});
       } catch {}
     });

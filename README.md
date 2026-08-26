@@ -1,9 +1,20 @@
-# Questwheel v13.4.3
+# Questwheel v13.5
 
-## Patch changes
+## Functionality update
 
-- Overlapping time blocks now split the wheel band only for the exact interval where the blocks overlap. Outside that interval, a lone block expands back to the full band instead of leaving an empty lane around the rest of the wheel.
-- Completed subtasks remain visible in the active quest tree for the calendar day they were completed, then stop appearing there on later days. They remain available in Completed history.
-- In the scheduled-block list, unfinished/upcoming blocks are shown first in chronological order. Completed blocks move to the bottom of the list for that day, also in chronological order.
+- Quest default duration can be left blank for abstract/container quests.
+- Leaf subtasks require a corresponding time block before completion. If none exists, Questwheel asks for a one-off completion block and completes the subtask with it.
+- Completion-created blocks never inherit recurrence or create future copies.
+- Quests can link to existing jars, and Create/Edit Quest can create a new linked jar directly.
+- Blocks have a Banked Free Time rule: bank planned/actual variance or do not affect the bank.
+- Banked Free Time can be deliberately spent with a dated ledger entry and an optional completed Free Time wheel block.
+- The Jars screen can move through earlier days/weeks, review historical contributions, and edit/delete historical manual jar entries.
+- Repeating quests show their recurrence expiry.
+- Repeating subtasks can be tethered to their parent or repeat independently. Tethered subtasks renew only with the parent. Independent subtasks keep their own rhythm but cannot extend beyond any ancestor quest's recurrence expiry.
 
-No theme changes are included in this patch.
+## Retained patch behaviour
+
+- Exact-interval overlap splitting on the wheel.
+- Completed subtasks remain visible through their completion day, then leave the active tree.
+- Completed scheduled blocks move below unfinished blocks for the day.
+- The Schedule Block dialog's top-right × behaves the same as Cancel.
