@@ -3,12 +3,7 @@ const CORE = [
   "./index.html",
   "./manifest-v13.3.webmanifest",
   "./icons/icon-v13.3-192.png",
-  "./icons/icon-v13.3-512.png",
-  "./theme-assets/tanglang1-texture.png",
-  "./theme-assets/tanglang1-corner.png",
-  "./theme-assets/tanglang1-cloud.png",
-  "./theme-assets/tanglang1-stars.svg",
-  "./theme-assets/tanglang1-center.png"
+  "./icons/icon-v13.3-512.png"
 ];
 
 self.addEventListener("install", event => {

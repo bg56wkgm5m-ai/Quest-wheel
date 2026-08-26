@@ -16,19 +16,18 @@ The Day screen no longer shows a separate Today net card. A smaller "Earned toda
 - Built-in theme renamed to Tanglang1.
 - Refined directly from the approved red/gold preview.
 - Central mantis, Big Dipper, cloud detail, corner fret ornament and brocade texture were rebuilt from the approved concept artwork.
-- The central mantis sits above the scheduled-time readout rather than behind it.
+- The full central medallion sits behind the daylight/twilight ring; the scheduled-time readout remains above the artwork for legibility.
 
 All v13 data, themes, quests, jars and schedules remain compatible.
 
 ## Update
-Upload v13.3 over the same GitHub Pages repository, replace index.html, then open once with ?v=13.1.
+Upload v13.3 over the same GitHub Pages repository, replace index.html, then open once with ?v=13.3.
 Do not clear Safari website data.
 
 
-Refinement notes in v13.3: centered Tanglang1 mantis emblem, daylight ring shifted outward, DAY MAP label removed, refined borders/buttons, closer background texture feel, and added subtle cloud background motifs.
-
-
-Additional v13.3 notes: Tanglang1 wheel narrowed to better match the concept image; new center emblem crop; solar/daylight ring shifted outward; gold reference-style current-time marker; cleaner Big Dipper stars without connector lines; and refined Tanglang1 button/card styling.
-
-
-v13.3 replacement patch: corrected center-art/daylight layering. Tanglang1 center artwork now uses a complete uncropped medallion canvas beneath the daylight ring; the daylight ring is no longer displaced to make room for it.
+## v13.3 Tanglang1 refinement
+- Rebuilt from the stable v13.2 base.
+- All Tanglang1 decorative artwork is embedded; there are no external theme asset files to go missing.
+- Full central medallion art sits behind the daylight/twilight SVG ring, while scheduled-time text remains above it.
+- Big Dipper stars have no connector lines and sit farther right.
+- Tanglang1 current-time marker, wheel scale/markings, bank plaque, mode selector, panel texture/clouds, and borders were refined toward the approved reference image.
