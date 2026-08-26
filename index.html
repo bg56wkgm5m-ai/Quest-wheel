@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Questwheel" />
-  <link rel="manifest" href="./manifest-v13.4.2.webmanifest" />
-  <link rel="apple-touch-icon" href="./icons/icon-v13.4.2-192.png" />
+  <link rel="manifest" href="./manifest-v13.4.3.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-v13.4.3-192.png" />
   <style>
 :root {
   color-scheme: dark;
@@ -947,7 +947,7 @@ html[data-theme-id="tanglang-red-velvet"] .legend,
 html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
 
 </style>
-  <title>Questwheel v13.4.2</title>
+  <title>Questwheel v13.4.3</title>
 </head>
 <body>
   <div class="app-shell">
@@ -957,7 +957,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
           <span class="relative-label">Today</span>
           <span class="relative-date">Mon 24 Aug ’26</span>
         </div>
-        <h1>Questwheel <span class="build-tag">v13.4.2</span></h1>
+        <h1>Questwheel <span class="build-tag">v13.4.3</span></h1>
       </div>
       <div class="topbar-actions">
         <button class="ghost compact theme-trigger" id="themeBtn" type="button" aria-label="Themes"><span aria-hidden="true">◈</span><span class="theme-trigger-label">Theme</span></button>
@@ -1457,7 +1457,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   <script>
 (() => {
   const STORE = "questwheel-v1"; // Preserve all prior Questwheel local data.
-  const BUILD = "v13.4.2";
+  const BUILD = "v13.4.3";
 
   const categories = {
     business: { label: "Business", color: "#FFB000" },
@@ -1527,6 +1527,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   let swipeStart = null;
   let swipeAnimating = false;
   let currentQuestMode = "active";
+  let lastQuestVisibilityDate = isoDate(new Date());
   let selectedBlockId = null;
   let suppressBlockClick = false;
   let pendingQuestCompletionId = null;
@@ -3316,6 +3317,11 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     state.collapsedQuestIds=[...set]; saveState(); renderQuests();
   }
 
+  function completedSubtaskStillVisible(q) {
+    if (!q?.completed || !q?.parentId || !q.completedAt) return false;
+    return isoDate(new Date(q.completedAt)) === isoDate(new Date());
+  }
+
   function createQuestNode(q, depth) {
     const node = document.createElement("div");
     node.className = "quest-node";
@@ -3325,8 +3331,9 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     const card = document.createElement("article");
     card.className = "quest-card" + (q.completed ? " completed" : "");
     const scheduled = state.blocks.filter(b => b.questId === q.id && !b.completed).length;
-    const visibleChildren = orderedChildren(q.id).filter(child => !child.archived);
-    const leaf = visibleChildren.length === 0;
+    const allChildren = orderedChildren(q.id).filter(child => !child.archived);
+    const visibleChildren = allChildren.filter(child => !child.completed || completedSubtaskStillVisible(child));
+    const leaf = allChildren.length === 0;
     const collapsed = !leaf && questIsCollapsed(q.id);
     if (collapsed) node.classList.add("collapsed");
     const progress = questProgress(q);
@@ -3376,7 +3383,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     meta.className = "card-meta";
     const parts = [categories[q.category]?.label || "Quest", `default ${fmtMinutes(q.defaultMinutes)}`];
     if (scheduled) parts.push(`${scheduled} scheduled`);
-    if (visibleChildren.length) parts.push(`${visibleChildren.length} direct subtask${visibleChildren.length === 1 ? "" : "s"}`);
+    if (allChildren.length) parts.push(`${allChildren.length} direct subtask${allChildren.length === 1 ? "" : "s"}`);
     meta.textContent = parts.join(" · ");
     titleWrap.append(hierarchy, titleRow, meta);
 
@@ -3659,7 +3666,12 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   }
 
   function renderTimeline() {
-    const blocks = selectedBlocks();
+    const blocks = [...selectedBlocks()].sort((a, b) => {
+      const aDone = Boolean(a.completed || questById(a.questId)?.completed);
+      const bDone = Boolean(b.completed || questById(b.questId)?.completed);
+      if (aDone !== bDone) return aDone ? 1 : -1;
+      return String(a.date || "").localeCompare(String(b.date || "")) || a.start - b.start || a.minutes - b.minutes;
+    });
     const earnedToday = blocks.reduce((sum, b) => sum + blockBankDelta(b), 0);
     el.reclaimedTotal.textContent = `Earned today: ${earnedToday ? "+" + fmtMinutes(earnedToday) : "0m"}`;
     el.reclaimedTotal.classList.remove("negative");
@@ -3812,81 +3824,135 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     return { gap, band, inner: ro - total };
   }
 
+  function wheelIntervalBoundaries(blocks) {
+    const points = new Set();
+    blocks.forEach(block => {
+      const start = Math.max(0, Math.min(1440, Number(block.start) || 0));
+      const end = Math.max(start, Math.min(1440, start + (Number(block.minutes) || 0)));
+      if (end > start) { points.add(start); points.add(end); }
+    });
+    return [...points].sort((a, b) => a - b);
+  }
+
+  function blocksActiveInInterval(blocks, start, end) {
+    return blocks.filter(block => {
+      const blockStart = Math.max(0, Number(block.start) || 0);
+      const blockEnd = Math.min(1440, blockStart + (Number(block.minutes) || 0));
+      return blockStart < end && blockEnd > start;
+    });
+  }
+
+  function maxConcurrentLaneCount(blocks) {
+    const boundaries = wheelIntervalBoundaries(blocks);
+    let maxLanes = 1;
+    for (let i = 0; i < boundaries.length - 1; i += 1) {
+      const start = boundaries[i], end = boundaries[i + 1];
+      if (end <= start) continue;
+      const active = blocksActiveInInterval(blocks, start, end);
+      if (!active.length) continue;
+      maxLanes = Math.max(maxLanes, assignLanes(active).laneCount);
+    }
+    return maxLanes;
+  }
+
+  function wheelLaneGeometry(blocks, ro, minInner) {
+    return laneGeometry(maxConcurrentLaneCount(blocks), ro, minInner);
+  }
+
+  function segmentLaneGeometry(laneCount, ro, fixedInner) {
+    const gap = laneCount > 1 ? 2 : 0;
+    const total = Math.max(1, ro - fixedInner);
+    const band = Math.max(1, (total - gap * Math.max(0, laneCount - 1)) / Math.max(1, laneCount));
+    return { gap, band, inner: fixedInner };
+  }
+
   function appendWheelBlocks(svg, blocks, cx, cy, ro, minInner, strokeWidth = 1.5, interactive = false, angleOffset = 0) {
     const NS = "http://www.w3.org/2000/svg";
-    const layout = assignLanes(blocks);
-    const geo = laneGeometry(layout.laneCount, ro, minInner);
-    const ordered = [...blocks].sort((a,b) => (layout.overlayDepthById.get(a.id)||0) - (layout.overlayDepthById.get(b.id)||0) || a.start-b.start);
+    const baseGeo = wheelLaneGeometry(blocks, ro, minInner);
+    const boundaries = wheelIntervalBoundaries(blocks);
 
-    ordered.forEach(b => {
-      const lane = layout.laneById.get(b.id) || 0;
-      const overlayDepth = layout.overlayDepthById.get(b.id) || 0;
-      let laneOuter = ro - lane * (geo.band + geo.gap);
-      let laneInner = laneOuter - geo.band;
-      if (overlayDepth > 0) {
-        const maxInset = Math.max(1, geo.band * .35);
-        const inset = Math.min(maxInset, 1.8 + (overlayDepth - 1) * 1.4);
-        laneOuter -= inset;
-        laneInner += inset;
-      }
-      const visibleEnd = Math.min(1440, b.start + b.minutes);
-      if (visibleEnd <= b.start || laneOuter <= laneInner) return;
-      const startA = angleOffset + b.start / 1440 * 360, endA = angleOffset + visibleEnd / 1440 * 360;
-      const path = document.createElementNS(NS, "path");
-      path.setAttribute("d", arcPath(cx, cy, laneOuter, laneInner, startA, endA));
-      path.setAttribute("fill", blockColor(b));
-      const linkedQuest = questById(b.questId);
-      const effectiveDone = b.completed || Boolean(linkedQuest?.completed);
-      path.setAttribute("opacity", b._manualJarEntry ? ".72" : (effectiveDone ? ".52" : (overlayDepth ? ".96" : ".93")));
-      const nestedStroke = overlayDepth ? "rgba(242,243,245,.58)" : cssVar("--bg", "#0e1014");
-      path.setAttribute("stroke", b._manualJarEntry ? "rgba(242,243,245,.8)" : (b.id === selectedBlockId && interactive ? "#f2f3f5" : nestedStroke));
-      path.setAttribute("stroke-width", String(b.id === selectedBlockId && interactive && !b._manualJarEntry ? Math.max(2.8, strokeWidth * 2) : strokeWidth));
-      if (overlayDepth) path.setAttribute("stroke-dasharray", overlayDepth > 1 ? "2.2 1.6" : "none");
+    // Render each time interval independently. A block uses the full wheel band while it is
+    // alone, and the band is divided only for the exact minutes where simultaneous blocks exist.
+    for (let intervalIndex = 0; intervalIndex < boundaries.length - 1; intervalIndex += 1) {
+      const intervalStart = boundaries[intervalIndex], intervalEnd = boundaries[intervalIndex + 1];
+      if (intervalEnd <= intervalStart) continue;
+      const activeOriginals = blocksActiveInInterval(blocks, intervalStart, intervalEnd);
+      if (!activeOriginals.length) continue;
+      const fragments = activeOriginals.map(block => ({ ...block, start: intervalStart, minutes: intervalEnd - intervalStart }));
+      const layout = assignLanes(fragments);
+      const geo = segmentLaneGeometry(layout.laneCount, ro, baseGeo.inner);
+      const ordered = [...fragments].sort((a,b) => (layout.overlayDepthById.get(a.id)||0) - (layout.overlayDepthById.get(b.id)||0) || a.start-b.start);
 
-      if (b._manualJarEntry) {
-        path.classList.add("manual-wheel-segment"); path.setAttribute("pointer-events", "none");
-      } else if (interactive) {
-        path.classList.add("wheel-block-segment");
-        if (b.id === selectedBlockId) path.classList.add("selected");
-        path.setAttribute("tabindex", "0"); path.setAttribute("role", "button");
-        const carryPrefix = b._displayPart === "carry" ? "Continues from previous day, " : "";
-        const hierarchyPrefix = overlayDepth ? `Nested level ${overlayDepth}, ` : "";
-        path.setAttribute("aria-label", `${carryPrefix}${hierarchyPrefix}${blockTitle(b)}, ${timeFromMinutes(b.start)} to ${timeFromMinutes(b.start + b.minutes)}, ${fmtMinutes(b.minutes)} visible`);
-        const activate = event => { if (suppressBlockClick) return; event.stopPropagation(); selectBlock(b.id); };
-        path.addEventListener("click", activate);
-        path.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); activate(event); } });
-      }
-      svg.appendChild(path);
-
-      // Completed leaf descendants grey only their exact portion of an ancestor block.
-      if (effectiveDone && overlayDepth > 0 && !b._manualJarEntry) {
-        const doneMask = document.createElementNS(NS, "path");
-        doneMask.setAttribute("d", path.getAttribute("d"));
-        doneMask.setAttribute("fill", "#9aa0aa"); doneMask.setAttribute("opacity", ".28"); doneMask.setAttribute("pointer-events", "none");
-        svg.appendChild(doneMask);
-      }
-
-      if (b.completed && b.reclaimed > 0 && b.actualMinutes != null) {
-        const original = state.blocks.find(item => item.id === b.id) || b;
-        const originalPlannedEnd = original.start + original.minutes, originalActualEnd = original.start + original.actualMinutes;
-        const dayOffset = b._displayPart === "carry" ? 1440 : 0;
-        const fragmentStartOriginal = dayOffset + b.start, fragmentEndOriginal = fragmentStartOriginal + b.minutes;
-        const freeStartOriginal = Math.max(originalActualEnd, fragmentStartOriginal), freeEndOriginal = Math.min(originalPlannedEnd, fragmentEndOriginal);
-        if (freeEndOriginal > freeStartOriginal) {
-          const freeStart = b.start + (freeStartOriginal - fragmentStartOriginal), freeEnd = b.start + (freeEndOriginal - fragmentStartOriginal);
-          const free = document.createElementNS(NS, "path");
-          free.setAttribute("d", arcPath(cx, cy, laneOuter, laneInner, angleOffset + freeStart/1440*360, angleOffset + freeEnd/1440*360));
-          free.setAttribute("fill", cssVar("--free", "#3d424d")); free.setAttribute("stroke", cssVar("--accent", "#d9b55b")); free.setAttribute("stroke-width", String(strokeWidth));
-          if (interactive) {
-            free.classList.add("wheel-block-segment"); free.setAttribute("tabindex", "0"); free.setAttribute("role", "button");
-            const activateFree = event => { if (suppressBlockClick) return; event.stopPropagation(); selectBlock(b.id); };
-            free.addEventListener("click", activateFree);
-          }
-          svg.appendChild(free);
+      ordered.forEach(b => {
+        const lane = layout.laneById.get(b.id) || 0;
+        const overlayDepth = layout.overlayDepthById.get(b.id) || 0;
+        let laneOuter = ro - lane * (geo.band + geo.gap);
+        let laneInner = laneOuter - geo.band;
+        if (overlayDepth > 0) {
+          const maxInset = Math.max(1, geo.band * .35);
+          const inset = Math.min(maxInset, 1.8 + (overlayDepth - 1) * 1.4);
+          laneOuter -= inset;
+          laneInner += inset;
         }
-      }
-    });
-    return geo;
+        const visibleEnd = Math.min(1440, b.start + b.minutes);
+        if (visibleEnd <= b.start || laneOuter <= laneInner) return;
+        const startA = angleOffset + b.start / 1440 * 360, endA = angleOffset + visibleEnd / 1440 * 360;
+        const path = document.createElementNS(NS, "path");
+        path.setAttribute("d", arcPath(cx, cy, laneOuter, laneInner, startA, endA));
+        path.setAttribute("fill", blockColor(b));
+        const linkedQuest = questById(b.questId);
+        const effectiveDone = b.completed || Boolean(linkedQuest?.completed);
+        path.setAttribute("opacity", b._manualJarEntry ? ".72" : (effectiveDone ? ".52" : (overlayDepth ? ".96" : ".93")));
+        const nestedStroke = overlayDepth ? "rgba(242,243,245,.58)" : cssVar("--bg", "#0e1014");
+        path.setAttribute("stroke", b._manualJarEntry ? "rgba(242,243,245,.8)" : (b.id === selectedBlockId && interactive ? "#f2f3f5" : nestedStroke));
+        path.setAttribute("stroke-width", String(b.id === selectedBlockId && interactive && !b._manualJarEntry ? Math.max(2.8, strokeWidth * 2) : strokeWidth));
+        if (overlayDepth) path.setAttribute("stroke-dasharray", overlayDepth > 1 ? "2.2 1.6" : "none");
+
+        if (b._manualJarEntry) {
+          path.classList.add("manual-wheel-segment"); path.setAttribute("pointer-events", "none");
+        } else if (interactive) {
+          path.classList.add("wheel-block-segment");
+          if (b.id === selectedBlockId) path.classList.add("selected");
+          path.setAttribute("tabindex", "0"); path.setAttribute("role", "button");
+          const carryPrefix = b._displayPart === "carry" ? "Continues from previous day, " : "";
+          const hierarchyPrefix = overlayDepth ? `Nested level ${overlayDepth}, ` : "";
+          path.setAttribute("aria-label", `${carryPrefix}${hierarchyPrefix}${blockTitle(b)}, ${timeFromMinutes(b.start)} to ${timeFromMinutes(b.start + b.minutes)}, ${fmtMinutes(b.minutes)} visible`);
+          const activate = event => { if (suppressBlockClick) return; event.stopPropagation(); selectBlock(b.id); };
+          path.addEventListener("click", activate);
+          path.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); activate(event); } });
+        }
+        svg.appendChild(path);
+
+        // Completed leaf descendants grey only their exact portion of an ancestor block.
+        if (effectiveDone && overlayDepth > 0 && !b._manualJarEntry) {
+          const doneMask = document.createElementNS(NS, "path");
+          doneMask.setAttribute("d", path.getAttribute("d"));
+          doneMask.setAttribute("fill", "#9aa0aa"); doneMask.setAttribute("opacity", ".28"); doneMask.setAttribute("pointer-events", "none");
+          svg.appendChild(doneMask);
+        }
+
+        if (b.completed && b.reclaimed > 0 && b.actualMinutes != null) {
+          const original = state.blocks.find(item => item.id === b.id) || b;
+          const originalPlannedEnd = original.start + original.minutes, originalActualEnd = original.start + original.actualMinutes;
+          const dayOffset = b._displayPart === "carry" ? 1440 : 0;
+          const fragmentStartOriginal = dayOffset + b.start, fragmentEndOriginal = fragmentStartOriginal + b.minutes;
+          const freeStartOriginal = Math.max(originalActualEnd, fragmentStartOriginal), freeEndOriginal = Math.min(originalPlannedEnd, fragmentEndOriginal);
+          if (freeEndOriginal > freeStartOriginal) {
+            const freeStart = b.start + (freeStartOriginal - fragmentStartOriginal), freeEnd = b.start + (freeEndOriginal - fragmentStartOriginal);
+            const free = document.createElementNS(NS, "path");
+            free.setAttribute("d", arcPath(cx, cy, laneOuter, laneInner, angleOffset + freeStart/1440*360, angleOffset + freeEnd/1440*360));
+            free.setAttribute("fill", cssVar("--free", "#3d424d")); free.setAttribute("stroke", cssVar("--accent", "#d9b55b")); free.setAttribute("stroke-width", String(strokeWidth));
+            if (interactive) {
+              free.classList.add("wheel-block-segment"); free.setAttribute("tabindex", "0"); free.setAttribute("role", "button");
+              const activateFree = event => { if (suppressBlockClick) return; event.stopPropagation(); selectBlock(b.id); };
+              free.addEventListener("click", activateFree);
+            }
+            svg.appendChild(free);
+          }
+        }
+      });
+    }
+    return baseGeo;
   }
 
   const solarColors = {
@@ -4071,7 +4137,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     const ro=tanglangTheme?140:148, minInner=tanglangTheme?70:58;
     const rolling=state.wheelMode==="rolling";
     const blocks=rolling?rollingWheelBlocks():wheelBlocksFor(state.selectedDate);
-    const layout=assignLanes(blocks), geo=laneGeometry(layout.laneCount,ro,minInner);
+    const geo=wheelLaneGeometry(blocks,ro,minInner);
     const base=document.createElementNS(NS,"circle");base.setAttribute("cx",cx);base.setAttribute("cy",cy);base.setAttribute("r",(ro+geo.inner)/2);base.setAttribute("fill","none");base.setAttribute("stroke",cssVar("--wheel-base","#252a33"));base.setAttribute("stroke-width",ro-geo.inner);svg.appendChild(base);
     if (rolling) appendRollingSolarRing(svg,cx,cy,geo.inner); else appendSolarRing(svg,state.selectedDate,cx,cy,geo.inner);
     appendWheelBlocks(svg,blocks,cx,cy,ro,minInner,1.4,true,rolling?-90:0);
@@ -4105,8 +4171,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     svg.innerHTML = "";
     const NS = "http://www.w3.org/2000/svg";
     const cx = 50, cy = 50, ro = 44;
-    const lanes = assignLanes(blocks);
-    const geo = laneGeometry(lanes.laneCount, ro, 15);
+    const geo = wheelLaneGeometry(blocks, ro, 15);
     const base = document.createElementNS(NS, "circle");
     base.setAttribute("cx", cx);
     base.setAttribute("cy", cy);
@@ -5140,7 +5205,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./sw-v13.4.2.js", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw-v13.4.3.js", { updateViaCache: "none" });
         if (reg.update) reg.update().catch(() => {});
       } catch {}
     });
@@ -5151,7 +5216,12 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   setEditBlockColorPicker(categoryColor("personal"));
   setJarColorPicker(questPalette[0]);
   setInterval(() => {
-    if (document.getElementById("dayView")?.classList.contains("active") && (state.wheelMode === "rolling" || state.selectedDate === isoDate(new Date()))) { renderDateIdentity(); renderTimeline(); renderWheel(); renderSelectedBlockPanel(); }
+    const todayNow = isoDate(new Date());
+    if (todayNow !== lastQuestVisibilityDate) {
+      lastQuestVisibilityDate = todayNow;
+      renderQuests();
+    }
+    if (document.getElementById("dayView")?.classList.contains("active") && (state.wheelMode === "rolling" || state.selectedDate === todayNow)) { renderDateIdentity(); renderTimeline(); renderWheel(); renderSelectedBlockPanel(); }
   }, 30000);
 
   render();
