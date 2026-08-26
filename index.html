@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Questwheel" />
-  <link rel="manifest" href="./manifest-v13.4.1.webmanifest" />
-  <link rel="apple-touch-icon" href="./icons/icon-v13.4.1-192.png" />
+  <link rel="manifest" href="./manifest-v13.4.2.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-v13.4.2-192.png" />
   <style>
 :root {
   color-scheme: dark;
@@ -947,7 +947,7 @@ html[data-theme-id="tanglang-red-velvet"] .legend,
 html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
 
 </style>
-  <title>Questwheel v13.4.1</title>
+  <title>Questwheel v13.4.2</title>
 </head>
 <body>
   <div class="app-shell">
@@ -957,7 +957,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
           <span class="relative-label">Today</span>
           <span class="relative-date">Mon 24 Aug ’26</span>
         </div>
-        <h1>Questwheel <span class="build-tag">v13.4.1</span></h1>
+        <h1>Questwheel <span class="build-tag">v13.4.2</span></h1>
       </div>
       <div class="topbar-actions">
         <button class="ghost compact theme-trigger" id="themeBtn" type="button" aria-label="Themes"><span aria-hidden="true">◈</span><span class="theme-trigger-label">Theme</span></button>
@@ -1148,7 +1148,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     <form method="dialog" id="blockForm">
       <div class="dialog-head">
         <div><span id="blockDialogEyebrow" class="eyebrow">TIME BLOCK</span><h2 id="blockDialogTitle">Schedule block</h2></div>
-        <button class="icon-btn" value="cancel" aria-label="Close">×</button>
+        <button id="closeBlockTop" class="icon-btn" type="button" value="cancel" aria-label="Close">×</button>
       </div>
       <input id="blockDuplicateSourceId" type="hidden" />
       <label>Linked quest (optional)<select id="blockQuest"></select></label>
@@ -1457,7 +1457,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   <script>
 (() => {
   const STORE = "questwheel-v1"; // Preserve all prior Questwheel local data.
-  const BUILD = "v13.4.1";
+  const BUILD = "v13.4.2";
 
   const categories = {
     business: { label: "Business", color: "#FFB000" },
@@ -1529,6 +1529,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   let currentQuestMode = "active";
   let selectedBlockId = null;
   let suppressBlockClick = false;
+  let pendingQuestCompletionId = null;
 
   const defaultState = {
     quests: [],
@@ -2226,8 +2227,85 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     return changed;
   }
 
+  function questBlockCompletionTimestamp(block) {
+    if (!block?.date) return Date.now();
+    const when = dateFromISO(block.date);
+    when.setHours(0, 0, 0, 0);
+    when.setMinutes((Number(block.start) || 0) + (Number(block.minutes) || 0));
+    return when.getTime();
+  }
+
+  function preferredQuestCompletionBlock(q) {
+    const linked = state.blocks.filter(block => block.questId === q?.id);
+    if (!linked.length) return null;
+
+    // A block that is already finished is already sufficient evidence for the subtask.
+    const completed = linked
+      .filter(block => block.completed)
+      .sort((a,b) => String(b.date).localeCompare(String(a.date)) || b.start - a.start);
+    if (completed.length) return completed[0];
+
+    // Otherwise finish one scheduled occurrence: prefer the most recent past/today block,
+    // then fall back to the next future occurrence.
+    const today = isoDate(new Date());
+    const past = linked
+      .filter(block => !block.completed && block.date <= today)
+      .sort((a,b) => String(b.date).localeCompare(String(a.date)) || b.start - a.start);
+    if (past.length) return past[0];
+    return linked
+      .filter(block => !block.completed)
+      .sort((a,b) => String(a.date).localeCompare(String(b.date)) || a.start - b.start)[0] || null;
+  }
+
+  function completeLeafQuestWithBlock(q, block) {
+    if (!q || !block) return false;
+    if (!block.completed) {
+      block.completed = true;
+      block.actualMinutes = block.minutes;
+      block.bankDelta = 0;
+      block.reclaimed = 0;
+      block.completedByQuest = true;
+      refreshLedgerForBlock(block);
+    }
+    q.completed = true;
+    q.completedAt = questBlockCompletionTimestamp(block);
+    syncDerivedQuestCompletion();
+    return true;
+  }
+
+  function openSubtaskCompletionBlockDialog(q) {
+    if (!q || !isLeafQuest(q) || !q.parentId) return;
+    pendingQuestCompletionId = q.id;
+    openBlockDialog(q.id);
+    el.blockDialogEyebrow.textContent = "COMPLETE SUBTASK";
+    el.blockDialogTitle.textContent = `Schedule time for ${q.name}`;
+    el.blockSubmit.textContent = "Schedule & complete";
+    el.blockQuest.disabled = true;
+    // This flow creates the one historical/scheduled block that justifies this completion.
+    // Recurrence can still be managed from the quest itself or from normal block creation.
+    el.repeatEnabled.checked = false;
+    el.repeatEnabled.disabled = true;
+    el.repeatFields.hidden = true;
+    const repeatToggle = el.repeatEnabled.closest(".repeat-toggle");
+    if (repeatToggle) repeatToggle.hidden = true;
+  }
+
   function setLeafQuestCompletion(q, completed) {
     if (!q || !isLeafQuest(q)) return;
+
+    // Subtasks may only become complete when there is a corresponding time block.
+    if (completed && q.parentId) {
+      const block = preferredQuestCompletionBlock(q);
+      if (!block) {
+        openSubtaskCompletionBlockDialog(q);
+        return;
+      }
+      completeLeafQuestWithBlock(q, block);
+      saveState();
+      render();
+      return;
+    }
+
     q.completed = completed;
     q.completedAt = completed ? Date.now() : null;
     const linked = state.blocks.filter(b => b.questId === q.id);
@@ -4673,8 +4751,20 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     render();
   });
 
-  $("addBlockBtn").addEventListener("click", () => openBlockDialog());
-  $("cancelBlock").addEventListener("click", () => el.blockDialog.close());
+  function closeBlockDialog() {
+    el.blockDialog.close();
+  }
+
+  $("addBlockBtn").addEventListener("click", () => { pendingQuestCompletionId = null; openBlockDialog(); });
+  $("cancelBlock").addEventListener("click", closeBlockDialog);
+  $("closeBlockTop").addEventListener("click", closeBlockDialog);
+  el.blockDialog.addEventListener("close", () => {
+    pendingQuestCompletionId = null;
+    el.blockQuest.disabled = false;
+    el.repeatEnabled.disabled = false;
+    const repeatToggle = el.repeatEnabled.closest(".repeat-toggle");
+    if (repeatToggle) repeatToggle.hidden = false;
+  });
   el.blockQuest.addEventListener("change", () => {
     toggleBlockMode();
     if (!el.blockDuplicateSourceId.value) applyQuestRecurrenceToBlockForm(questById(el.blockQuest.value));
@@ -4715,11 +4805,12 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
       if (generated.truncated) window.alert("That repetition would create more than 1,200 blocks, so Questwheel created the first 1,200 only.");
     }
 
+    const createdBlocks = [];
     dates.forEach((date, occurrenceIndex) => {
       const qConfig = questRecurrenceConfig(q);
       const questManaged = Boolean(qConfig && el.repeatEnabled.checked && Math.max(1, Number(el.repeatEvery.value) || 1) === qConfig.every);
       const anchorDate = qConfig && questManaged ? isoDate(addDays(dateFromISO(q.questOccurrenceDate), occurrenceIndex * qConfig.every)) : null;
-      state.blocks.push({
+      const newBlock = {
         id: uid("b"),
         questId: q?.id || null,
         name,
@@ -4740,8 +4831,15 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
         questManagedRecurrence: questManaged,
         questTemplateId: questManaged ? (q.questTemplateId || q.id) : null,
         questOccurrenceAnchorDate: questManaged ? anchorDate : null
-      });
+      };
+      state.blocks.push(newBlock);
+      createdBlocks.push(newBlock);
     });
+
+    if (pendingQuestCompletionId && q?.id === pendingQuestCompletionId && q.parentId && createdBlocks.length) {
+      completeLeafQuestWithBlock(q, createdBlocks[0]);
+      pendingQuestCompletionId = null;
+    }
 
     saveState();
     el.blockDialog.close();
@@ -4900,7 +4998,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
     if (selectedBlockId) openEditBlockDialog(selectedBlockId);
   });
   el.selectedBlockDuplicate.addEventListener("click", () => {
-    if (selectedBlockId) openBlockDialog(null, selectedBlockId);
+    if (selectedBlockId) { pendingQuestCompletionId = null; openBlockDialog(null, selectedBlockId); }
   });
   el.selectedBlockFinish.addEventListener("click", () => {
     if (selectedBlockId) openFinishDialog(selectedBlockId);
@@ -5042,7 +5140,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./sw-v13.4.1.js", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw-v13.4.2.js", { updateViaCache: "none" });
         if (reg.update) reg.update().catch(() => {});
       } catch {}
     });
