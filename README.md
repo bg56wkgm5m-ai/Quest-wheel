@@ -1,4 +1,4 @@
-# Questwheel v13.5.5
+# Questwheel v13.5.6
 
 Tanglang1 visual refinement:
 - Slightly smaller centre mantis medallion for better fit inside the inner wheel.
