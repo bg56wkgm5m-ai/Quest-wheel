@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Questwheel" />
-  <link rel="manifest" href="./manifest-v13.5.6.webmanifest" />
+  <link rel="manifest" href="./manifest-v13.5.7.webmanifest" />
   <link rel="apple-touch-icon" href="./icons/icon-v13.5-192.png" />
   <style>
 :root {
@@ -842,7 +842,8 @@ body::after {
 }
 .app-shell { position:relative; z-index:1; }
 .wheel-panel { isolation:isolate; overflow:hidden; }
-.theme-corner-art,.theme-top-right-art,.theme-cloud-art,.theme-wheel-emblem { position:absolute; pointer-events:none; user-select:none; -webkit-user-drag:none; }
+.theme-corner-art,.theme-top-right-art,.theme-cloud-art,.theme-wheel-emblem,.tanglang-asset { position:absolute; pointer-events:none; user-select:none; -webkit-user-drag:none; }
+.tanglang-asset { display:none; }
 .theme-corner-art { top:-4px; left:-4px; width:92px; height:92px; opacity:.82; z-index:1; }
 .theme-top-right-art { top:50px; right:14px; width:118px; max-height:68px; object-fit:contain; opacity:.9; z-index:1; }
 .theme-cloud-art { left:4%; right:4%; top:28%; width:92%; height:auto; opacity:.22; z-index:0; }
@@ -880,43 +881,56 @@ html[data-theme-id="tanglang-red-velvet"] body::before { display:none !important
 html[data-theme-id="tanglang-red-velvet"] .wheel-panel {
   background-color:#4b0503;
   background-image:
-    radial-gradient(circle at 50% 20%, rgba(167,31,18,.18), transparent 30%),
-    linear-gradient(180deg,rgba(98,12,8,.20),rgba(30,2,2,.12)),
-    var(--theme-bg-art);
+    radial-gradient(circle at 50% 18%, rgba(176,47,28,.12), transparent 34%),
+    linear-gradient(180deg,rgba(90,8,5,.10),rgba(23,0,0,.20)),
+    url("./theme-assets/tanglang1-texture.png");
   background-repeat:no-repeat,no-repeat,repeat;
-  background-size:100% 100%,100% 100%,210px 210px;
+  background-size:100% 100%,100% 100%,420px 420px;
   background-position:center,center,center;
-  border:1px solid #cd9836;
-  box-shadow:inset 0 0 0 1px rgba(247,212,114,.18), inset 0 0 42px rgba(0,0,0,.12), 0 10px 24px rgba(0,0,0,.18);
+  border:1px solid rgba(210,158,53,.72);
+  box-shadow:inset 0 0 0 1px rgba(247,212,114,.12), inset 0 0 44px rgba(0,0,0,.20), 0 10px 24px rgba(0,0,0,.18);
 }
 html[data-theme-id="tanglang-red-velvet"] .wheel-panel::before {
   content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 1500' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23d7a53d' stroke-linecap='square'%3E%3Crect x='8' y='8' width='984' height='1484' rx='26' stroke-width='2.1' opacity='.92'/%3E%3Crect x='17' y='17' width='966' height='1466' rx='20' stroke-width='1.25' opacity='.58'/%3E%3Cg stroke-width='2.1' opacity='.88'%3E%3Cpath d='M18 74V18H74M18 48H48V18M31 74V31H74M31 56H56V31'/%3E%3Cpath d='M982 74V18H926M982 48H952V18M969 74V31H926M969 56H944V31'/%3E%3Cpath d='M18 1426v56h56M18 1452h30v30M31 1426v43h43M31 1444h25v25'/%3E%3Cpath d='M982 1426v56h-56M982 1452h-30v30M969 1426v43h-43M969 1444h-25v25'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  background-size:100% 100%; background-repeat:no-repeat;
+  background:linear-gradient(90deg,rgba(255,214,105,.035),transparent 11%,transparent 89%,rgba(255,214,105,.035));
 }
 html[data-theme-id="tanglang-red-velvet"] .wheel-panel::after {
-  content:""; position:absolute; inset:0; pointer-events:none; z-index:0; opacity:.16;
-  background:linear-gradient(180deg, rgba(255,215,125,.03), rgba(0,0,0,0));
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background:linear-gradient(180deg,rgba(255,220,130,.025),transparent 17%,transparent 82%,rgba(0,0,0,.10));
 }
-html[data-theme-id="tanglang-red-velvet"] .theme-corner-art { display:none !important; }
+html[data-theme-id="tanglang-red-velvet"] .theme-corner-art,
+html[data-theme-id="tanglang-red-velvet"] .theme-cloud-art { display:none !important; }
 html[data-theme-id="tanglang-red-velvet"] .theme-top-right-art {
-  top:58px; right:8px; width:116px; max-height:82px; object-fit:contain; opacity:.98; z-index:3;
+  top:58px; right:8px; width:116px; max-height:82px; object-fit:contain; opacity:.98; z-index:4;
 }
+html[data-theme-id="tanglang-red-velvet"] .tanglang-asset { display:block; z-index:1; }
+html[data-theme-id="tanglang-red-velvet"] .tanglang-corner { width:86px; height:86px; object-fit:contain; opacity:.68; z-index:3; }
+html[data-theme-id="tanglang-red-velvet"] .tanglang-corner.tl { top:-8px; left:-8px; transform:none; }
+html[data-theme-id="tanglang-red-velvet"] .tanglang-corner.tr { top:-8px; right:-8px; transform:scaleX(-1); }
+html[data-theme-id="tanglang-red-velvet"] .tanglang-corner.bl { bottom:-8px; left:-8px; transform:scaleY(-1); }
+html[data-theme-id="tanglang-red-velvet"] .tanglang-corner.br { bottom:-8px; right:-8px; transform:scale(-1,-1); }
+html[data-theme-id="tanglang-red-velvet"] .tanglang-edge-h { left:72px; right:72px; width:calc(100% - 144px); height:16px; object-fit:fill; opacity:.50; z-index:2; }
+html[data-theme-id="tanglang-red-velvet"] .tanglang-edge-h.top { top:0; }
+html[data-theme-id="tanglang-red-velvet"] .tanglang-edge-h.bottom { bottom:0; transform:scaleY(-1); }
+html[data-theme-id="tanglang-red-velvet"] .tanglang-edge-v { top:72px; bottom:72px; height:calc(100% - 144px); width:16px; object-fit:fill; opacity:.50; z-index:2; }
+html[data-theme-id="tanglang-red-velvet"] .tanglang-edge-v.left { left:0; }
+html[data-theme-id="tanglang-red-velvet"] .tanglang-edge-v.right { right:0; transform:scaleX(-1); }
+html[data-theme-id="tanglang-red-velvet"] .tanglang-cloud { object-fit:contain; opacity:.15; z-index:1; filter:saturate(.82) brightness(1.02); }
+html[data-theme-id="tanglang-red-velvet"] .tanglang-cloud.a { top:19%; right:-34px; width:190px; height:auto; }
+html[data-theme-id="tanglang-red-velvet"] .tanglang-cloud.b { top:63%; left:-44px; width:205px; height:auto; transform:scaleX(-1); opacity:.12; }
 html[data-theme-id="tanglang-red-velvet"] .wheel-viewport { max-width:370px; overflow:hidden; }
 html[data-theme-id="tanglang-red-velvet"] .theme-wheel-emblem {
-  top:50%; left:50%; width:44.5%; height:44.5%; object-fit:contain; object-position:center; opacity:.97; z-index:1;
+  top:50%; left:50%; width:43.5%; height:43.5%; object-fit:contain; object-position:center; opacity:.97; z-index:1;
 }
 html[data-theme-id="tanglang-red-velvet"] #dayWheel { position:relative; z-index:2; }
 html[data-theme-id="tanglang-red-velvet"] .wheel-center { top:62.4%; z-index:3; text-shadow:0 2px 3px #2a0302,0 0 8px rgba(42,3,2,.75); }
 html[data-theme-id="tanglang-red-velvet"] .wheel-center span { font-size:30px; font-weight:800; letter-spacing:.01em; color:#f3d27a; }
 html[data-theme-id="tanglang-red-velvet"] .wheel-center small { font-size:11px; color:#e0bb62; }
-html[data-theme-id="tanglang-red-velvet"] .theme-cloud-art {
-  display:block !important; inset:0; left:0; right:auto; top:0; width:100%; height:100%; opacity:.30; object-fit:fill; z-index:1;
-}
 
 html[data-theme-id="tanglang-red-velvet"] .bank-time-badge,
 html[data-theme-id="tanglang-red-velvet"] .bank-time-badge-wide {
-  background:linear-gradient(180deg,#80100b,#650a07);
+  background-image:linear-gradient(180deg,rgba(128,16,11,.82),rgba(64,4,3,.88)),url("./theme-assets/tanglang1-texture.png");
+  background-size:100% 100%,280px 280px;
   border:1px solid #d3a13c; border-radius:12px;
   box-shadow:inset 0 0 0 1px rgba(255,218,112,.18),inset 0 0 20px rgba(40,0,0,.18);
 }
@@ -927,7 +941,7 @@ html[data-theme-id="tanglang-red-velvet"] .bank-time-badge strong,
 html[data-theme-id="tanglang-red-velvet"] .bank-time-badge-wide strong { color:#f0c75d; }
 html[data-theme-id="tanglang-red-velvet"] .wheel-mode-switch {
   display:grid; grid-template-columns:1fr 1fr; gap:0; padding:3px;
-  background:#121316; border:1px solid #d1a13c; border-radius:13px;
+  background-image:linear-gradient(rgba(18,19,22,.90),rgba(18,19,22,.90)),url("./theme-assets/tanglang1-texture.png"); background-size:100% 100%,260px 260px; border:1px solid #d1a13c; border-radius:13px;
   box-shadow:inset 0 0 0 1px rgba(255,218,112,.15);
 }
 html[data-theme-id="tanglang-red-velvet"] .wheel-mode-switch .seg-btn {
@@ -977,7 +991,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
 @media (max-width:520px){ .jar-date-nav{grid-template-columns:40px 1fr 40px;} }
 
 </style>
-  <title>Questwheel v13.5.6</title>
+  <title>Questwheel v13.5.7</title>
 </head>
 <body>
   <div class="app-shell">
@@ -987,7 +1001,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
           <span class="relative-label">Today</span>
           <span class="relative-date">Mon 24 Aug ’26</span>
         </div>
-        <h1>Questwheel <span class="build-tag">v13.5.6</span></h1>
+        <h1>Questwheel <span class="build-tag">v13.5.7</span></h1>
       </div>
       <div class="topbar-actions">
         <button class="ghost compact theme-trigger" id="themeBtn" type="button" aria-label="Themes"><span aria-hidden="true">◈</span><span class="theme-trigger-label">Theme</span></button>
@@ -999,6 +1013,16 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
       <section class="view active" id="dayView" aria-labelledby="dayTab">
         <section class="panel wheel-panel">
           <img id="themeCornerArt" class="theme-corner-art" alt="" aria-hidden="true" hidden />
+          <img class="tanglang-asset tanglang-corner tl" src="./theme-assets/tanglang1-corner.png" alt="" aria-hidden="true" />
+          <img class="tanglang-asset tanglang-corner tr" src="./theme-assets/tanglang1-corner.png" alt="" aria-hidden="true" />
+          <img class="tanglang-asset tanglang-corner bl" src="./theme-assets/tanglang1-corner.png" alt="" aria-hidden="true" />
+          <img class="tanglang-asset tanglang-corner br" src="./theme-assets/tanglang1-corner.png" alt="" aria-hidden="true" />
+          <img class="tanglang-asset tanglang-edge-h top" src="./theme-assets/tanglang1-edge-h.png" alt="" aria-hidden="true" />
+          <img class="tanglang-asset tanglang-edge-h bottom" src="./theme-assets/tanglang1-edge-h.png" alt="" aria-hidden="true" />
+          <img class="tanglang-asset tanglang-edge-v left" src="./theme-assets/tanglang1-edge-v.png" alt="" aria-hidden="true" />
+          <img class="tanglang-asset tanglang-edge-v right" src="./theme-assets/tanglang1-edge-v.png" alt="" aria-hidden="true" />
+          <img class="tanglang-asset tanglang-cloud a" src="./theme-assets/tanglang1-cloud-a.png" alt="" aria-hidden="true" />
+          <img class="tanglang-asset tanglang-cloud b" src="./theme-assets/tanglang1-cloud-b.png" alt="" aria-hidden="true" />
           <img id="themeTopRightArt" class="theme-top-right-art" alt="" aria-hidden="true" hidden />
           <img id="themeCloudArt" class="theme-cloud-art" alt="" aria-hidden="true" hidden />
           <button id="sunSettingsBtn" class="sun-settings-btn" type="button" aria-label="Daylight and twilight settings">☀︎</button>
@@ -1553,7 +1577,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   <script>
 (() => {
   const STORE = "questwheel-v1"; // Preserve all prior Questwheel local data.
-  const BUILD = "v13.5.6";
+  const BUILD = "v13.5.7";
 
   const categories = {
     business: { label: "Business", color: "#FFB000" },
@@ -1607,8 +1631,10 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
       wheelEmblem: "./tanglang1-center-padded.png",
     };
   }
+    tanglangBuiltin.assets.backgroundTexture = "./theme-assets/tanglang1-texture.png";
+    tanglangBuiltin.assets.cornerOrnament = "";
     tanglangBuiltin.assets.topRightOverlay = "data:image/svg+xml;utf8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20145%2090'%3E%3Cg%20fill='%23e3b74e'%20opacity='.98'%3E%3Cpath%20d='M0,-6.8%20L1.85,-2.15%206.8,0%201.85,2.15%200,6.8%20-1.85,2.15%20-6.8,0%20-1.85,-2.15%20Z'%20transform='translate(14%2017)%20scale(0.95)'/%3E%3Cpath%20d='M0,-6.8%20L1.85,-2.15%206.8,0%201.85,2.15%200,6.8%20-1.85,2.15%20-6.8,0%20-1.85,-2.15%20Z'%20transform='translate(36%2028)%20scale(0.93)'/%3E%3Cpath%20d='M0,-6.8%20L1.85,-2.15%206.8,0%201.85,2.15%200,6.8%20-1.85,2.15%20-6.8,0%20-1.85,-2.15%20Z'%20transform='translate(59%2040)%20scale(0.96)'/%3E%3Cpath%20d='M0,-6.8%20L1.85,-2.15%206.8,0%201.85,2.15%200,6.8%20-1.85,2.15%20-6.8,0%20-1.85,-2.15%20Z'%20transform='translate(82%2049)%20scale(0.91)'/%3E%3Cpath%20d='M0,-6.8%20L1.85,-2.15%206.8,0%201.85,2.15%200,6.8%20-1.85,2.15%20-6.8,0%20-1.85,-2.15%20Z'%20transform='translate(121%2039)%20scale(0.99)'/%3E%3Cpath%20d='M0,-6.8%20L1.85,-2.15%206.8,0%201.85,2.15%200,6.8%20-1.85,2.15%20-6.8,0%20-1.85,-2.15%20Z'%20transform='translate(129%2072)%20scale(0.96)'/%3E%3Cpath%20d='M0,-6.8%20L1.85,-2.15%206.8,0%201.85,2.15%200,6.8%20-1.85,2.15%20-6.8,0%20-1.85,-2.15%20Z'%20transform='translate(91%2074)%20scale(0.94)'/%3E%3C/g%3E%3C/svg%3E";
-    tanglangBuiltin.assets.cloudOverlay = "data:image/svg+xml;utf8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201000%201630'%20preserveAspectRatio='none'%3E%0A%3Cg%20opacity='.86'%3E%0A%20%20%3Cg%20transform='translate(844%20365)%20scale(.55)'%3E%0A%3Cg%20fill='none'%20stroke='%23d6a63c'%20stroke-width='3.0'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%0A%20%20%3Cpath%20d='M0%2070%20H30%20C32%2053%2044%2042%2060%2042%20C71%2042%2080%2047%2086%2055%20C91%2038%20105%2027%20122%2027%20C143%2027%20159%2042%20162%2061%20C169%2053%20180%2048%20192%2048%20C212%2048%20227%2061%20231%2079%20H260'/%3E%0A%20%20%3Cpath%20d='M39%2053%20C39%2037%2052%2025%2068%2025%20C80%2025%2090%2032%2093%2042%20C96%2051%2089%2060%2080%2060%20C72%2060%2068%2055%2069%2049%20C70%2044%2075%2042%2079%2044'/%3E%0A%20%20%3Cpath%20d='M106%2043%20C104%2027%20116%2014%20131%2014%20C145%2014%20155%2024%20155%2036%20C155%2047%20147%2054%20138%2053%20C130%2052%20126%2047%20128%2042%20C130%2037%20135%2036%20139%2039'/%3E%0A%20%20%3Cpath%20d='M181%2058%20C181%2046%20190%2037%20202%2037%20C213%2037%20222%2045%20222%2055%20C222%2064%20216%2070%20208%2070%20C201%2070%20197%2066%20198%2061%20C199%2057%20203%2055%20207%2057'/%3E%0A%20%20%3Cpath%20d='M15%2070%20C28%2070%2037%2078%2040%2088%20C45%2081%2052%2077%2061%2077%20C73%2077%2082%2084%2085%2095'/%3E%0A%3C/g%3E%0A%3C/g%3E%0A%20%20%3Cg%20transform='translate(-12%20905)%20scale(.63)'%3E%0A%3Cg%20fill='none'%20stroke='%23d6a63c'%20stroke-width='3.0'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%0A%20%20%3Cpath%20d='M0%2070%20H30%20C32%2053%2044%2042%2060%2042%20C71%2042%2080%2047%2086%2055%20C91%2038%20105%2027%20122%2027%20C143%2027%20159%2042%20162%2061%20C169%2053%20180%2048%20192%2048%20C212%2048%20227%2061%20231%2079%20H260'/%3E%0A%20%20%3Cpath%20d='M39%2053%20C39%2037%2052%2025%2068%2025%20C80%2025%2090%2032%2093%2042%20C96%2051%2089%2060%2080%2060%20C72%2060%2068%2055%2069%2049%20C70%2044%2075%2042%2079%2044'/%3E%0A%20%20%3Cpath%20d='M106%2043%20C104%2027%20116%2014%20131%2014%20C145%2014%20155%2024%20155%2036%20C155%2047%20147%2054%20138%2053%20C130%2052%20126%2047%20128%2042%20C130%2037%20135%2036%20139%2039'/%3E%0A%20%20%3Cpath%20d='M181%2058%20C181%2046%20190%2037%20202%2037%20C213%2037%20222%2045%20222%2055%20C222%2064%20216%2070%20208%2070%20C201%2070%20197%2066%20198%2061%20C199%2057%20203%2055%20207%2057'/%3E%0A%20%20%3Cpath%20d='M15%2070%20C28%2070%2037%2078%2040%2088%20C45%2081%2052%2077%2061%2077%20C73%2077%2082%2084%2085%2095'/%3E%0A%3C/g%3E%0A%3C/g%3E%0A%20%20%3Cg%20transform='translate(410%201135)%20scale(.35)'%20opacity='.45'%3E%0A%3Cg%20fill='none'%20stroke='%23d6a63c'%20stroke-width='3.0'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%0A%20%20%3Cpath%20d='M0%2070%20H30%20C32%2053%2044%2042%2060%2042%20C71%2042%2080%2047%2086%2055%20C91%2038%20105%2027%20122%2027%20C143%2027%20159%2042%20162%2061%20C169%2053%20180%2048%20192%2048%20C212%2048%20227%2061%20231%2079%20H260'/%3E%0A%20%20%3Cpath%20d='M39%2053%20C39%2037%2052%2025%2068%2025%20C80%2025%2090%2032%2093%2042%20C96%2051%2089%2060%2080%2060%20C72%2060%2068%2055%2069%2049%20C70%2044%2075%2042%2079%2044'/%3E%0A%20%20%3Cpath%20d='M106%2043%20C104%2027%20116%2014%20131%2014%20C145%2014%20155%2024%20155%2036%20C155%2047%20147%2054%20138%2053%20C130%2052%20126%2047%20128%2042%20C130%2037%20135%2036%20139%2039'/%3E%0A%20%20%3Cpath%20d='M181%2058%20C181%2046%20190%2037%20202%2037%20C213%2037%20222%2045%20222%2055%20C222%2064%20216%2070%20208%2070%20C201%2070%20197%2066%20198%2061%20C199%2057%20203%2055%20207%2057'/%3E%0A%20%20%3Cpath%20d='M15%2070%20C28%2070%2037%2078%2040%2088%20C45%2081%2052%2077%2061%2077%20C73%2077%2082%2084%2085%2095'/%3E%0A%3C/g%3E%0A%3C/g%3E%0A%3C/g%3E%3C/svg%3E";
+    tanglangBuiltin.assets.cloudOverlay = "";
 
 
   const THEME_SURFACES = new Set(["flat","velvet","lacquer","parchment","ink"]);
@@ -5720,7 +5746,7 @@ html[data-theme-id="tanglang-red-velvet"] .solar-legend { color:#dfb95e; }
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
-        const reg = await navigator.serviceWorker.register("./sw-v13.5.6.js", { updateViaCache: "none" });
+        const reg = await navigator.serviceWorker.register("./sw-v13.5.7.js", { updateViaCache: "none" });
         if (reg.update) reg.update().catch(() => {});
       } catch {}
     });
